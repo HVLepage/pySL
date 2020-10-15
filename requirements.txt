@@ -5,4 +5,5 @@ pycuda
 
 # Extra additions #
 
+matplotlib
 # guppy3
