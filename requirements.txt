@@ -1,0 +1,8 @@
+# Essential modules #
+
+pycuda
+
+
+# Extra additions #
+
+# guppy3
