@@ -1,5 +1,6 @@
 import sys
 import os
+# Set target CUDA device. Must be an integer. Currently no error checking.
 if (len(sys.argv) > 1):
   print("\nTarget CUDA device: ",str(sys.argv[1]))
   os.environ['CUDA_DEVICE'] = str(sys.argv[1])
@@ -14,7 +15,10 @@ import tracemalloc
 
 # Import project modules
 import src.get_gpu_info as gpuinfo
-# import src.kernel.staggeredleapfrog
+
+print("\n----------------------------------------------------------------")
+print("pySL version 0.0.1")
+print("----------------------------------------------------------------")
 
 ################################################################################################################################
 # Application profiling
@@ -40,8 +44,12 @@ mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
 ################################################################################################################################
 # Staggered Leapfrog Setup
 ################################################################################################################################
+v_si2nu = 1.312342066e-2
+t_si2nu = 1.157676458e2
 
-Nx = 40000000
+
+
+Nx = 801
 x = np.linspace(-200, 200, Nx)  # Define the simulation domain
 dx = x[1] - x[0]                  # Extract spacing between lattice sites
 
@@ -52,11 +60,11 @@ im = np.zeros(len(x)) # Initial wave function (imaginary part)
 
 V = np.zeros(len(x)) # Static 1D potential (particle in a box)
 
-dt = 0.00000005 # Time step
-N = 1000 # Total solution iterations
-PrintStep = 100 # Used for saving the wave function
+dt = 0.0005 * t_si2nu # Time step
+N = 10000 # Total solution iterations
+PrintStep = 10 # Used for saving the wave function
 
-# psi2 = np.zeros((int(N/PrintStep),len(x)))
+psi2 = np.zeros((int(N/PrintStep),len(x)))
 
 aa = dt/dx**2
 bb = 2*dt
@@ -100,6 +108,10 @@ im_new = np.empty_like(im)
 # IterateGPU
 ################################################################################################################################
 
+print("\n----------------------------------------------------------------")
+print("GPU-accelerated Simulation")
+print("----------------------------------------------------------------")
+
 func_re = mod.get_function("gqsl_re")
 func_im = mod.get_function("gqsl_im")
 
@@ -116,12 +128,19 @@ k=0
 t0 = time.time()
 t1 = t0
 for i in range(0, N):
-  func_re(re_gpu,im_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
+  func_re(
+    re_gpu,
+    im_gpu,
+    V_gpu,
+    bb,
+    aa,
+    Nx, 
+    block=(blockSize,1,1), grid=(numBlocks,1))
   func_im(re_gpu,im_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
   if (i % PrintStep) == 0:
     cuda.memcpy_dtoh(re_new, re_gpu)
     cuda.memcpy_dtoh(im_new, im_gpu)
-    # psi2[k] = re_new**2 + im_new**2
+    psi2[k] = re_new**2 + im_new**2
     k = k + 1
   if (i % (PrintStep)) == 0:
     t2 = time.time()
@@ -130,13 +149,8 @@ for i in range(0, N):
     print("Iteration", i, "        k = ", k, "        Time Elapsed = ",t_print)
 
 t2 = time.time()
-t_print = t2-t1
-t1 = t2
-print("Iteration Time Elapsed = ",t_print)
-
-
-# Flush context printf buffer
-# cuda.Context.synchronize()
+t_print = t2-t0
+print("Total Time Elapsed = ",t_print)
 
 
 
@@ -154,12 +168,22 @@ cuda.memcpy_dtoh(im_new, im_gpu)
 # # plt. plot(x, re_new + im_new, label = "line 2")
 # plt.show()
 
-
+plt.rcParams.update({'font.size': 10})
+# plt.rc('font',**{'family':'serif','serif':['Times']})
+plt.imshow(np.transpose(psi2), extent=[0,100,-200,200], aspect=0.1, cmap='inferno', vmin=0, vmax=0.01)
+plt.xlabel('x (nm)')
+plt.ylabel('y (nm)')
+# plt.savefig('DoubleSlit.png', dpi=600)
+# plt.savefig("graph.pdf")
+plt.show()
 
 ################################################################################################################################
 # Trace Memory Management
 ################################################################################################################################
 
+print("\n----------------------------------------------------------------")
+print("Total Memory Usage")
+print("----------------------------------------------------------------")
 
 snapshot = tracemalloc.take_snapshot()
 top_stats = snapshot.statistics('lineno')
