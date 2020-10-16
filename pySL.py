@@ -1,5 +1,8 @@
 import sys
 import os
+if (len(sys.argv) > 1):
+  print("Target CUDA device: ",str(sys.argv[1]))
+  os.environ['CUDA_DEVICE'] = str(sys.argv[1])
 import math
 import pycuda.driver as cuda
 import pycuda.autoinit
@@ -25,8 +28,7 @@ tracemalloc.start() # Memory allocation profile
 
 gpuinfo.print_gpu_info()
 
-os.environ['CUDA_DEVICE'] = '0'
-pycuda.tools.make_default_context()
+# pycuda.tools.make_default_context()
 
 ################################################################################################################################
 # Staggered Leapfrog Setup
