@@ -1,3 +1,7 @@
+################################################################################################################################
+# GPU hardware info
+################################################################################################################################
+
 import sys
 import pycuda.driver as cuda
 import pycuda.autoinit
@@ -15,7 +19,7 @@ def print_gpu_info():
         dev_name=device.name()
         dev_cc=device.compute_capability()
         dev_mem=device.total_memory()
-        attrs=device.get_attributes()
+        # attrs=device.get_attributes()
 
         print("\n===Attributes for device %d"%devicenum, ":",dev_name)
         print("   Compute capability: %d.%d"%dev_cc)
