@@ -15,6 +15,8 @@ import tracemalloc
 
 # Import project modules
 import src.get_gpu_info as gpuinfo
+import src.input.parameters as inputparameters
+import src.input.wavefunction as wavefunction
 
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.1")
@@ -44,15 +46,20 @@ mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
 ################################################################################################################################
 # Staggered Leapfrog Setup
 ################################################################################################################################
+
+
 v_si2nu = 1.312342066e-2
 t_si2nu = 1.157676458e2
 
+params = inputparameters.getparams()
 
 
-Nx = 801
-x = np.linspace(-200, 200, Nx)  # Define the simulation domain
+
+x = np.linspace(params["Xa"], params["Xb"], params["Nx"])  # Define the simulation domain
 dx = x[1] - x[0]                  # Extract spacing between lattice sites
 
+
+# Define initial wave function
 w = 0.1                           # Initial wave packet spread
 xoffset = 40                      # Wave packet distance from center
 re = ((w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2))/2 # Initial wave function
@@ -60,9 +67,9 @@ im = np.zeros(len(x)) # Initial wave function (imaginary part)
 
 V = np.zeros(len(x)) # Static 1D potential (particle in a box)
 
-dt = 0.0005 * t_si2nu # Time step
-N = 10000 # Total solution iterations
-PrintStep = 10 # Used for saving the wave function
+dt = 0.001 * t_si2nu # Time step
+N = 1000 # Total solution iterations
+PrintStep = 100 # Used for saving the wave function
 
 psi2 = np.zeros((int(N/PrintStep),len(x)))
 
@@ -72,6 +79,9 @@ bb = 2*dt
 k = 0
 
 
+################################################################################################################################
+# CUDA malloc
+################################################################################################################################
 
 V = V.astype(np.float32)
 V_gpu = cuda.mem_alloc(V.nbytes)
@@ -86,16 +96,9 @@ im_gpu = cuda.mem_alloc(im.nbytes)
 cuda.memcpy_htod(im_gpu, im)
 
 aa = aa.astype(np.float32)
-# aa_gpu = cuda.mem_alloc(aa.nbytes)
-# cuda.memcpy_htod(aa_gpu, aa)
-
 bb = np.float32(bb)
-# bb_gpu = cuda.mem_alloc(bb.nbytes)
-# cuda.memcpy_htod(bb_gpu, bb)
+Nx = np.int32(params["Nx"])
 
-Nx = np.int32(Nx)
-# Nx_gpu = cuda.mem_alloc(Nx.nbytes)
-# cuda.memcpy_htod(Nx_gpu, Nx_int)
 
 
 re_new = np.empty_like(re)
