@@ -1,7 +1,7 @@
 import sys
 import os
 if (len(sys.argv) > 1):
-  print("Target CUDA device: ",str(sys.argv[1]))
+  print("\nTarget CUDA device: ",str(sys.argv[1]))
   os.environ['CUDA_DEVICE'] = str(sys.argv[1])
 import math
 import pycuda.driver as cuda
@@ -14,7 +14,7 @@ import tracemalloc
 
 # Import project modules
 import src.get_gpu_info as gpuinfo
-
+# import src.kernel.staggeredleapfrog
 
 ################################################################################################################################
 # Application profiling
@@ -28,7 +28,14 @@ tracemalloc.start() # Memory allocation profile
 
 gpuinfo.print_gpu_info()
 
-# pycuda.tools.make_default_context()
+################################################################################################################################
+# CUDA Module
+################################################################################################################################
+
+with open('./src/kernel.cu', 'r') as file:
+    source = file.read()
+
+mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
 
 ################################################################################################################################
 # Staggered Leapfrog Setup
@@ -86,31 +93,8 @@ Nx = np.int32(Nx)
 re_new = np.empty_like(re)
 im_new = np.empty_like(im)
 
-################################################################################################################################
-# CUDA Module
-################################################################################################################################
 
-mod = SourceModule("""
 
-  __global__ void gqsl_re(float *re, float *im, float *V, float bb, float aa, int Nx)
-  {
-    int idx = threadIdx.x + blockDim.x * blockIdx.x;
-    if (idx > 0 && idx < Nx-1){
-      //re[idx] = re[idx];
-      re[idx] = re[idx] - (V[idx]*bb*im[idx] + aa*(2*im[idx] - (im[idx-1] + im[idx+1])));
-    }
-  }
-
-  __global__ void gqsl_im(float *re, float *im, float *V, float bb, float aa, int Nx)
-  {
-    int idx = threadIdx.x + blockDim.x * blockIdx.x;
-    if (idx > 0 && idx < Nx-1){
-      //im[idx] = im[idx];
-      im[idx] = im[idx] +  V[idx]*bb*re[idx] + aa*(2*re[idx] - (re[idx-1] + re[idx+1]));
-    }
-  }
-
-  """, options=['-ccbin', 'cuda-g++'])
 
 ################################################################################################################################
 # IterateGPU
