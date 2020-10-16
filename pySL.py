@@ -17,6 +17,7 @@ import tracemalloc
 import src.get_gpu_info as gpuinfo
 import src.input.parameters as inputparameters
 import src.input.wavefunction as wavefunction
+from src.export.calculatenorm import getNorm
 
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.1")
@@ -55,7 +56,7 @@ params = inputparameters.getparams()
 
 
 
-x = np.linspace(params["Xa"], params["Xb"], params["Nx"])  # Define the simulation domain
+x = np.linspace(params["x0"], params["x1"], params["Nx"])  # Define the simulation domain
 dx = x[1] - x[0]                  # Extract spacing between lattice sites
 
 
@@ -145,16 +146,15 @@ for i in range(0, N):
     cuda.memcpy_dtoh(im_new, im_gpu)
     psi2[k] = re_new**2 + im_new**2
     k = k + 1
-  if (i % (PrintStep)) == 0:
     t2 = time.time()
     t_print = t2-t1
     t1 = t2
-    print("Iteration", i, "        k = ", k, "        Time Elapsed = ",t_print)
+    norm = getNorm(re_new,im_new,params)
+    print("Iteration", i, "        k = ", k, "        Time Elapsed = ",t_print, "NORM: ", norm)
 
 t2 = time.time()
 t_print = t2-t0
 print("Total Time Elapsed = ",t_print)
-
 
 
 cuda.memcpy_dtoh(re_new, re_gpu)
