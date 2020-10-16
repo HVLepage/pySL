@@ -1,9 +1,13 @@
 def getparams():
+    
+    v_si2nu = 1.312342066e-2
+    t_si2nu = 1.157676458e2
+
     params = {
         "SimName": "CUDA_1D_Double_Slit_Experiment",
 
         # Flags
-        "ParticlesNr": 1,
+        "nP": 1,
         "SolveEigenValueProblem": False,
         "KSpaceLeapfrog": False,
         "GPUSolver": True,
@@ -44,13 +48,13 @@ def getparams():
 
 
         # Lattice boundaries
-        "Xa": -200.0,
-        "Xb": 200.0,
-        "Ya": 0.0,
-        "Yb": 0.0,
+        "x0": -200.0,
+        "x1": 200.0,
+        "y0": 0.0,
+        "y1": 0.0,
 
-        "Za": 0.0,
-        "Zb": 0.0,
+        "z0": 0.0,
+        "z1": 0.0,
 
         # Lattice Sites
         "Nx": 801,
@@ -101,5 +105,27 @@ def getparams():
         "sigmaFit": [1.74707037e-17, -2.73761743e-14, 1.78462882e-11, -6.26868417e-09, 1.28479963e-06, -1.55625754e-04, 1.07952353e-02, 6.02006265e-01, 6.93382649e+00],
         "Traces": 0 
     }
+
+    # Convert variables to Natural Units
+    params["dt"] *= t_si2nu
+    params["StartTime"] *= t_si2nu
+    params["ASAW"] *= v_si2nu
+    params["wSAW"] /= t_si2nu
+    params["cSAW"] /= t_si2nu
+    params["DRt0"] *= t_si2nu
+    params["URt0"] *= t_si2nu
+
+    # Construct Hamiltonian
+    params["dx"] = 1.0
+    params["dy"] = 1.0
+    params["dz"] = 1.0
+    if (params["Nx"] > 1):
+        params["dx"] = (params["x1"] - params["x0"]) / (params["Nx"] - 1)
+    if (params["Ny"] > 1):
+        params["dy"] = (params["y1"] - params["y0"]) / (params["Ny"] - 1)
+    if (params["Nz"] > 1):
+        params["dz"] = (params["z1"] - params["z0"]) / (params["Nz"] - 1)
+
+
 
     return params
