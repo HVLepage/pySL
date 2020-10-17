@@ -122,8 +122,8 @@ print("\n----------------------------------------------------------------")
 print("GPU-accelerated Simulation")
 print("----------------------------------------------------------------")
 
-func_re = mod.get_function("gqsl_re")
-func_im = mod.get_function("gqsl_im")
+func_re = mod.get_function("gqsl_x_re")
+func_im = mod.get_function("gqsl_x_im")
 
 blockSize = 256
 numBlocks = math.ceil((Nx + blockSize - 1) / blockSize)

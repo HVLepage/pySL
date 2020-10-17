@@ -1,7 +1,7 @@
 // #include <pycuda-complex.hpp>
 
 
-__global__ void gqsl_re(float *re, float *im, float *V, float bb, float aa, int N)
+__global__ void gqsl_x_re(float *re, float *im, float *V, float bb, float aa, int N)
 {
   int idx = threadIdx.x + blockDim.x * blockIdx.x;
   if (idx > 0 && idx < N-1){
@@ -10,7 +10,7 @@ __global__ void gqsl_re(float *re, float *im, float *V, float bb, float aa, int 
   }
 }
 
-__global__ void gqsl_im(float *re, float *im, float *V, float bb, float aa, int N)
+__global__ void gqsl_x_im(float *re, float *im, float *V, float bb, float aa, int N)
 {
   int idx = threadIdx.x + blockDim.x * blockIdx.x;
   if (idx > 0 && idx < N-1){
@@ -18,6 +18,22 @@ __global__ void gqsl_im(float *re, float *im, float *V, float bb, float aa, int 
     im[idx] = im[idx] +  V[idx]*bb*re[idx] + aa*(2*re[idx] - (re[idx-1] + re[idx+1]));
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // __global__ void gqsl_re(pycuda::complex<float> *psi, float *V, float bb, float aa, int Nx)
