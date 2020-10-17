@@ -69,10 +69,10 @@ im = np.zeros(len(x)) # Initial wave function (imaginary part)
 V = np.zeros(len(x)) # Static 1D potential (particle in a box)
 
 dt = params["dt"] # Time step
-N = params["TimeSteps"] # Total solution iterations
+TimeSteps = params["TimeSteps"] # Total solution iterations
 PrintStep = params["PrintStep"]  # Used for saving the wave function
 
-psi2 = np.zeros((int(N/PrintStep),len(x)))
+psi2 = np.zeros((int(TimeSteps/PrintStep),len(x)))
 
 aa = dt/dx**2
 bb = 2*dt
@@ -126,16 +126,10 @@ func_im = mod.get_function("gqsl_im")
 blockSize = 256
 numBlocks = math.ceil((Nx + blockSize - 1) / blockSize)
 
-# OBSOLETE DELETE
-# cuda.memcpy_htod(re_gpu, re)
-# cuda.memcpy_htod(im_gpu, im)
-
-# psi2 = np.zeros((int(N/PrintStep),len(x)))
-
 k=0
 t0 = time.time()
 t1 = t0
-for i in range(0, N):
+for i in range(0, TimeSteps):
 
   # func_re(psi_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
   # func_im(psi_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
@@ -152,11 +146,11 @@ for i in range(0, N):
     t_print = t2-t1
     t1 = t2
     norm = getNorm(re_new,im_new,params)
-    print("Iteration", i, "        k = ", k, "        Time Elapsed = ",t_print, "NORM: ", norm)
+    print("Iteration: ", str(i).zfill(5), "    Time Elapsed: %.4f"%t_print, "    NORM: %.8f"%norm)
 
 t2 = time.time()
 t_print = t2-t0
-print("Total Time Elapsed = ",t_print)
+print("\nTotal Time Elapsed = ",t_print)
 
 
 cuda.memcpy_dtoh(re_new, re_gpu)
