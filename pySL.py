@@ -20,7 +20,7 @@ import src.input.wavefunction as wavefunction
 from src.export.calculatenorm import getNorm
 
 print("\n----------------------------------------------------------------")
-print("pySL version 0.0.1")
+print("pySL version 0.0.3")
 print("----------------------------------------------------------------")
 
 ################################################################################################################################
@@ -80,6 +80,10 @@ bb = 2*dt
 k = 0
 
 
+psi = re + im*1j
+
+
+
 ################################################################################################################################
 # CUDA malloc
 ################################################################################################################################
@@ -100,7 +104,9 @@ aa = aa.astype(np.float32)
 bb = np.float32(bb)
 Nx = np.int32(params["Nx"])
 
-
+psi = psi.astype(np.complex64)
+psi_gpu = cuda.mem_alloc(psi.nbytes)
+cuda.memcpy_htod(psi_gpu, psi)
 
 re_new = np.empty_like(re)
 im_new = np.empty_like(im)
@@ -120,9 +126,9 @@ func_im = mod.get_function("gqsl_im")
 blockSize = 256
 numBlocks = math.ceil((Nx + blockSize - 1) / blockSize)
 
-
-cuda.memcpy_htod(re_gpu, re)
-cuda.memcpy_htod(im_gpu, im)
+# OBSOLETE DELETE
+# cuda.memcpy_htod(re_gpu, re)
+# cuda.memcpy_htod(im_gpu, im)
 
 # psi2 = np.zeros((int(N/PrintStep),len(x)))
 
@@ -130,15 +136,13 @@ k=0
 t0 = time.time()
 t1 = t0
 for i in range(0, N):
-  func_re(
-    re_gpu,
-    im_gpu,
-    V_gpu,
-    bb,
-    aa,
-    Nx, 
-    block=(blockSize,1,1), grid=(numBlocks,1))
+
+  # func_re(psi_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
+  # func_im(psi_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
+
+  func_re(re_gpu,im_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
   func_im(re_gpu,im_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
+
   if (i % PrintStep) == 0:
     cuda.memcpy_dtoh(re_new, re_gpu)
     cuda.memcpy_dtoh(im_new, im_gpu)
