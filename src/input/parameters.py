@@ -39,12 +39,12 @@ def getparams():
 
 
         # dt is time in [ps] per each timeStep
-        "dt": 0.0005,
+        "dt": 0.00005,
         "StartTime": 0.0,
 
         # Total time steps and how often to print data
-        "TimeSteps": 10000,
-        "PrintStep": 10,
+        "TimeSteps": 50000,
+        "PrintStep": 5000,
 
 
         # Lattice boundaries

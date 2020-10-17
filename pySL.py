@@ -68,9 +68,9 @@ im = np.zeros(len(x)) # Initial wave function (imaginary part)
 
 V = np.zeros(len(x)) # Static 1D potential (particle in a box)
 
-dt = 0.00005 * t_si2nu # Time step
-N = 50000 # Total solution iterations
-PrintStep = 5000 # Used for saving the wave function
+dt = params["dt"] # Time step
+N = params["TimeSteps"] # Total solution iterations
+PrintStep = params["PrintStep"]  # Used for saving the wave function
 
 psi2 = np.zeros((int(N/PrintStep),len(x)))
 
