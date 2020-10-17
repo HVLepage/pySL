@@ -81,11 +81,6 @@ bb = 2*dt
 
 k = 0
 
-
-# psi = re + im*1j
-
-
-
 ################################################################################################################################
 # CUDA malloc
 ################################################################################################################################
@@ -104,8 +99,9 @@ cuda.memcpy_htod(im_gpu, im)
 
 aa = aa.astype(np.float32)
 bb = np.float32(bb)
-Nx = np.int32(params["Nx"])
+N = np.int32(N)
 
+psi = re + im*1j
 psi = psi.astype(np.complex64)
 psi_gpu = cuda.mem_alloc(psi.nbytes)
 cuda.memcpy_htod(psi_gpu, psi)
@@ -126,15 +122,15 @@ func_re = mod.get_function("gqsl_x_re")
 func_im = mod.get_function("gqsl_x_im")
 
 blockSize = 256
-numBlocks = math.ceil((Nx + blockSize - 1) / blockSize)
+numBlocks = math.ceil((N + blockSize - 1) / blockSize)
 
 k=0
 t0 = time.time()
 t1 = t0
 for i in range(0, TimeSteps):
 
-  # func_re(psi_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
-  # func_im(psi_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
+  # func_re(psi_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
+  # func_im(psi_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
 
   func_re(re_gpu,im_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
   func_im(re_gpu,im_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
