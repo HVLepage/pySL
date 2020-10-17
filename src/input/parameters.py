@@ -7,7 +7,7 @@ def getparams():
         "SimName": "CUDA_1D_Double_Slit_Experiment",
 
         # Flags
-        "nP": 1,
+        "Np": 1,
         "SolveEigenValueProblem": False,
         "KSpaceLeapfrog": False,
         "GPUSolver": True,

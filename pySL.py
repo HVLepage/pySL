@@ -48,11 +48,13 @@ mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
 # Staggered Leapfrog Setup
 ################################################################################################################################
 
-
 v_si2nu = 1.312342066e-2
 t_si2nu = 1.157676458e2
 
+# Import parameters
 params = inputparameters.getparams()
+
+N = (params["Nx"] * params["Ny"] * params["Nz"]) ** params["Np"]
 
 
 
@@ -80,7 +82,7 @@ bb = 2*dt
 k = 0
 
 
-psi = re + im*1j
+# psi = re + im*1j
 
 
 
@@ -134,8 +136,8 @@ for i in range(0, TimeSteps):
   # func_re(psi_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
   # func_im(psi_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
 
-  func_re(re_gpu,im_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
-  func_im(re_gpu,im_gpu,V_gpu,bb,aa,Nx, block=(blockSize,1,1), grid=(numBlocks,1))
+  func_re(re_gpu,im_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
+  func_im(re_gpu,im_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
 
   if (i % PrintStep) == 0:
     cuda.memcpy_dtoh(re_new, re_gpu)
