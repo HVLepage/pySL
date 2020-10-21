@@ -16,8 +16,8 @@ import tracemalloc
 # Import project modules
 import src.get_gpu_info as gpuinfo
 import src.input.parameters as inputparameters
-import src.input.wavefunction as wavefunction
-import src.fft.fftauxV as potential
+from src.input.wavefunction import Wavefunction
+from src.fft.fftauxV import Potential
 
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.3")
@@ -61,10 +61,10 @@ dx = x[1] - x[0]
 
 
 
-psi = wavefunction.Wavefunction(params)
+psi = Wavefunction(params)
 
 
-V = potential.Potential(params) # Static 1D potential (particle in a box)
+V = Potential(params) # Static 1D potential (particle in a box)
 
 dt = params["dt"] # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations

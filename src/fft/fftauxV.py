@@ -5,6 +5,8 @@ import src.fft.index6Dto1D as index6Dto1D
 import src.fft.index3Dto1D as index3Dto1D
 import src.fft.index1DtoND as index1DtoND
 import src.fft.indexNDto1D as indexNDto1D
+from src.fft.OnePpotential import OnePpotential
+from src.fft.TwoPpotential import TwoPpotential
 
 class Potential():
     def dtoh(self):
@@ -32,12 +34,7 @@ class Potential():
         Ny = params["Ny"]
         Nz = params["Nz"]
 
-        ATB1 = params["ATB1"]
-        ATB2 = params["ATB2"]
-        s2TB1 = params["s2TB1"]
-        s2TB2 = params["s2TB2"]
-        omegaX2 = params["w2X"]
-        omegaY2 = params["w2Y"]
+
         Np = params["Np"]
         dim = params["dim"]
 
@@ -73,16 +70,7 @@ class Potential():
                     for i2 in range(0,Nx):
                         for j2 in range(0,Ny):
                             for k2 in range(0,Nz):
-                                x1 = x[i1]
-                                y1 = y[j1]
-                                z1 = z[k1]
-                                x2 = x[i2]
-                                y2 = y[j2]
-                                z2 = z[k2]
-
-                                d = math.sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
-                                dsoft = d**8 * params["sigmaFit"][0] + d**7 * params["sigmaFit"][1] + d**6 * params["sigmaFit"][2] + d**5 * params["sigmaFit"][3] + d**4 * params["sigmaFit"][4] + d**3 * params["sigmaFit"][5] + d**2 * params["sigmaFit"][6] + d * params["sigmaFit"][7] + params["sigmaFit"][8]
-                                VVal = (18.8950673 / params["RelPerm"]) * dsoft**(-1) #//use Coulomb softening with cap at 100, 18.89... is conversion factor to natural units and nm
+                                VVal = TwoPpotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
                                 if (VVal > 100):
                                     VVal = 100.0
 
@@ -121,15 +109,11 @@ class Potential():
                     for k in range(0,Nz):
                         VVal = 0.0;
                         ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
-
+                        
                         if (params["ImportPotential"]):
                             VVal= self.filePot[ind]
                         else:
-                            Vy = 0.5 * params["Mass"][p] * omegaY2 * y[j]**2 #harmonic pot in y
-                            Vp = 0.5 * params["Mass"][p] * omegaX2 * x[i]**2   # .. in x
-                            Vb = ATB1 * params["Mass"][p] * math.exp(-s2TB1*(x[i]**2) / 2) #gaussian pot
-                            Vb2 = ATB2 * params["Mass"][p] * math.exp(-s2TB2*(x[i] ** 2) / 2)
-                            VVal = Vy + Vp + Vb + Vb2
+                            VVal = OnePpotential(params,p,x[i],y[j],z[k])
 
                         if (VVal > 100):
                             VVal = 100.0
