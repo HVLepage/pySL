@@ -1,5 +1,10 @@
 import numpy as np
 import pycuda.driver as cuda
+import math
+import src.fft.index6Dto1D as index6Dto1D
+import src.fft.index3Dto1D as index3Dto1D
+import src.fft.index1DtoND as index1DtoND
+import src.fft.indexNDto1D as indexNDto1D
 
 class Potential():
     def dtoh(self):
@@ -8,7 +13,141 @@ class Potential():
     def htod(self):
         cuda.memcpy_htod(self.pot_gpu, self.pot)
         
-        
+    def construct(self,params):
+        Xa = params["Xa"]
+        Xb = params["Xb"]
+        Ya = params["Ya"]
+        Yb = params["Yb"]
+        Za = params["Za"]
+        Zb = params["Zb"]
+        Nx = params["Nx"]
+        Ny = params["Ny"]
+        Nz = params["Nz"]
+
+        ATB1 = params["ATB1"]
+        ATB2 = params["ATB2"]
+        s2TB1 = params["s2TB1"]
+        s2TB2 = params["s2TB2"]
+        omegaX2 = params["w2X"]
+        omegaY2 = params["w2Y"]
+        Np = params["Np"]
+        dim = params["dim"]
+
+
+        Lx = Xb - Xa  #Length
+        Ly = Yb - Ya
+        Lz = Zb - Za
+
+        x = np.linspace(Xa, Xb, Nx)
+        y = np.linspace(Ya, Yb, Ny)
+        z = np.linspace(Za, Zb, Nz)
+	
+
+
+
+        inds = np.zeros(dim,Np)
+
+        if (Np > 1):
+            interactionsNr = (Np**2 - Np) / 2
+            interactionsMap = np.zeros(interactionsNr,2)
+		
+
+
+            for i in range(0,Np):
+                for j in range(i+1,Np):
+                    interactionsMap[i,0] = i
+                    interactionsMap[i,1] = j
+
+
+        if (interactionsNr > 0):
+            V2P=np.zeros((Nx * Ny * Nz)**2)
+
+        for i1 in range(0,Nx):
+            for j1 in range(0,Ny):
+                for k1 in range(0,Nz):
+                    for i2 in range(0,Nx):
+                        for j2 in range(0,Ny):
+                            for k2 in range(0,Nz):
+                                x1 = x[i1]
+                                y1 = y[j1]
+                                z1 = z[k1]
+                                x2 = x[i2]
+                                y2 = y[j2]
+                                z2 = z[k2]
+
+                                d = math.sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
+                                dsoft = d**8 * params["sigmaFit"][0] + d**7 * params["sigmaFit"][1] + d**6 * params["sigmaFit"][2] + d**5 * params["sigmaFit"][3] + d**4 * params["sigmaFit"][4] + d**3 * params["sigmaFit"][5] + d**2 * params["sigmaFit"][6] + d * params["sigmaFit"][7] + params["sigmaFit"][8]
+                                VVal = (18.8950673 / params["RelPerm"]) * dsoft**(-1) #//use Coulomb softening with cap at 100, 18.89... is conversion factor to natural units and nm
+                                if (VVal > 100):
+                                    VVal = 100.0
+
+                                V2P[index6Dto1D.index(i1, j1, k1, i2, j2, k2, Nx, Ny, Nz, Nx, Ny, Nz)] = VVal
+
+		
+
+
+        for p in range(0,Np):
+
+            p1 = interactionsMap[p]
+            p2 = interactionsMap[p + 1]
+            inds2P = np.zeros(dim,2)
+
+            for i in range(0,params["N"]):
+                index1DtoND.index(i, inds, params["Sizes"], params)
+
+            for j in range(0,params["dim"]):
+                inds2P[j,0] = inds[p1 * params["dim"] + j]
+                inds2P[j,1] = inds[p2 * params["dim"] + j]
+				
+
+            ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
+
+            self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
+
+
+
+	#Add 1 particle static V
+        V1P = np.zeros(Nx * Ny * Nz)
+
+        for p in range(0, params["Np"]):
+
+            for i in range(0,Nx):
+                for j in range(0,Ny):
+                    for k in range(0,Nz):
+                        VVal = 0.0;
+                        ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
+
+                        if (params["ImportPotential"]):
+                            #VVal= potV[ind]
+                            a=1 #placeholder, add potV = pot from file
+                        else:
+                            Vy = 0.5 * params["Mass"][p] * omegaY2 * y[j]**2 #harmonic pot in y
+                            Vp = 0.5 * params["Mass"][p] * omegaX2 * x[i]**2   # .. in x
+                            Vb = ATB1 * params["Mass"][p] * math.exp(-s2TB1*(x[i]**2) / 2) #gaussian pot
+                            Vb2 = ATB2 * params["Mass"][p] * math.exp(-s2TB2*(x[i] ** 2) / 2)
+                            VVal = Vy + Vp + Vb + Vb2
+
+                        if (VVal > 100):
+                            VVal = 100.0
+					
+
+                        V1P[ind] = VVal
+		
+        inds1P = np.zeros(dim)
+		
+
+		#Only go into if right indexes are 0, i.e. do this other way around ...
+        for i in range(0,params["N"]):
+            index1DtoND.index(i, inds, params["Sizes"], params)
+
+            for j in range(0, params["dim"]):
+                inds1P[j] = inds[p * params["dim"] + j]
+			
+            ind1P = indexNDto1D.index(inds1P, params["Sizes"], params, 1)
+            self.pot[i] += V1P[ind1P]
+
+
+            
     
     def __init__(self,params):        
         
