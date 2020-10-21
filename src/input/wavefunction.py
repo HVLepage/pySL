@@ -27,6 +27,8 @@ class Wavefunction:
         self.re=np.zeros(params["N"])
         self.im=np.zeros(params["N"])
         
+        self.re = self.re.astype(np.float32)
+        self.im = self.im.astype(np.float32)
         self.re_gpu=cuda.mem_alloc(self.re.nbytes)
         self.im_gpu=cuda.mem_alloc(self.im.nbytes)
         

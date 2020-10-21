@@ -17,7 +17,7 @@ import tracemalloc
 import src.get_gpu_info as gpuinfo
 import src.input.parameters as inputparameters
 import src.input.wavefunction as wavefunction
-from src.export.calculatenorm import getNorm
+import src.fft.fftauxV as potential
 
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.3")
@@ -64,7 +64,7 @@ dx = x[1] - x[0]
 psi = wavefunction.Wavefunction(params)
 
 
-V = np.zeros(len(x)) # Static 1D potential (particle in a box)
+V = potential.Potential(params) # Static 1D potential (particle in a box)
 
 dt = params["dt"] # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
@@ -81,18 +81,10 @@ k = 0
 # CUDA malloc
 ################################################################################################################################
 
-V = V.astype(np.float32)
-V_gpu = cuda.mem_alloc(V.nbytes)
-cuda.memcpy_htod(V_gpu, V)
-
-
-
-
 
 aa = aa.astype(np.float32)
 bb = np.float32(bb)
 N = np.int32(params["N"])
-
 
 
 
@@ -119,8 +111,8 @@ for i in range(0, TimeSteps):
   # func_re(psi_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
   # func_im(psi_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
 
-  func_re(psi.re_gpu,psi.im_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
-  func_im(psi.re_gpu,psi.im_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
+  func_re(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
+  func_im(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
 
   if (i % PrintStep) == 0:
     psi.dtoh()
