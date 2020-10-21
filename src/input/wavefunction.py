@@ -20,7 +20,7 @@ class Wavefunction:
         return norm
     
     def readFromFile(self,params):
-        file = open(params["WavefunctionName"])
+        file = open(".\src\\" + params["WavefunctionName"])
         lines = file.readlines()
         for i in range(0,params["N"]):
             self.re[i] = float(lines[i].split()[0])

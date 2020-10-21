@@ -16,7 +16,7 @@ class Potential():
         cuda.memcpy_htod(self.pot_gpu, self.pot)
         
     def readFromFile(self,params):
-        file = open(params["PotentialFileName"])
+        file = open(".\src\\" + params["PotentialFileName"])
         self.filePot = np.zeros(params["N1"])
         lines = file.readlines()
         for i in range(0,params["N1"]):

@@ -22,7 +22,10 @@ def getparams():
         "ExportTrace": False,
 
         # Mass is quoted in [electron masses] (so 1 for a free electron in a vacuum)
-        "Mass": 1.0,
+        "Mass": [1.0],
+        
+        # Charge in [electron charges]
+        "Charge": [1.0],
 
         # Relative permittivity of quantum well material
         "RelPerm": 13.1,
