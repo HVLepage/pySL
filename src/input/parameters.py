@@ -103,7 +103,8 @@ def getparams():
 
         "InputStates": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         "sigmaFit": [1.74707037e-17, -2.73761743e-14, 1.78462882e-11, -6.26868417e-09, 1.28479963e-06, -1.55625754e-04, 1.07952353e-02, 6.02006265e-01, 6.93382649e+00],
-        "Traces": 0 
+        "Traces": 0,
+        
     }
 
     # Convert variables to Natural Units
@@ -125,6 +126,49 @@ def getparams():
         params["dy"] = (params["y1"] - params["y0"]) / (params["Ny"] - 1)
     if (params["Nz"] > 1):
         params["dz"] = (params["z1"] - params["z0"]) / (params["Nz"] - 1)
+        
+        
+    if (params["SolveEigenValueProblem"] != True):
+        params["KxECO"] = 0
+        params["KyECO"] = 0
+        params["KzECO"] = 0
+	
+
+    if (params["KSpaceLeapfrog"]!=True):
+        params["NxOutK"] = 1
+        params["NyOutK"] = 1
+        params["NzOutK"] = 1
+        params["KxKCO"] = 0
+        params["KyKCO"] = 0
+        params["KzKCO"] = 0
+	
+        
+    params["N"] =(params["Nx"] * params["Ny"] * params["Nz"]) ** params["Np"]
+    params["N1"] = params["Nx"] * params["Ny"] * params["Nz"]
+    params["NOut"] = (params["NxOutK"] * params["NyOutK"] * params["NzOutK"])**params["Np"]
+    params["NK"] = ((2 * params["KxKCO"] + 1) * (2 * params["KyKCO"] + 1) * (2 * params["KzKCO"] + 1))**params["Np"]
+    
+    params["dim"] = 0
+    if (params["Nx"] > 1):
+        params["dim"]=params["dim"]+1
+    if (params["Ny"] > 1):
+        params["dim"]=params["dim"]+1
+    if (params["Nz"] > 1):
+        params["dim"]=params["dim"]+1
+    if (params["dim"] == 0):
+        print( "No dimension size is greater than 1")
+        exit(1)
+	
+
+	# Check if padded output is greater than Psi
+    if ((params["KSpaceLeapfrog"]) and (params["NxOutK"] < params["Nx"] or params["NyOutK"] < params["Ny"] or params["NzOutK"] < params["Nz"])) :
+        print("NOut parameters cannot be smaller than N for KSpaceLeapfrog")
+        exit(1)
+	
+    if ((params["KSpaceLeapfrog"]) and ((2 * params["KxKCO"] + 1) >params["Nx"] or (2 * params["KyKCO"] + 1) > params["Ny"] or (2 * params["KzKCO"] + 1) > params["Nz"])):
+        print("(2 * Kx/y/zKCO + 1)  cannot be greater than Nx/y/z for KSpaceLeapfrog")
+        exit(1)
+	
 
 
 
