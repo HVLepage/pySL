@@ -13,6 +13,14 @@ class Potential():
     def htod(self):
         cuda.memcpy_htod(self.pot_gpu, self.pot)
         
+    def readFromFile(self,params):
+        file = open(params["PotentialFileName"])
+        self.filePot = np.zeros(params["N1"])
+        lines = file.readlines()
+        for i in range(0,params["N1"]):
+            self.filePot[i] = float(lines[i+3].split()[0])
+        
+        
     def construct(self,params):
         Xa = params["Xa"]
         Xb = params["Xb"]
@@ -34,15 +42,12 @@ class Potential():
         dim = params["dim"]
 
 
-        Lx = Xb - Xa  #Length
-        Ly = Yb - Ya
-        Lz = Zb - Za
-
         x = np.linspace(Xa, Xb, Nx)
         y = np.linspace(Ya, Yb, Ny)
         z = np.linspace(Za, Zb, Nz)
 	
-
+        if (params["importPotential"]):
+            self.readFromFile(params)
 
 
         inds = np.zeros(dim,Np)
@@ -108,7 +113,7 @@ class Potential():
 
 	#Add 1 particle static V
         V1P = np.zeros(Nx * Ny * Nz)
-
+        
         for p in range(0, params["Np"]):
 
             for i in range(0,Nx):
@@ -118,8 +123,7 @@ class Potential():
                         ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
 
                         if (params["ImportPotential"]):
-                            #VVal= potV[ind]
-                            a=1 #placeholder, add potV = pot from file
+                            VVal= self.filePot[ind]
                         else:
                             Vy = 0.5 * params["Mass"][p] * omegaY2 * y[j]**2 #harmonic pot in y
                             Vp = 0.5 * params["Mass"][p] * omegaX2 * x[i]**2   # .. in x

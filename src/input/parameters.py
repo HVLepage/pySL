@@ -48,13 +48,13 @@ def getparams():
 
 
         # Lattice boundaries
-        "x0": -200.0,
-        "x1": 200.0,
-        "y0": 0.0,
-        "y1": 0.0,
+        "Xa": -200.0,
+        "Xb": 200.0,
+        "Ya": 0.0,
+        "Yb": 0.0,
 
-        "z0": 0.0,
-        "z1": 0.0,
+        "Za": 0.0,
+        "Zb": 0.0,
 
         # Lattice Sites
         "Nx": 801,
@@ -121,11 +121,11 @@ def getparams():
     params["dy"] = 1.0
     params["dz"] = 1.0
     if (params["Nx"] > 1):
-        params["dx"] = (params["x1"] - params["x0"]) / (params["Nx"] - 1)
+        params["dx"] = (params["Xb"] - params["Xa"]) / (params["Nx"] - 1)
     if (params["Ny"] > 1):
-        params["dy"] = (params["y1"] - params["y0"]) / (params["Ny"] - 1)
+        params["dy"] = (params["Yb"] - params["Ya"]) / (params["Ny"] - 1)
     if (params["Nz"] > 1):
-        params["dz"] = (params["z1"] - params["z0"]) / (params["Nz"] - 1)
+        params["dz"] = (params["Zb"] - params["Za"]) / (params["Nz"] - 1)
         
         
     if (params["SolveEigenValueProblem"] != True):

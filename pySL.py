@@ -56,7 +56,7 @@ params = inputparameters.getparams()
 
 
 
-x = np.linspace(params["x0"], params["x1"], params["Nx"])  # Define the simulation domain
+x = np.linspace(params["Xa"], params["Xb"], params["Nx"])  # Define the simulation domain
 dx = x[1] - x[0]      
 
 
