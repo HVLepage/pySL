@@ -20,7 +20,7 @@ from src.input.wavefunction import Wavefunction
 from src.fft.fftauxV import Potential
 
 print("\n----------------------------------------------------------------")
-print("pySL version 0.0.3")
+print("pySL version 0.0.4")
 print("----------------------------------------------------------------")
 
 ################################################################################################################################
@@ -42,7 +42,10 @@ gpuinfo.print_gpu_info()
 with open('./src/kernel.cu', 'r') as file:
     source = file.read()
 
-mod = SourceModule(source, options=['-ccbin', 'cl.exe'])
+if os.name == 'nt':
+  mod = SourceModule(source, options=['-ccbin', 'cl.exe'])
+else:
+  mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
 
 ################################################################################################################################
 # Staggered Leapfrog Setup
