@@ -3,16 +3,17 @@ import pycuda.driver as cuda
 
 class Wavefunction:
         
-
+    # Retrieve data from GPU device and copy to host array
     def dtoh(self):
         cuda.memcpy_dtoh(self.re, self.re_gpu)
         cuda.memcpy_dtoh(self.im, self.im_gpu)
     
+    # Copy wave function array from host to GPU device
     def htod(self):
         cuda.memcpy_htod(self.re_gpu, self.re)
         cuda.memcpy_htod(self.im_gpu, self.im)
         
-        
+    # Calculate norm, used at every print step to check simulation convergence
     def norm(self):
 
         norm = sum(self.re**2 + self.im**2) * self.dV
@@ -20,7 +21,7 @@ class Wavefunction:
         return norm
     
     def readFromFile(self,params):
-        file = open(".\src\\" + params["WavefunctionName"])
+        file = open(".\input\\" + params["WavefunctionName"])
         lines = file.readlines()
         for i in range(0,params["N"]):
             self.re[i] = float(lines[i].split()[0])
