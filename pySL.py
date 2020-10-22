@@ -15,7 +15,7 @@ import tracemalloc
 
 # Import project modules
 import src.get_gpu_info as gpuinfo
-import src.input.parameters as inputparameters
+from src.input.parameters import getparams
 from src.input.wavefunction import Wavefunction
 from src.fft.fftauxV import Potential
 
@@ -55,7 +55,7 @@ v_si2nu = 1.312342066e-2
 t_si2nu = 1.157676458e2
 
 # Import parameters
-params = inputparameters.getparams()
+params = getparams()
 
 
 
