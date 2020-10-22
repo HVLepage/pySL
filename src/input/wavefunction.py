@@ -1,9 +1,16 @@
 import numpy as np
 import pycuda.driver as cuda
+from  src.eigensolver.RSpaceSolverCPU import RSpaceSolverCPU
 
 class Wavefunction:
         
+
     # Retrieve data from GPU device and copy to host array
+
+
+    def solve(self,params,V):
+        RSpaceSolverCPU(params,self,V)
+        
     def dtoh(self):
         cuda.memcpy_dtoh(self.re, self.re_gpu)
         cuda.memcpy_dtoh(self.im, self.im_gpu)
