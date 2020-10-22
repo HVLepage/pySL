@@ -1,3 +1,5 @@
+import math
+
 def getparams():
     
     v_si2nu = 1.312342066e-2
@@ -109,8 +111,9 @@ def getparams():
     params["dt"] *= t_si2nu
     params["StartTime"] *= t_si2nu
     params["ASAW"] *= v_si2nu
-    params["wSAW"] /= t_si2nu
     params["cSAW"] /= t_si2nu
+    params["wSAW"] = 2 * math.pi * params["cSAW"] / params["lambdaSAW"]
+    params["kSAW"] = 2 * math.pi  / params["lambdaSAW"]
     params["DRt0"] *= t_si2nu
     params["URt0"] *= t_si2nu
 
