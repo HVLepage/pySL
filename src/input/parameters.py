@@ -30,16 +30,11 @@ def getparams():
         # Relative permittivity of quantum well material
         "RelPerm": 13.1,
 
-        # SAW amplitude [meV] , wavenumber 1/[nm], and frequency 1/[s] see MATLAB Code
+        # SAW amplitude [meV] , wavenumber 1/[nm], and frequency 1/[s]
         "ASAW": 0.0,
         "cSAW": 3.0,
         "lambdaSAW": 1000.0,
         "SAWoffset": 0.0,
-
-        # Soon to be obsolete (calculated in InputParameters.cu)
-        "kSAW": 0.006283185307180,
-        "wSAW": 0.018849555921539,
-
 
         # dt is time in [ps] per each timeStep
         "dt": 0.00005,
