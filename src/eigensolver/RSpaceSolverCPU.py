@@ -14,13 +14,6 @@ def RSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
     Np = params["Np"]
     dim = params["dim"]
     PsiSize = (Nx * Ny * Nz) ** Np
-
-    dx = params["dx"]
-    dy = params["dy"]
-    dz = params["dz"]
-
-	
-
 	
 	
 	#generate Hamiltonian matrix for eigenfunction solving
@@ -75,8 +68,14 @@ def RSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	#	FFTAuxPsi(params, PsiOut, planConvND, true, false)
 	#	ExportFullWave(PsiOut, params, -1, PsiSize, params["SimName, "Kwave")
 	#else:
-	#	ExportFullWave(PsiOut, params, -1, PsiSize, params["SimName, "wave")
+    PsiOut.exportFull( params, -1, "wave")
 	
-	#ExportEigenvalues(params, D)
+    ExportEigenvalues(params, D, 5)
 
     print("EigenSolver finished!  \n")
+
+def ExportEigenvalues(params, D, count):
+    OutputFileName = ".\\" + params["SimName"] + "eigs.txt"
+    with open(OutputFileName, 'w+') as OutputFile:
+        for i in range(0, count):
+            OutputFile.write("%.8e \n", D[i])

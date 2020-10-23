@@ -144,6 +144,7 @@ class Potential():
         
         self.pot_gpu=cuda.mem_alloc(self.pot.nbytes)
         
+        self.construct(params)
         
         self.pot = self.pot.astype(np.float32)
 

@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pycuda.driver as cuda
 from  src.eigensolver.RSpaceSolverCPU import RSpaceSolverCPU
@@ -22,11 +23,28 @@ class Wavefunction:
         
     # Calculate norm, used at every print step to check simulation convergence
     def norm(self):
-
-        norm = sum(self.re**2 + self.im**2) * self.dV
-
+        norm = sum(self.re**2 + self.im**2) *self.dV
         return norm
+
+    def exportFull(self, params, step, Filename="wave"):
+        #n_zero = math.log10((float)(params["TimeSteps"] / params["PrintStep"]) + 1)
+        #count = step / params["PrintStep"]
+        #index = (n_zero - count.length(), '0') + count
+        index = step
+        
+        if (step >= 0):
+            OutputFileName = ".\\" + params["SimName"] + "\\waves\\wave_iteration_" + index + ".txt"
+        else:
+            OutputFileName = ".\\" + params["SimName"] + "\\" + Filename + ".txt"
+	
+        with open(OutputFileName, 'w+') as OutputFile:
+            for i in range(0, self.N):
+                OutputFile.write("%.8e %.8e\n", self.re[i], self.im[i])
+	
+
+
     
+
     def readFromFile(self,params):
         file = open(".\input\\" + params["WavefunctionName"])
         lines = file.readlines()
@@ -36,7 +54,12 @@ class Wavefunction:
     
     def __init__(self,params):
         
-        self.dV = params["dx"] * params["dy"] * params["dz"] * params["Np"]
+        if (params["KSpace"]):
+            self.dV = (params["dKx"] * params["dKy"] *params["dKz"]) ** params["Np"]
+        else: 
+            self.dV = (params["dx"] * params["dy"] *params["dz"]) ** params["Np"]
+        
+        self.N = params["N"];
         
         self.re=np.zeros(params["N"])
         self.im=np.zeros(params["N"])
