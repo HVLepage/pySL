@@ -52,9 +52,9 @@ class Wavefunction:
             self.re[i] = float(lines[i].split()[0])
             self.im[i] = float(lines[i].split()[1])
     
-    def __init__(self,params):
+    def __init__(self,params,V=0):
         
-        if (params["KSpace"]):
+        if (params["KSpaceLeapfrog"]):
             self.dV = (params["dKx"] * params["dKy"] *params["dKz"]) ** params["Np"]
         else: 
             self.dV = (params["dx"] * params["dy"] *params["dz"]) ** params["Np"]
@@ -70,7 +70,7 @@ class Wavefunction:
         self.im_gpu=cuda.mem_alloc(self.im.nbytes)
         
         if (params["SolveEigenValueProblem"]):
-            a=1 # put eigensolvers here
+            RSpaceSolverCPU(params,self,V)
         else:
             #self.readFromFile(params) #read from file
             

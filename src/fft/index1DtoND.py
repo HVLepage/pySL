@@ -1,4 +1,4 @@
-def index(ind, inds, sizes, params, p): 
+def index(ind, inds, sizes, params, p = 0): 
     if (p == 0):
         p = params["Np"]
 

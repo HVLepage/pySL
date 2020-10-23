@@ -64,16 +64,14 @@ dx = x[1] - x[0]
 
 
 
-psi = Wavefunction(params)
-
-
 V = Potential(params) # Static 1D potential (particle in a box)
+psi = Wavefunction(params,V)
 
 dt = params["dt"] # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
 PrintStep = params["PrintStep"]  # Used for saving the wave function
 
-psi2 = np.zeros((int(TimeSteps/PrintStep),len(x)))
+psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N))
 
 aa = dt/dx**2
 bb = 2*dt

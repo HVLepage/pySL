@@ -43,11 +43,11 @@ class Potential():
         y = np.linspace(Ya, Yb, Ny)
         z = np.linspace(Za, Zb, Nz)
 	
-        if (params["importPotential"]):
+        if (params["ImportPotential"]):
             self.readFromFile(params)
 
 
-        inds = np.zeros(dim,Np)
+        inds = np.zeros([dim,Np])
 
         if (Np > 1):
             interactionsNr = (Np**2 - Np) / 2
@@ -59,43 +59,40 @@ class Potential():
                 for j in range(i+1,Np):
                     interactionsMap[i,0] = i
                     interactionsMap[i,1] = j
-
+        else:
+            interactionsNr = 0
 
         if (interactionsNr > 0):
             V2P=np.zeros((Nx * Ny * Nz)**2)
 
-        for i1 in range(0,Nx):
-            for j1 in range(0,Ny):
-                for k1 in range(0,Nz):
-                    for i2 in range(0,Nx):
-                        for j2 in range(0,Ny):
-                            for k2 in range(0,Nz):
-                                VVal = TwoPpotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
-                                if (VVal > 100):
-                                    VVal = 100.0
-
-                                V2P[index6Dto1D.index(i1, j1, k1, i2, j2, k2, Nx, Ny, Nz, Nx, Ny, Nz)] = VVal
+            for i1 in range(0,Nx):
+                for j1 in range(0,Ny):
+                    for k1 in range(0,Nz):
+                        for i2 in range(0,Nx):
+                            for j2 in range(0,Ny):
+                                for k2 in range(0,Nz):
+                                    VVal = TwoPpotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
+                                    if (VVal > 100):
+                                        VVal = 100.0
+    
+                                    V2P[index6Dto1D.index(i1, j1, k1, i2, j2, k2, Nx, Ny, Nz, Nx, Ny, Nz)] = VVal
 
 		
+            for p in range(0,interactionsNr):
 
+                p1 = interactionsMap[p]
+                p2 = interactionsMap[p + 1]
+                inds2P = np.zeros([dim,2])
 
-        for p in range(0,Np):
+                for i in range(0,params["N"]):
+                    index1DtoND.index(i, inds, params["Sizes"], params)
 
-            p1 = interactionsMap[p]
-            p2 = interactionsMap[p + 1]
-            inds2P = np.zeros(dim,2)
-
-            for i in range(0,params["N"]):
-                index1DtoND.index(i, inds, params["Sizes"], params)
-
-            for j in range(0,params["dim"]):
-                inds2P[j,0] = inds[p1 * params["dim"] + j]
-                inds2P[j,1] = inds[p2 * params["dim"] + j]
+                for j in range(0,params["dim"]):
+                    inds2P[j,0] = inds[p1 * params["dim"] + j]
+                    inds2P[j,1] = inds[p2 * params["dim"] + j]
 				
-
-            ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
-
-            self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
+                ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
+                self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
 
 
 
@@ -132,7 +129,7 @@ class Potential():
                 inds1P[j] = inds[p * params["dim"] + j]
 			
             ind1P = indexNDto1D.index(inds1P, params["Sizes"], params, 1)
-            self.pot[i] += V1P[ind1P]
+            self.pot[i] += V1P[int(ind1P)]
 
 
             

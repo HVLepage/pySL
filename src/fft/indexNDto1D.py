@@ -1,4 +1,4 @@
-def IndexNDto1D(inds, sizes, params, p):
+def index(inds, sizes, params, p = 0):
     if (p == 0):
         p = params["Np"]
 

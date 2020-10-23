@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 def getparams():
     
@@ -169,8 +170,55 @@ def getparams():
     if ((params["KSpaceLeapfrog"]) and ((2 * params["KxKCO"] + 1) >params["Nx"] or (2 * params["KyKCO"] + 1) > params["Ny"] or (2 * params["KzKCO"] + 1) > params["Nz"])):
         print("(2 * Kx/y/zKCO + 1)  cannot be greater than Nx/y/z for KSpaceLeapfrog")
         exit(1)
+
+    params["Kx"] = 2 * params["KxKCO"]  + 1
+    params["Ky"]  = 2 * params["KyKCO"]  + 1
+    params["Kz"] = 2 * params["KzKCO"]  + 1
+	
+    params["dKx"] =  2 * math.pi / (params["Xb"] - params["Xa"]) if (params["Xb"] - params["Xa"])>0 else 1.0 #delta momentum
+    params["dKy"] =  2 * math.pi / (params["Yb"] - params["Ya"]) if (params["Yb"] - params["Ya"])>0 else 1.0
+    params["dKz"] =  2 * math.pi / (params["Zb"] - params["Za"]) if (params["Zb"] - params["Za"])>0 else 1.0
+    
+    params["Sizes"] = np.zeros( params["dim"])
+    params["SizesK"] = np.zeros( params["dim"])
+    params["SizesOutK"] = np.zeros( params["dim"])
+    params["KCOs"] = np.zeros( params["dim"])
+    params["dKs"] = np.zeros( params["dim"])
+    params["dXs"] = np.zeros( params["dim"])
+    params["faa"] = np.zeros( params["dim"])
+
+    hbar = 1
+    
+    i = 0
+    if (params["Nx"] > 1):
+        params["Sizes"][i] = params["Nx"] #Psi size
+        params["SizesK"][i] = params["Kx"] #K space size
+        params["SizesOutK"][i] = params["NxOutK"]
+        params["KCOs"][i] = params["KxKCO"] #K cutoff
+        params["dKs"][i] = params["dKx"] #delta K
+        params["dXs"][i] = params["dx"]
+        params["faa"][i] = hbar * params["dt"] / (params["dx"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        i=i+1
+    if (params["Ny"] > 1):
+        params["Sizes"][i] = params["Ny"] #Psi size
+        params["SizesK"][i] = params["Ky"] #K space size
+        params["SizesOutK"][i] = params["NyOutK"]
+        params["KCOs"][i] = params["KyKCO"] #K cutoff
+        params["dKs"][i] = params["dKy"] #delta K
+        params["dXs"][i] = params["dy"]
+        params["faa"][i] = hbar * params["dt"] / (params["dy"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        i=i+1
+    if (params["Nz"] > 1):
+        params["Sizes"][i] = params["Nz"] #Psi size
+        params["SizesK"][i] = params["Kz"] #K space size
+        params["SizesOutK"][i] = params["NzOutK"]
+        params["KCOs"][i] = params["KzKCO"] #K cutoff
+        params["dKs"][i] = params["dKz"] #delta K
+        params["dXs"][i] = params["dz"]
+        params["faa"][i] = hbar * params["dt"] / (params["dz"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        i=i+1
 	
 
-
+    params["fbb"] = 2.0 * params["dt"] / hbar #time parameter fbb for Hamiltonians/kernels
 
     return params
