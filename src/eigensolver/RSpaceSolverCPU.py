@@ -19,7 +19,7 @@ def RSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	#generate Hamiltonian matrix for eigenfunction solving
 	
 	#Init Hamiltonian
-    H = np.zeros(PsiSize, PsiSize)
+    H = np.zeros([PsiSize, PsiSize])
 
     H2 = params["hbar"] ** 2 #hbar squared
 
@@ -30,19 +30,19 @@ def RSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 		#fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
 
 		#on-site potential
-        H[k,k] += V[k] #!!!!!!!!!!!!!!!!!!!!!!!
+        H[k,k] += V.pot[k] #!!!!!!!!!!!!!!!!!!!!!!!
         for d in range(0,dim):
             for p in range(0,Np):
                 H[k,k] += H2 / (params["Mass"][p] * params["dXs"][d] ** 2) # on-site kinetic part
 
-                if ((k-1)>0):
+                if ((k-1)>=0):
                     H[k,k-1] -= H2 / (2 * params["Mass"][p] * params["dXs"][d] ** 2)
 				
-                if ((k+1)>0):
+                if ((k+1)<PsiSize):
                     H[k,k+1] -=  H2 / (2 * params["Mass"][p] * params["dXs"][d] ** 2)
 				
 
-    D, V = LA.eigh(H)
+    D, eV = LA.eigh(H)
 
     for i in range(0,5):
         print(D[i])
@@ -52,13 +52,14 @@ def RSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	# Go over eigenstates to construct the init wave function as specified by Input Params
     for J in range(0,5):
         if ((params["InputStates"][2 * J] != 0.0) or (params["InputStates"][2 * J + 1] != 0.0)):
-            PsiOut.re += params["InputStates"][2 * J] * V[:J] 
+            PsiOut.re += params["InputStates"][2 * J] * eV[:,J] 
 
 	
 							# do a final normalisation
     norm = PsiOut.norm()
 
     PsiOut.re /= norm
+    PsiOut.im *= 0
 		
 
 
@@ -78,4 +79,4 @@ def ExportEigenvalues(params, D, count):
     OutputFileName = ".\\" + params["SimName"] + "eigs.txt"
     with open(OutputFileName, 'w+') as OutputFile:
         for i in range(0, count):
-            OutputFile.write("%.8e \n", D[i])
+            OutputFile.write("{:e} \n".format(D[i]))

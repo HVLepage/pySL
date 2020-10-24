@@ -2,6 +2,7 @@ import math
 import numpy as np
 import pycuda.driver as cuda
 from  src.eigensolver.RSpaceSolverCPU import RSpaceSolverCPU
+import pycuda.gpuarray as gpuarray
 
 class Wavefunction:
         
@@ -13,13 +14,13 @@ class Wavefunction:
         RSpaceSolverCPU(params,self,V)
         
     def dtoh(self):
-        cuda.memcpy_dtoh(self.re, self.re_gpu)
-        cuda.memcpy_dtoh(self.im, self.im_gpu)
+        self.re_gpu.get(self.re)
+        self.im_gpu.get(self.im)
     
     # Copy wave function array from host to GPU device
     def htod(self):
-        cuda.memcpy_htod(self.re_gpu, self.re)
-        cuda.memcpy_htod(self.im_gpu, self.im)
+        self.re_gpu.set(self.re)
+        self.im_gpu.set(self.im)
         
     # Calculate norm, used at every print step to check simulation convergence
     def norm(self):
@@ -27,10 +28,10 @@ class Wavefunction:
         return norm
 
     def exportFull(self, params, step, Filename="wave"):
-        #n_zero = math.log10((float)(params["TimeSteps"] / params["PrintStep"]) + 1)
-        #count = step / params["PrintStep"]
+        n_zero = math.log10((float)(params["TimeSteps"] // params["PrintStep"]) + 1)
+        count = int(step / params["PrintStep"])
         #index = (n_zero - count.length(), '0') + count
-        index = step
+        index = str(count).zfill((int(n_zero)))
         
         if (step >= 0):
             OutputFileName = ".\\" + params["SimName"] + "\\waves\\wave_iteration_" + index + ".txt"
@@ -39,7 +40,7 @@ class Wavefunction:
 	
         with open(OutputFileName, 'w+') as OutputFile:
             for i in range(0, self.N):
-                OutputFile.write("%.8e %.8e\n", self.re[i], self.im[i])
+                OutputFile.write("{:e} {:e} \n".format(self.re[i], self.im[i]))
 	
 
 
@@ -59,15 +60,20 @@ class Wavefunction:
         else: 
             self.dV = (params["dx"] * params["dy"] *params["dz"]) ** params["Np"]
         
-        self.N = params["N"];
+        self.N = params["N"]
         
-        self.re=np.zeros(params["N"])
-        self.im=np.zeros(params["N"])
+        size = []
+        for i in range(0,params["dim"]):
+            size.append(int(params["Sizes"][i]))
+        
+        
+        self.re=np.zeros(size)
+        self.im=np.zeros(size)
         
         self.re = self.re.astype(np.float32)
         self.im = self.im.astype(np.float32)
-        self.re_gpu=cuda.mem_alloc(self.re.nbytes)
-        self.im_gpu=cuda.mem_alloc(self.im.nbytes)
+        self.re_gpu=gpuarray.to_gpu(self.re)
+        self.im_gpu=gpuarray.to_gpu(self.im)
         
         if (params["SolveEigenValueProblem"]):
             RSpaceSolverCPU(params,self,V)

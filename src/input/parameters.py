@@ -11,7 +11,7 @@ def getparams():
 
         # Flags
         "Np": 1,
-        "SolveEigenValueProblem": False,
+        "SolveEigenValueProblem": True,
         "KSpaceLeapfrog": False,
         "GPUSolver": True,
         "SparseSolver": False,
@@ -40,7 +40,7 @@ def getparams():
         "SAWoffset": 0.0,
 
         # dt is time in [ps] per each timeStep
-        "dt": 0.00005,
+        "dt": 0.000005,
         "StartTime": 0.0,
 
         # Total time steps and how often to print data
@@ -187,7 +187,7 @@ def getparams():
     params["dXs"] = np.zeros( params["dim"])
     params["faa"] = np.zeros( params["dim"])
 
-    hbar = 1
+    params["hbar"] = 1
     
     i = 0
     if (params["Nx"] > 1):
@@ -197,7 +197,7 @@ def getparams():
         params["KCOs"][i] = params["KxKCO"] #K cutoff
         params["dKs"][i] = params["dKx"] #delta K
         params["dXs"][i] = params["dx"]
-        params["faa"][i] = hbar * params["dt"] / (params["dx"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        params["faa"][i] = params["hbar"] * params["dt"] / (params["dx"] **2) #kinetic parameter faa for Hamiltonians/kernels
         i=i+1
     if (params["Ny"] > 1):
         params["Sizes"][i] = params["Ny"] #Psi size
@@ -206,7 +206,7 @@ def getparams():
         params["KCOs"][i] = params["KyKCO"] #K cutoff
         params["dKs"][i] = params["dKy"] #delta K
         params["dXs"][i] = params["dy"]
-        params["faa"][i] = hbar * params["dt"] / (params["dy"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        params["faa"][i] = params["hbar"] * params["dt"] / (params["dy"] **2) #kinetic parameter faa for Hamiltonians/kernels
         i=i+1
     if (params["Nz"] > 1):
         params["Sizes"][i] = params["Nz"] #Psi size
@@ -215,10 +215,10 @@ def getparams():
         params["KCOs"][i] = params["KzKCO"] #K cutoff
         params["dKs"][i] = params["dKz"] #delta K
         params["dXs"][i] = params["dz"]
-        params["faa"][i] = hbar * params["dt"] / (params["dz"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        params["faa"][i] = params["hbar"] * params["dt"] / (params["dz"] **2) #kinetic parameter faa for Hamiltonians/kernels
         i=i+1
 	
 
-    params["fbb"] = 2.0 * params["dt"] / hbar #time parameter fbb for Hamiltonians/kernels
+    params["fbb"] = 2.0 * params["dt"] / params["hbar"] #time parameter fbb for Hamiltonians/kernels
 
     return params

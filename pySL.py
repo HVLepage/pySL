@@ -19,6 +19,8 @@ from src.input.parameters import getparams
 from src.input.wavefunction import Wavefunction
 from src.fft.fftauxV import Potential
 
+import pycuda.gpuarray as gpuarray
+
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.4")
 print("----------------------------------------------------------------")
@@ -58,6 +60,33 @@ t_si2nu = 1.157676458e2
 params = getparams()
 
 
+# create output dir
+
+dirPath = ".\\" + params["SimName"]
+if not os.path.isdir(dirPath):
+    os.mkdir(dirPath)
+dirPath = dirPath + "\\waves"
+if not os.path.isdir(dirPath):
+    os.mkdir(dirPath)
+
+#test_cpu = np.ones([4,4])
+
+#test_cpu[0,0]=1
+#test_cpu[0,1]=10
+#test_cpu[1,0]=2
+#test_cpu[2,0]=3
+#test_cpu[3,1]=4
+
+#test_cpu = test_cpu.astype(np.float32)
+#test_gpu = gpuarray.to_gpu(test_cpu)
+#test_gpu.set(test_cpu)
+#test_gpu = test_gpu.astype(np.float32)
+#func_test = mod.get_function("gputest")
+
+
+#Ngpu = np.int32(16)
+
+#func_test(test_gpu, Ngpu, block=(16,1,1), grid=(1,1))
 
 x = np.linspace(params["Xa"], params["Xb"], params["Nx"])  # Define the simulation domain
 dx = x[1] - x[0]      
@@ -124,6 +153,7 @@ for i in range(0, TimeSteps):
     t1 = t2
     norm = psi.norm()
     print("Iteration: ", str(i).zfill(5), "    Time Elapsed: %.4f"%t_print, "    NORM: %.8f"%norm)
+    psi.exportFull(params,i)
 
 t2 = time.time()
 t_print = t2-t0
