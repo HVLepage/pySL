@@ -45,9 +45,9 @@ with open('./src/kernel.cu', 'r') as file:
     source = file.read()
 
 if os.name == 'nt':
-  mod = SourceModule(source, options=['-ccbin', 'cl.exe'])
+    mod = SourceModule(source, options=['-ccbin', 'cl.exe'])
 else:
-  mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
+    mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
 
 ################################################################################################################################
 # Staggered Leapfrog Setup

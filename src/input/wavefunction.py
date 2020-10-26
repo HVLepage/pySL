@@ -24,7 +24,7 @@ class Wavefunction:
         RSpaceSolverCPU(params,self,V)
         
     def dtoh(self):
-        if self.TDSESolver=="kSpace":
+        if (self.TDSESolver == "kSpace"):
             self.wave_gpu.get(self.wave)
         else:
             tempre = np.zeros(self.N, dtype=np.float32)
@@ -81,14 +81,12 @@ class Wavefunction:
     
     def __init__(self,params,V=0):
         
-        if params["KSpaceLeapfrog"]:
+        
+        if (params["TDSESolver"] == "kSpace"):
             self.TDSESolver = "kSpace"
+            self.dV = (params["dKx"] * params["dKy"] *params["dKz"]) ** params["Np"]
         else:
             self.TDSESolver = "rSpace"
-        
-        if (params["KSpaceLeapfrog"]):
-            self.dV = (params["dKx"] * params["dKy"] *params["dKz"]) ** params["Np"]
-        else: 
             self.dV = (params["dx"] * params["dy"] *params["dz"]) ** params["Np"]
         
         self.N = params["N"]
@@ -102,7 +100,7 @@ class Wavefunction:
         
         self.wave=np.zeros(self.size, dtype = np.complex64)
         
-        if params["KSpaceLeapfrog"]:
+        if (params["TDSESolver"] == "kSpace"):
             self.wave_gpu=gpuarray.to_gpu(self.wave)
             self.api = cluda.cuda_api()
             self.thr = self.api.Thread.create()
@@ -112,7 +110,7 @@ class Wavefunction:
             self.re_gpu=cuda.mem_alloc_like(self.wave.real)
             self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
         
-        if (params["SolveEigenValueProblem"]):
+        if (not params["ImportWavefunction"]):
             RSpaceSolverCPU(params,self,V)
         else:
             #self.readFromFile(params) #read from file

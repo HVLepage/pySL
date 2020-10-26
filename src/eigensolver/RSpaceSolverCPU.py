@@ -5,7 +5,6 @@ from numpy import linalg as LA
 def RSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	#read input parameters from params & declare stuff
 
-    KSpaceLeapfrog = params["KSpaceLeapfrog"]
 	
     Nx = params["Nx"]
     Ny = params["Ny"]

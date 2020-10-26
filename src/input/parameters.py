@@ -11,16 +11,15 @@ def getparams():
 
         # Flags
         "Np": 1,
-        "SolveEigenValueProblem": False,
+        "TDSESolver": "rSpace",
         "KSpaceLeapfrog": False,
-        "GPUSolver": True,
-        "SparseSolver": False,
-        "KSpaceSolver": False,
+        "Eignesolver": "CPUrSpace",
         "NormalizeWaveFunction": True,
         "SlidingWindow": False,
         "ImportPotential": False,
-        "IncludeSpin": False,
         "PotentialFileName": "potential.txt",
+        "IncludeSpin": False,
+        "ImportWavefunction": True,
         "WaveFileName": "wave.txt",
         "ExportTrace": False,
 
@@ -130,13 +129,13 @@ def getparams():
         params["dz"] = (params["Zb"] - params["Za"]) / (params["Nz"] - 1)
         
         
-    if (params["SolveEigenValueProblem"] != True):
+    if (params["TDSESolver"] == "kSpace"):
         params["KxECO"] = 0
         params["KyECO"] = 0
         params["KzECO"] = 0
 	
 
-    if (params["KSpaceLeapfrog"]!=True):
+    if (params["TDSESolver"] != "kSpace"):
         params["NxOutK"] = 1
         params["NyOutK"] = 1
         params["NzOutK"] = 1
@@ -163,11 +162,11 @@ def getparams():
 	
 
 	# Check if padded output is greater than Psi
-    if ((params["KSpaceLeapfrog"]) and (params["NxOutK"] < params["Nx"] or params["NyOutK"] < params["Ny"] or params["NzOutK"] < params["Nz"])) :
+    if ((params["TDSESolver"] == "kSpace") and (params["NxOutK"] < params["Nx"] or params["NyOutK"] < params["Ny"] or params["NzOutK"] < params["Nz"])) :
         print("NOut parameters cannot be smaller than N for KSpaceLeapfrog")
         exit(1)
 	
-    if ((params["KSpaceLeapfrog"]) and ((2 * params["KxKCO"] + 1) >params["Nx"] or (2 * params["KyKCO"] + 1) > params["Ny"] or (2 * params["KzKCO"] + 1) > params["Nz"])):
+    if ((params["TDSESolver"] == "kSpace") and ((2 * params["KxKCO"] + 1) >params["Nx"] or (2 * params["KyKCO"] + 1) > params["Ny"] or (2 * params["KzKCO"] + 1) > params["Nz"])):
         print("(2 * Kx/y/zKCO + 1)  cannot be greater than Nx/y/z for KSpaceLeapfrog")
         exit(1)
 
