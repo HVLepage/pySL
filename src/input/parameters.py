@@ -11,7 +11,7 @@ def getparams():
 
         # Flags
         "Np": 1,
-        "SolveEigenValueProblem": True,
+        "SolveEigenValueProblem": False,
         "KSpaceLeapfrog": False,
         "GPUSolver": True,
         "SparseSolver": False,
@@ -40,7 +40,7 @@ def getparams():
         "SAWoffset": 0.0,
 
         # dt is time in [ps] per each timeStep
-        "dt": 0.000005,
+        "dt": 0.00005,
         "StartTime": 0.0,
 
         # Total time steps and how often to print data

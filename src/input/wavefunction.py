@@ -2,6 +2,9 @@ import math
 import numpy as np
 import pycuda.driver as cuda
 from  src.eigensolver.RSpaceSolverCPU import RSpaceSolverCPU
+import reikna
+import reikna.fft as rfft
+import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
 
 class Wavefunction:
@@ -9,22 +12,45 @@ class Wavefunction:
 
     # Retrieve data from GPU device and copy to host array
 
+    def fft(self, inv = 0):
+        #api = cluda.cuda_api()
+        #thr = api.Thread.create()
+        #fft_h = rfft.FFT(self.wave)
+        #fftc=fft_h.compile(thr)
+        self.fftc(self.wave_gpu, self.wave_gpu, inv)
+        self.thr.synchronize()
 
     def solve(self,params,V):
         RSpaceSolverCPU(params,self,V)
         
     def dtoh(self):
-        self.re_gpu.get(self.re)
-        self.im_gpu.get(self.im)
+        if self.TDSESolver=="kSpace":
+            self.wave_gpu.get(self.wave)
+        else:
+            tempre = np.zeros(self.N, dtype=np.float32)
+            cuda.memcpy_dtoh(tempre, self.re_gpu)
+            
+            tempim = np.zeros(self.N, dtype=np.float32)
+            cuda.memcpy_dtoh(tempim, self.im_gpu)
+            self.wave = tempre + 1j*tempim
+            #cuda.memcpy_dtoh(temp, self.im_gpu)
+            #self.wave.imag = temp.reshape(self.size)
+           
+            
+            #cuda.memcpy_dtoh(self.wave.real, self.re_gpu.reshape(self.size))
+            #cuda.memcpy_dtoh(self.wave.imag, self.im_gpu.reshape(self.size))
     
     # Copy wave function array from host to GPU device
     def htod(self):
-        self.re_gpu.set(self.re)
-        self.im_gpu.set(self.im)
+        if self.TDSESolver=="kSpace":
+            self.wave_gpu.set(self.wave)
+        else:
+            cuda.memcpy_htod(self.re_gpu, self.wave.real.ravel())
+            cuda.memcpy_htod(self.im_gpu, self.wave.imag.ravel())
         
     # Calculate norm, used at every print step to check simulation convergence
     def norm(self):
-        norm = sum(self.re**2 + self.im**2) *self.dV
+        norm = sum(self.wave.real**2 + self.wave.imag**2) *self.dV
         return norm
 
     def exportFull(self, params, step, Filename="wave"):
@@ -40,7 +66,7 @@ class Wavefunction:
 	
         with open(OutputFileName, 'w+') as OutputFile:
             for i in range(0, self.N):
-                OutputFile.write("{:e} {:e} \n".format(self.re[i], self.im[i]))
+                OutputFile.write("{:e} {:e} \n".format(self.wave.real[i], self.wave.imag[i]))
 	
 
 
@@ -50,10 +76,15 @@ class Wavefunction:
         file = open(".\input\\" + params["WavefunctionName"])
         lines = file.readlines()
         for i in range(0,params["N"]):
-            self.re[i] = float(lines[i].split()[0])
-            self.im[i] = float(lines[i].split()[1])
+            self.wave.real[i] = float(lines[i].split()[0])
+            self.wave.imag[i] = float(lines[i].split()[1])
     
     def __init__(self,params,V=0):
+        
+        if params["KSpaceLeapfrog"]:
+            self.TDSESolver = "kSpace"
+        else:
+            self.TDSESolver = "rSpace"
         
         if (params["KSpaceLeapfrog"]):
             self.dV = (params["dKx"] * params["dKy"] *params["dKz"]) ** params["Np"]
@@ -62,18 +93,24 @@ class Wavefunction:
         
         self.N = params["N"]
         
-        size = []
+        self.size1P = []
+        self.size = []
         for i in range(0,params["dim"]):
-            size.append(int(params["Sizes"][i]))
+            self.size1P.append(int(params["Sizes"][i]))
+        for i in range(0,params["Np"]):
+            self.size += self.size1P
         
+        self.wave=np.zeros(self.size, dtype = np.complex64)
         
-        self.re=np.zeros(size)
-        self.im=np.zeros(size)
-        
-        self.re = self.re.astype(np.float32)
-        self.im = self.im.astype(np.float32)
-        self.re_gpu=gpuarray.to_gpu(self.re)
-        self.im_gpu=gpuarray.to_gpu(self.im)
+        if params["KSpaceLeapfrog"]:
+            self.wave_gpu=gpuarray.to_gpu(self.wave)
+            self.api = cluda.cuda_api()
+            self.thr = self.api.Thread.create()
+            fft_h = rfft.FFT(self.wave)
+            self.fftc=fft_h.compile(self.thr)
+        else:
+            self.re_gpu=cuda.mem_alloc_like(self.wave.real)
+            self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
         
         if (params["SolveEigenValueProblem"]):
             RSpaceSolverCPU(params,self,V)
@@ -85,9 +122,9 @@ class Wavefunction:
             xoffset = 40                      # Wave packet distance from center
             x = np.linspace(params["Xa"], params["Xb"], params["Nx"])  # Define the simulation domain
             
-            self.re = (2**(0.5))*((w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2))/2 # Initial wave function
+            self.wave = (2**(0.5))*((w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2))/2 +1j*0 # Initial wave function
         
         
-        self.re = self.re.astype(np.float32)
-        self.im = self.im.astype(np.float32)
+        self.wave = self.wave.astype(np.complex64)
+        
         self.htod()

@@ -146,7 +146,7 @@ for i in range(0, TimeSteps):
 
   if (i % PrintStep) == 0:
     psi.dtoh()
-    psi2[k] = psi.re**2 + psi.im**2
+    psi2[k] = psi.wave.real**2 + psi.wave.imag**2
     k = k + 1
     t2 = time.time()
     t_print = t2-t1
