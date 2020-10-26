@@ -10,14 +10,18 @@ def getparams():
         "SimName": "CUDA_1D_Double_Slit_Experiment",
 
         # Flags
+        # no of particles
         "Np": 1,
+        #which solver kernel to use
         "TDSESolver": "rSpace",
-        "KSpaceLeapfrog": False,
+        #which eigensolver to use
         "Eignesolver": "CPUrSpace",
         "NormalizeWaveFunction": True,
         "SlidingWindow": False,
+        #Import underlying potential, or create it from equations in fftauxV.py
         "ImportPotential": False,
         "PotentialFileName": "potential.txt",
+        #use spin?
         "IncludeSpin": False,
         "ImportWavefunction": True,
         "WaveFileName": "wave.txt",

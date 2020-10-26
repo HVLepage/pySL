@@ -5,8 +5,8 @@ import src.fft.index6Dto1D as index6Dto1D
 import src.fft.index3Dto1D as index3Dto1D
 import src.fft.index1DtoND as index1DtoND
 import src.fft.indexNDto1D as indexNDto1D
-from src.fft.OnePpotential import OnePpotential
-from src.fft.TwoPpotential import TwoPpotential
+from src.fft.underlyingPotential import UnderlyingPotential
+from src.fft.coulombPotential import CoulombPotential
 
 class Potential():
     def dtoh(self):
@@ -71,7 +71,7 @@ class Potential():
                         for i2 in range(0,Nx):
                             for j2 in range(0,Ny):
                                 for k2 in range(0,Nz):
-                                    VVal = TwoPpotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
+                                    VVal = CoulombPotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
                                     if (VVal > 100):
                                         VVal = 100.0
     
@@ -110,7 +110,7 @@ class Potential():
                         if (params["ImportPotential"]):
                             VVal= self.filePot[ind]
                         else:
-                            VVal = OnePpotential(params,p,x[i],y[j],z[k])
+                            VVal = UnderlyingPotential(params,p,x[i],y[j],z[k])
 
                         if (VVal > 100):
                             VVal = 100.0

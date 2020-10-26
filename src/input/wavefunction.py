@@ -8,11 +8,11 @@ import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
 
 class Wavefunction:
-        
 
-    # Retrieve data from GPU device and copy to host array
-
+    
+    
     def fft(self, inv = 0):
+        #Perform fft or ifft
         #api = cluda.cuda_api()
         #thr = api.Thread.create()
         #fft_h = rfft.FFT(self.wave)
@@ -20,9 +20,11 @@ class Wavefunction:
         self.fftc(self.wave_gpu, self.wave_gpu, inv)
         self.thr.synchronize()
 
+    #use appropriate eigensolver to get wavefunction
     def solve(self,params,V):
         RSpaceSolverCPU(params,self,V)
         
+    # Retrieve data from GPU device and copy to host array
     def dtoh(self):
         if (self.TDSESolver == "kSpace"):
             self.wave_gpu.get(self.wave)
@@ -53,6 +55,7 @@ class Wavefunction:
         norm = sum(self.wave.real**2 + self.wave.imag**2) *self.dV
         return norm
 
+    #write full wavefunction to file
     def exportFull(self, params, step, Filename="wave"):
         n_zero = math.log10((float)(params["TimeSteps"] // params["PrintStep"]) + 1)
         count = int(step / params["PrintStep"])
@@ -71,7 +74,7 @@ class Wavefunction:
 
 
     
-
+    #if importing, read wavefunction from file
     def readFromFile(self,params):
         file = open(".\input\\" + params["WavefunctionName"])
         lines = file.readlines()
@@ -79,6 +82,7 @@ class Wavefunction:
             self.wave.real[i] = float(lines[i].split()[0])
             self.wave.imag[i] = float(lines[i].split()[1])
     
+    #thi sis called on creation of instance
     def __init__(self,params,V=0):
         
         
