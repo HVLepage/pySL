@@ -85,7 +85,7 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
     uplo = ctypes.c_int(1)
     
     #dwork = ctypes.double()
-    lwork = ctypes.c_int(0)
+    lwork = gpuarray.to_gpu(np.zeros(1,dtype=np.int32))
     devinfo = ctypes.c_void_p()
     
     
@@ -120,7 +120,7 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
                                  (dH.gpudata),
                                  lda,
                                  (dD.gpudata),
-                                lwork)
+                                lwork.gpudata)
     
     dwork=gpuarray.to_gpu(np.zeros(lwork, dtype=np.float64))
     
@@ -134,7 +134,7 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
                                  lda,
                                   (dD.gpudata),
                                  dwork.gpudata,
-                                 lwork,
+                                 lwork.gpudata,
                                  devinfo)
                                  
 
