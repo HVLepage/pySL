@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import linalg as LA
+from src.export.exportEigenvalues import exportEigenvalues
 
 
 def rSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
@@ -70,12 +71,6 @@ def rSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	#else:
     PsiOut.exportFull( params, -1, "wave")
 	
-    ExportEigenvalues(params, D, 5)
+    exportEigenvalues(params, D, 5)
 
     print("EigenSolver finished!  \n")
-
-def ExportEigenvalues(params, D, count):
-    OutputFileName = "./out/" + params["SimName"] + "/eigs.txt"
-    with open(OutputFileName, 'w+') as OutputFile:
-        for i in range(0, count):
-            OutputFile.write("{:e} \n".format(D[i]))
