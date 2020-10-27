@@ -7,3 +7,5 @@ pycuda
 
 matplotlib
 # guppy3
+
+reikna
