@@ -74,8 +74,8 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
                                             ctypes.c_float,
                                             ctypes.c_int,
                                             ctypes.c_float,
-                                            ctypes.c_double,
-                                            ctypes.c_int,
+                                            ctypes.c_void_p,
+                                            ctypes.c_void_p,
                                             ctypes.c_void_p]
 
 
@@ -85,7 +85,9 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
     uplo = ctypes.c_int(1)
     
     #dwork = ctypes.double()
-    lwork = gpuarray.to_gpu(np.zeros(1,dtype=np.int32))
+    #lwork = gpuarray.to_gpu(np.zeros(1,dtype=np.int32))
+    dwork =ctypes.c_void_p()
+    lwork = ctypes.c_void_p()
     devinfo = ctypes.c_void_p()
     
     
@@ -113,31 +115,33 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
                                             ctypes.c_float,
                                             ctypes.c_int]
     
-    _libcusolver.cusolverDnSsyevd_bufferSize(cuso_handle,
-                                 jobz,
-                                 uplo,
-                                 n,
-                                 (dH.gpudata),
-                                 lda,
-                                 (dD.gpudata),
-                                lwork.gpudata)
+   # status = _libcusolver.cusolverDnSsyevd_bufferSize(cuso_handle,
+    #                             jobz,
+     #                            uplo,
+      #                           n,
+       #                          (dH.gpudata),
+        #                         lda,
+         #                        (dD.gpudata),
+          #                      lwork.gpudata)
     
-    dwork=gpuarray.to_gpu(np.zeros(lwork, dtype=np.float64))
+   # print('Buffer status: ' + str(status))
     
+    #dwork=gpuarray.to_gpu(np.zeros(lwork, dtype=np.float64))
+    #dwork=gpuarray.to_gpu(np.zeros(1, dtype=np.float64))
                                             
     
-    _libcusolver.cusolverDnSsyevd(cuso_handle,
+    status =  _libcusolver.cusolverDnSsyevd(cuso_handle,
                                  jobz,
                                  uplo,
                                  n,
                                  (dH.gpudata),
                                  lda,
                                   (dD.gpudata),
-                                 dwork.gpudata,
-                                 lwork.gpudata,
+                                 dwork,
+                                 lwork,
                                  devinfo)
                                  
-
+    print('Eigensolver status: ' + str(status))
      #destroy handles
     status = _libcusolver.cusolverDnDestroy(cuso_handle)
     print('status: ' + str(status))
