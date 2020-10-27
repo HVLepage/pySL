@@ -1,17 +1,20 @@
 import sys
 import os
-# Set target CUDA device. Must be an integer. Currently no error checking.
-if (len(sys.argv) > 1):
-  print("\nTarget CUDA device: ",str(sys.argv[1]))
-  os.environ['CUDA_DEVICE'] = str(sys.argv[1])
 import math
-import pycuda.driver as cuda
-import pycuda.autoinit
-from pycuda.compiler import SourceModule
 import numpy as np
 import time
 import matplotlib.pyplot as plt
 import tracemalloc
+
+# Set target CUDA device. Must be an integer. Currently no error checking.
+if (len(sys.argv) > 1):
+  print("\nTarget CUDA device: ",str(sys.argv[1]))
+  os.environ['CUDA_DEVICE'] = str(sys.argv[1])
+# Import pyCUDA modules
+import pycuda.driver as cuda
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
+import pycuda.gpuarray as gpuarray
 
 # Import project modules
 import src.get_gpu_info as gpuinfo
@@ -19,7 +22,6 @@ from src.input.parameters import getparams
 from src.input.wavefunction import Wavefunction
 from src.fft.fftauxV import Potential
 
-import pycuda.gpuarray as gpuarray
 
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.4")
