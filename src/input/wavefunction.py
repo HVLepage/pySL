@@ -59,7 +59,7 @@ class wavefunction:
 
     #write full wavefunction to file
     def exportFull(self, params, step, Filename="wave"):
-        n_zero = math.log10((float)(params["TimeSteps"] // params["PrintStep"]) + 1)
+        n_zero = math.log10((float)(params["TimeSteps"] / params["PrintStep"]) + 1) + 1
         count = int(step / params["PrintStep"])
         #index = (n_zero - count.length(), '0') + count
         index = str(count).zfill((int(n_zero)))
@@ -86,7 +86,6 @@ class wavefunction:
     
     #thi sis called on creation of instance
     def __init__(self,params,V=0):
-        
         
         if (params["TDSESolver"] == "kSpace"):
             self.TDSESolver = "kSpace"
