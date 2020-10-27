@@ -46,7 +46,7 @@ gpuinfo.print_gpu_info()
 with open('./src/kernel.cu', 'r') as file:
     source = file.read()
 
-if os.name == 'nt':
+if os.name == 'nt': # Compatibility with Windows
     mod = SourceModule(source, options=['-ccbin', 'cl.exe'])
 else:
     mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
