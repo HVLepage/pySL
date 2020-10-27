@@ -1,9 +1,8 @@
 import numpy as np
 import ctypes
 import pycuda.gpuarray as gpuarray
-import pycuda.driver as cuda
-import pycuda.autoinit
 import os
+from skcuda import linalg
 
 def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
 	#read input parameters from params & declare stuff
@@ -45,112 +44,18 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
 				
 
    #Do eig things here
-    H=H.ravel()
-    dH = gpuarray.to_gpu(H)
-    dH.set(H)
+    H=np.reshape(H.ravel(), [PsiSize,PsiSize], order='F')
+    H_gpu = gpuarray.to_gpu(H)
     D=np.zeros(PsiSize, dtype=np.float32)
-    dD = gpuarray.to_gpu(D)
     
-
-    if os.name == 'nt':
-        _libcusolver = ctypes.cdll.LoadLibrary('cusolver64_11.dll')
-    else:
-        _libcusolver = ctypes.cdll.LoadLibrary('libcusolver.so')
-
-    #_libcusolver = ctypes.cdll.LoadLibrary('libcusolver.dll')
-
-    _libcusolver.cusolverDnCreate.restype = int
-    _libcusolver.cusolverDnCreate.argtypes = [ctypes.c_void_p]
-
-    _libcusolver.cusolverDnDestroy.restype = int
-    _libcusolver.cusolverDnDestroy.argtypes = [ctypes.c_void_p]
+    linalg.init()
+    V_gpu, D_gpu = linalg.eig(H_gpu, 'N', 'V')
 
 
-    _libcusolver.cusolverDnSsyevd.restype = int
-    _libcusolver.cusolverDnSsyevd.argtypes= [ctypes.c_void_p,
-                                            ctypes.c_int,
-                                            ctypes.c_int,
-                                            ctypes.c_int,
-                                            ctypes.c_float,
-                                            ctypes.c_int,
-                                            ctypes.c_float,
-                                            ctypes.c_void_p,
-                                            ctypes.c_void_p,
-                                            ctypes.c_void_p]
-
-
-    n = ctypes.c_int(PsiSize)
-    lda = ctypes.c_int(PsiSize)
-    jobz = ctypes.c_int(1)
-    uplo = ctypes.c_int(1)
-    
-    #dwork = ctypes.double()
-    #lwork = gpuarray.to_gpu(np.zeros(1,dtype=np.int32))
-    dwork =ctypes.c_void_p()
-    lwork = ctypes.c_void_p()
-    devinfo = ctypes.c_void_p()
-    
-    
-    #create cusolver handle
-    _cuso_handle = ctypes.c_void_p()
-    status = _libcusolver.cusolverDnCreate(ctypes.byref(_cuso_handle))
-    print('status: ' + str(status))
-    cuso_handle = _cuso_handle.value
-    
-    #create MatDescriptor
-    #status = _libcusolver.cusolverDnCreateMatDescr(ctypes.byref(descrA))
-    #print('status: ' + str(status))
-    
-    print('cuso handle: ' + str(cuso_handle))
-    
- 
-    
-    _libcusolver.cusolverDnSsyevd_bufferSize.restype = int
-    _libcusolver.cusolverDnSsyevd_bufferSize.argtypes= [ctypes.c_void_p,
-                                            ctypes.c_int,
-                                            ctypes.c_int,
-                                            ctypes.c_int,
-                                            ctypes.c_float,
-                                            ctypes.c_int,
-                                            ctypes.c_float,
-                                            ctypes.c_int]
-    
-   # status = _libcusolver.cusolverDnSsyevd_bufferSize(cuso_handle,
-    #                             jobz,
-     #                            uplo,
-      #                           n,
-       #                          (dH.gpudata),
-        #                         lda,
-         #                        (dD.gpudata),
-          #                      lwork.gpudata)
-    
-   # print('Buffer status: ' + str(status))
-    
-    #dwork=gpuarray.to_gpu(np.zeros(lwork, dtype=np.float64))
-    #dwork=gpuarray.to_gpu(np.zeros(1, dtype=np.float64))
-                                            
-    
-    status =  _libcusolver.cusolverDnSsyevd(cuso_handle,
-                                 jobz,
-                                 uplo,
-                                 n,
-                                 (dH.gpudata),
-                                 lda,
-                                  (dD.gpudata),
-                                 dwork,
-                                 lwork,
-                                 devinfo)
-                                 
-    print('Eigensolver status: ' + str(status))
-     #destroy handles
-    status = _libcusolver.cusolverDnDestroy(cuso_handle)
-    print('status: ' + str(status))
-
-    #
-
-    dD.get(D)
-    dH.get(H)
-    H=H.reshape([PsiSize,PsiSize])
+    D_gpu.get(D)
+    V_gpu.get(H)
+    #H=H.reshape([PsiSize,PsiSize])
+    H=np.reshape(H.ravel(), [PsiSize,PsiSize], order='C')
 
     for i in range(0,5):
         print(D[i])
