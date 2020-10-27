@@ -104,7 +104,8 @@ class wavefunction:
         for i in range(0,params["Np"]):
             self.size += self.size1P
         
-        self.wave=np.zeros(self.size, dtype = np.complex64)
+        #self.wave=np.zeros(self.size, dtype = np.complex64)
+        self.wave=np.zeros(self.N, dtype = np.complex64)
         
         if (params["TDSESolver"] == "kSpace"):
             self.wave_gpu=gpuarray.to_gpu(self.wave)
