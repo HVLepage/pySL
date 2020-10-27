@@ -50,7 +50,6 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
     dH.set(H)
     D=np.zeros(PsiSize, dtype=np.float32)
     dD = gpuarray.to_gpu(D)
-    dV = gpuarray.to_gpu(H)
     
 
     if os.name == 'nt':
@@ -75,18 +74,18 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
                                             ctypes.c_float,
                                             ctypes.c_int,
                                             ctypes.c_float,
-                                            ctypes.c_void_p,
-                                            ctypes.c_void_p,
+                                            ctypes.c_double,
+                                            ctypes.c_int,
                                             ctypes.c_void_p]
 
 
     n = ctypes.c_int(PsiSize)
     lda = ctypes.c_int(PsiSize)
-    jobz = ctypes.c_int(0)
-    uplo = ctypes.c_int(0)
+    jobz = ctypes.c_int(1)
+    uplo = ctypes.c_int(1)
     
-    dwork = ctypes.c_void_p()
-    lwork = ctypes.c_void_p()
+    #dwork = ctypes.double()
+    lwork = ctypes.c_int(0)
     devinfo = ctypes.c_void_p()
     
     
@@ -102,14 +101,39 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
     
     print('cuso handle: ' + str(cuso_handle))
     
+ 
+    
+    _libcusolver.cusolverDnSsyevd_bufferSize.restype = int
+    _libcusolver.cusolverDnSsyevd_bufferSize.argtypes= [ctypes.c_void_p,
+                                            ctypes.c_int,
+                                            ctypes.c_int,
+                                            ctypes.c_int,
+                                            ctypes.c_float,
+                                            ctypes.c_int,
+                                            ctypes.c_float,
+                                            ctypes.c_int]
+    
+    _libcusolver.cusolverDnSsyevd_bufferSize(cuso_handle,
+                                 jobz,
+                                 uplo,
+                                 n,
+                                 (dH.gpudata),
+                                 lda,
+                                 (dD.gpudata),
+                                lwork)
+    
+    dwork=gpuarray.to_gpu(np.zeros(lwork, dtype=np.float64))
+    
+                                            
+    
     _libcusolver.cusolverDnSsyevd(cuso_handle,
                                  jobz,
                                  uplo,
                                  n,
-                                 dH.gpudata,
+                                 (dH.gpudata),
                                  lda,
-                                 dD.gpudata,
-                                 dwork,
+                                  (dD.gpudata),
+                                 dwork.gpudata,
                                  lwork,
                                  devinfo)
                                  
@@ -118,8 +142,10 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
     status = _libcusolver.cusolverDnDestroy(cuso_handle)
     print('status: ' + str(status))
 
+    #
+
     dD.get(D)
-    dV.get(H)
+    dH.get(H)
     H=H.reshape([PsiSize,PsiSize])
 
     for i in range(0,5):
