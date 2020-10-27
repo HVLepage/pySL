@@ -20,7 +20,7 @@ def getparams():
         # Define the initial superposition state of the wave function. 
         # The first two elements are the real and imaginary components of the ground state. 
         # The second two elements are the real and imaginary components of the first excited state. 
-        "InputStates": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "InputStates": [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 
 
         "NormalizeWaveFunction": True, # Set to false if looking at 
@@ -66,7 +66,7 @@ def getparams():
         ################################################################
 
         
-        "dt": 0.00005, # duration of a single time step in [ps]
+        "dt": 0.005, # duration of a single time step in [ps]
         "StartTime": 0.0,
         "TimeSteps": 50000,
         "PrintStep": 5000, # How often the wave function is saved to a file
@@ -137,6 +137,9 @@ def getparams():
         # "Traces": 0,
         
     }
+
+    t_si2nu = params["t_si2nu"]
+    v_si2nu = params["v_si2nu"]
 
     # Convert variables to Natural Units
     params["dt"] *= t_si2nu
