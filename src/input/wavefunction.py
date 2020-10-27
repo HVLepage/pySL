@@ -1,8 +1,8 @@
 import math
 import numpy as np
 import pycuda.driver as cuda
-from  src.eigensolver.rSolverCPU import rSpaceSolverCPU
-from  src.eigensolver.rSpaceSolverGPU import rrSpaceSolverGPU
+from  src.eigensolver.rSpaceSolverCPU import rSpaceSolverCPU
+from  src.eigensolver.rSpaceSolverGPU import rSpaceSolverGPU
 import reikna.fft as rfft
 import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
@@ -65,9 +65,9 @@ class Wavefunction:
         index = str(count).zfill((int(n_zero)))
         
         if (step >= 0):
-            OutputFileName = ".\\" + params["SimName"] + "\\waves\\wave_iteration_" + index + ".txt"
+            OutputFileName = "./out/" + params["SimName"] + "/waves/wave_iteration_" + index + ".txt"
         else:
-            OutputFileName = ".\\" + params["SimName"] + "\\" + Filename + ".txt"
+            OutputFileName = "./out/" + params["SimName"] + "/" + Filename + ".txt"
 	
         with open(OutputFileName, 'w+') as OutputFile:
             for i in range(0, self.N):
@@ -78,7 +78,7 @@ class Wavefunction:
     
     #if importing, read wavefunction from file
     def readFromFile(self,params):
-        file = open(".\input\\" + params["WavefunctionName"])
+        file = open("./input/" + params["WavefunctionName"])
         lines = file.readlines()
         for i in range(0,params["N"]):
             self.wave.real[i] = float(lines[i].split()[0])

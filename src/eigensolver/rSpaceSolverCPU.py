@@ -75,7 +75,7 @@ def rSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
     print("EigenSolver finished!  \n")
 
 def ExportEigenvalues(params, D, count):
-    OutputFileName = ".\\" + params["SimName"] + "eigs.txt"
+    OutputFileName = "./out/" + params["SimName"] + "/eigs.txt"
     with open(OutputFileName, 'w+') as OutputFile:
         for i in range(0, count):
             OutputFile.write("{:e} \n".format(D[i]))
