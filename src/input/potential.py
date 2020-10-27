@@ -87,12 +87,12 @@ class potential():
                 for i in range(0,params["N"]):
                     index1DtoND.index(i, inds, params["Sizes"], params)
 
-                for j in range(0,params["dim"]):
-                    inds2P[j,0] = inds[p1 * params["dim"] + j]
-                    inds2P[j,1] = inds[p2 * params["dim"] + j]
+                    for j in range(0,params["dim"]):
+                        inds2P[j,0] = inds[p1 * params["dim"] + j]
+                        inds2P[j,1] = inds[p2 * params["dim"] + j]
 				
-                ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
-                self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
+                    ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
+                    self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
 
 
 
@@ -136,13 +136,19 @@ class potential():
     
     def __init__(self,params):        
         
-        self.pot=np.zeros(params["N"])
-        self.pot = self.pot.astype(np.float32)
+        self.pot=np.zeros(params["N"], dtype=np.float32)
         
         self.pot_gpu=cuda.mem_alloc(self.pot.nbytes)
-        
+    
         self.construct(params)
         
-        self.pot = self.pot.astype(np.float32)
+        self.size1P = []
+        self.size = []
+        for i in range(0,params["dim"]):
+            self.size1P.append(int(params["Sizes"][i]))
+        for i in range(0,params["Np"]):
+            self.size += self.size1P
+        
+        self.pot = np.reshape(self.pot, self.size)
 
         self.htod()
