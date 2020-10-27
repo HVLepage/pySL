@@ -19,7 +19,7 @@ def getparams():
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
         "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
-        "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
+        "Eignesolver": "CPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         "NormalizeWaveFunction": True, # Set to false if looking at 
 
