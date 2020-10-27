@@ -19,7 +19,7 @@ import pycuda.gpuarray as gpuarray
 # Import project modules
 import src.get_gpu_info as gpuinfo
 from src.input.parameters import getparams
-from src.input.wavefunction import Wavefunction
+from src.input.wavefunction import wavefunction
 from src.input.potential import potential
 from src.export.makepath import makepath
 
@@ -56,20 +56,15 @@ else:
 # Staggered Leapfrog Setup
 ################################################################################################################################
 
-# Conversion between SI units and natural units (hbar = 1, m_e = 1)
-v_si2nu = 1.312342066e-2
-t_si2nu = 1.157676458e2
-
 # Import parameters
 params = getparams()
-
 
 # Create output directory
 makepath(params)
 
 
-V = potential(params) # Static 1D potential (particle in a box)
-psi = Wavefunction(params,V)
+V = potential(params) # Static potential
+psi = wavefunction(params,V)
 
 dt = params["dt"] # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations

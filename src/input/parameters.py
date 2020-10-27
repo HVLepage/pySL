@@ -3,10 +3,6 @@ import numpy as np
 
 def getparams():
     
-    # Conversion between SI units and natural units (hbar = 1, m_e = 1)
-    v_si2nu = 1.312342066e-2
-    t_si2nu = 1.157676458e2
-
     params = {
         
         "SimName": "CUDA_1D_Double_Slit_Experiment",
@@ -21,6 +17,12 @@ def getparams():
         "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
         "Eignesolver": "CPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
+        # Define the initial superposition state of the wave function. 
+        # The first two elements are the real and imaginary components of the ground state. 
+        # The second two elements are the real and imaginary components of the first excited state. 
+        "InputStates": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+
+
         "NormalizeWaveFunction": True, # Set to false if looking at 
 
         # Import external files (if set to sal)
@@ -32,6 +34,10 @@ def getparams():
 
         "ExportTrace": False, # Export a reduced wave function for speed and smaller disk usage
 
+        ################################################################
+        # Particle properties
+        ################################################################
+
         # Mass is quoted in [electron masses] (so 1 for a free electron in a vacuum)
         "Mass": [1.0],
         
@@ -41,20 +47,33 @@ def getparams():
         # Relative permittivity of quantum well material
         "RelPerm": 13.1,
 
+        # Conversion between SI units and natural units (hbar = 1, m_e = 1)
+        "v_si2nu": 1.312342066e-2,
+        "t_si2nu": 1.157676458e2,
+
+        ################################################################
+        # Surface acoustic wave
+        ################################################################
+
         # SAW amplitude [meV] , speed of sound [nm]/[ps], wave length [nm], and offset [nm]
         "ASAW": 0.0,
         "cSAW": 3.0,
         "lambdaSAW": 1000.0,
         "SAWoffset": 0.0,
 
-        # dt is time in [ps] per each timeStep
-        "dt": 0.00005,
+        ################################################################
+        # Simulation time
+        ################################################################
+
+        
+        "dt": 0.00005, # duration of a single time step in [ps]
         "StartTime": 0.0,
-
-        # Total time steps and how often to print data
         "TimeSteps": 50000,
-        "PrintStep": 5000,
+        "PrintStep": 5000, # How often the wave function is saved to a file
 
+        ################################################################
+        # Simulation domain
+        ################################################################
 
         # Lattice boundaries
         "Xa": -200.0,
@@ -97,6 +116,10 @@ def getparams():
         # "ABC_U": 0,
         # "ABC_D": 0,
 
+        ################################################################
+        # Potential 
+        ################################################################
+
         # Potential variables
         "w2X": 0.0,
         "w2Y": 0.0,
@@ -110,9 +133,8 @@ def getparams():
         "DRt0": 1.0,
         "URt0": 12.4,
 
-        "InputStates": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        "sigmaFit": [1.74707037e-17, -2.73761743e-14, 1.78462882e-11, -6.26868417e-09, 1.28479963e-06, -1.55625754e-04, 1.07952353e-02, 6.02006265e-01, 6.93382649e+00],
-        "Traces": 0,
+        # "sigmaFit": [1.74707037e-17, -2.73761743e-14, 1.78462882e-11, -6.26868417e-09, 1.28479963e-06, -1.55625754e-04, 1.07952353e-02, 6.02006265e-01, 6.93382649e+00],
+        # "Traces": 0,
         
     }
 
