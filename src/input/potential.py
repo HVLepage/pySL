@@ -149,6 +149,6 @@ class potential():
         for i in range(0,params["Np"]):
             self.size += self.size1P
         
-        self.pot = np.reshape(self.pot, self.size)
+        #self.pot = np.reshape(self.pot, self.size)
 
         self.htod()
