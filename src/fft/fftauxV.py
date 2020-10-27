@@ -5,7 +5,7 @@ import src.fft.index6Dto1D as index6Dto1D
 import src.fft.index3Dto1D as index3Dto1D
 import src.fft.index1DtoND as index1DtoND
 import src.fft.indexNDto1D as indexNDto1D
-from src.fft.underlyingPotential import UnderlyingPotential
+from src.fft.electrostaticPotential import electrostaticPotential
 from src.fft.coulombPotential import CoulombPotential
 
 class Potential():
@@ -110,7 +110,7 @@ class Potential():
                         if (params["ImportPotential"]):
                             VVal= self.filePot[ind]
                         else:
-                            VVal = UnderlyingPotential(params,p,x[i],y[j],z[k])
+                            VVal = electrostaticPotential(params,p,x[i],y[j],z[k])
 
                         if (VVal > 100):
                             VVal = 100.0
