@@ -15,7 +15,7 @@ def getparams():
         #which solver kernel to use
         "TDSESolver": "rSpace",
         #which eigensolver to use
-        "Eignesolver": "CPUrSpace",
+        "Eignesolver": "GPUrSpace",
         "NormalizeWaveFunction": True,
         "SlidingWindow": False,
         #Import underlying potential, or create it from equations in fftauxV.py
@@ -23,7 +23,7 @@ def getparams():
         "PotentialFileName": "potential.txt",
         #use spin?
         "IncludeSpin": False,
-        "ImportWavefunction": True,
+        "ImportWavefunction": False,
         "WaveFileName": "wave.txt",
         "ExportTrace": False,
 

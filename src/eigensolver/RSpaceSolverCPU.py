@@ -18,7 +18,7 @@ def RSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	#generate Hamiltonian matrix for eigenfunction solving
 	
 	#Init Hamiltonian
-    H = np.zeros([PsiSize, PsiSize])
+    H = np.zeros([PsiSize, PsiSize], dtype = np.float32)
 
     H2 = params["hbar"] ** 2 #hbar squared
 

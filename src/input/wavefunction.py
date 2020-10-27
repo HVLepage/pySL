@@ -2,14 +2,13 @@ import math
 import numpy as np
 import pycuda.driver as cuda
 from  src.eigensolver.RSpaceSolverCPU import RSpaceSolverCPU
-import reikna
+from  src.eigensolver.RSpaceSolverGPU import RSpaceSolverGPU
 import reikna.fft as rfft
 import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
 
 class Wavefunction:
 
-    
     
     def fft(self, inv = 0):
         #Perform fft or ifft
@@ -22,7 +21,10 @@ class Wavefunction:
 
     #use appropriate eigensolver to get wavefunction
     def solve(self,params,V):
-        RSpaceSolverCPU(params,self,V)
+        if params["Eignesolver"] == "CPUrSpace":
+            RSpaceSolverCPU(params,self,V)
+        elif params["Eignesolver"] == "GPUrSpace":
+            RSpaceSolverGPU(params,self,V)
         
     # Retrieve data from GPU device and copy to host array
     def dtoh(self):
@@ -115,7 +117,7 @@ class Wavefunction:
             self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
         
         if (not params["ImportWavefunction"]):
-            RSpaceSolverCPU(params,self,V)
+            self.solve(params,V)
         else:
             #self.readFromFile(params) #read from file
             
@@ -124,7 +126,7 @@ class Wavefunction:
             xoffset = 40                      # Wave packet distance from center
             x = np.linspace(params["Xa"], params["Xb"], params["Nx"])  # Define the simulation domain
             
-            self.wave = (2**(0.5))*((w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2))/2 +1j*0 # Initial wave function
+            self.wave = (2**(0.5))*((w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2))/2  # Initial wave function
         
         
         self.wave = self.wave.astype(np.complex64)
