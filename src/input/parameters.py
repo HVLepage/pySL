@@ -3,29 +3,34 @@ import numpy as np
 
 def getparams():
     
+    # Conversion between SI units and natural units (hbar = 1, m_e = 1)
     v_si2nu = 1.312342066e-2
     t_si2nu = 1.157676458e2
 
     params = {
+        
         "SimName": "CUDA_1D_Double_Slit_Experiment",
 
-        # Flags
-        # no of particles
-        "Np": 1,
-        #which solver kernel to use
-        "TDSESolver": "rSpace",
-        #which eigensolver to use
-        "Eignesolver": "GPUrSpace",
-        "NormalizeWaveFunction": True,
-        "SlidingWindow": False,
-        #Import underlying potential, or create it from equations in fftauxV.py
-        "ImportPotential": False,
+        ################################################################
+        # FLAGS 
+        ################################################################
+        
+        "Np": 1, # Number of particles
+        # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
+        
+        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
+
+        "NormalizeWaveFunction": True, # Set to false if looking at 
+
+        # Import external files (if set to sal)
+        "ImportPotential": False, # If set to false, the potential will be created functionally in fftauxV.py
         "PotentialFileName": "potential.txt",
-        #use spin?
-        "IncludeSpin": False,
-        "ImportWavefunction": False,
+
+        "ImportWavefunction": False, # If set to false, the wave function will be solved using the specified eigensolver
         "WaveFileName": "wave.txt",
-        "ExportTrace": False,
+
+        "ExportTrace": False, # Export a reduced wave function for speed and smaller disk usage
 
         # Mass is quoted in [electron masses] (so 1 for a free electron in a vacuum)
         "Mass": [1.0],
@@ -36,7 +41,7 @@ def getparams():
         # Relative permittivity of quantum well material
         "RelPerm": 13.1,
 
-        # SAW amplitude [meV] , wavenumber 1/[nm], and frequency 1/[s]
+        # SAW amplitude [meV] , speed of sound [nm]/[ps], wave length [nm], and offset [nm]
         "ASAW": 0.0,
         "cSAW": 3.0,
         "lambdaSAW": 1000.0,
@@ -60,7 +65,7 @@ def getparams():
         "Za": 0.0,
         "Zb": 0.0,
 
-        # Lattice Sites
+        # Number of lattice sites
         "Nx": 801,
         "Ny": 1,
         "Nz": 1,
@@ -79,18 +84,18 @@ def getparams():
 
 
         # Lattice padding (for expanding TDSE solution window)
-        "padLeft": 0,
-        "padRight": 0,
-        "padTop": 0,
-        "padBottom": 0,
+        # "padLeft": 0,
+        # "padRight": 0,
+        # "padTop": 0,
+        # "padBottom": 0,
 
         # Absorbing Boudary Conditions (Leave as zero for Dirichlet boundary)
-        "ABC_L": 0,
-        "ABC_R": 0,
-        "ABC_T": 0,
-        "ABC_B": 0,
-        "ABC_U": 0,
-        "ABC_D": 0,
+        # "ABC_L": 0,
+        # "ABC_R": 0,
+        # "ABC_T": 0,
+        # "ABC_B": 0,
+        # "ABC_U": 0,
+        # "ABC_D": 0,
 
         # Potential variables
         "w2X": 0.0,
