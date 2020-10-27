@@ -74,4 +74,4 @@ def rSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	
     exportEigenvalues(params, D, 5)
 
-    print("EigenSolver finished!  \n")
+    # print("EigenSolver finished!  \n")

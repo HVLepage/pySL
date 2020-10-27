@@ -125,7 +125,8 @@ for i in range(0, TimeSteps):
     t_print = t2-t1
     t1 = t2
     norm = psi.norm()
-    print("Iteration: ", str(i).zfill(5), "    Time Elapsed: %.4f"%t_print, "    NORM: %.8f"%norm)
+    n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
+    print("Iteration: ", str(i).zfill(int(n_zero)), "    Time Elapsed: %.4f"%t_print, "    NORM: %.8f"%norm)
     psi.exportFull(params,i)
 
 t2 = time.time()
