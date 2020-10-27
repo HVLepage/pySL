@@ -4,7 +4,7 @@ import pycuda.gpuarray as gpuarray
 import os
 from skcuda import linalg
 
-def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
+def rSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
 	#read input parameters from params & declare stuff
 
 	

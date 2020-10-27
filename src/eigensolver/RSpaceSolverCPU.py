@@ -2,7 +2,7 @@ import numpy as np
 from numpy import linalg as LA
 
 
-def RSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
+def rSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	#read input parameters from params & declare stuff
 
 	

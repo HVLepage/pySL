@@ -1,8 +1,8 @@
 import math
 import numpy as np
 import pycuda.driver as cuda
-from  src.eigensolver.RSpaceSolverCPU import RSpaceSolverCPU
-from  src.eigensolver.RSpaceSolverGPU import RSpaceSolverGPU
+from  src.eigensolver.rSolverCPU import rSpaceSolverCPU
+from  src.eigensolver.rSpaceSolverGPU import rrSpaceSolverGPU
 import reikna.fft as rfft
 import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
@@ -22,9 +22,9 @@ class Wavefunction:
     #use appropriate eigensolver to get wavefunction
     def solve(self,params,V):
         if params["Eignesolver"] == "CPUrSpace":
-            RSpaceSolverCPU(params,self,V)
+            rSpaceSolverCPU(params,self,V)
         elif params["Eignesolver"] == "GPUrSpace":
-            RSpaceSolverGPU(params,self,V)
+            rSpaceSolverGPU(params,self,V)
         
     # Retrieve data from GPU device and copy to host array
     def dtoh(self):
