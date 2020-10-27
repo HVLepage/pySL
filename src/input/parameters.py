@@ -3,10 +3,6 @@ import numpy as np
 
 def getparams():
     
-    # Conversion between SI units and natural units (hbar = 1, m_e = 1)
-    v_si2nu = 1.312342066e-2
-    t_si2nu = 1.157676458e2
-
     params = {
         
         "SimName": "CUDA_1D_Double_Slit_Experiment",
@@ -50,6 +46,10 @@ def getparams():
 
         # Relative permittivity of quantum well material
         "RelPerm": 13.1,
+
+        # Conversion between SI units and natural units (hbar = 1, m_e = 1)
+        "v_si2nu": 1.312342066e-2,
+        "t_si2nu": 1.157676458e2,
 
         ################################################################
         # Surface acoustic wave
