@@ -20,7 +20,7 @@ import pycuda.gpuarray as gpuarray
 import src.get_gpu_info as gpuinfo
 from src.input.parameters import getparams
 from src.input.wavefunction import Wavefunction
-from src.fft.fftauxV import Potential
+from src.input.potential import potential
 from src.export.makepath import makepath
 
 
@@ -68,27 +68,7 @@ params = getparams()
 makepath(params)
 
 
-#test_cpu = np.ones([4,4])
-
-#test_cpu[0,0]=1
-#test_cpu[0,1]=10
-#test_cpu[1,0]=2
-#test_cpu[2,0]=3
-#test_cpu[3,1]=4
-
-#test_cpu = test_cpu.astype(np.float32)
-#test_gpu = gpuarray.to_gpu(test_cpu)
-#test_gpu.set(test_cpu)
-#test_gpu = test_gpu.astype(np.float32)
-#func_test = mod.get_function("gputest")
-
-
-#Ngpu = np.int32(16)
-
-#func_test(test_gpu, Ngpu, block=(16,1,1), grid=(1,1))
-
-
-V = Potential(params) # Static 1D potential (particle in a box)
+V = potential(params) # Static 1D potential (particle in a box)
 psi = Wavefunction(params,V)
 
 dt = params["dt"] # Time step
