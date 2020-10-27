@@ -7,7 +7,7 @@ import reikna.fft as rfft
 import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
 
-class Wavefunction:
+class wavefunction:
 
     
     def fft(self, inv = 0):
