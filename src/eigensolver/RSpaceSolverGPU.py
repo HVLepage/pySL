@@ -3,6 +3,7 @@ import ctypes
 import pycuda.gpuarray as gpuarray
 import pycuda.driver as cuda
 import pycuda.autoinit
+import os
 
 def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
 	#read input parameters from params & declare stuff
@@ -51,7 +52,12 @@ def RSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
     dD = gpuarray.to_gpu(D)
     dV = gpuarray.to_gpu(H)
     
-    _libcusolver = ctypes.cdll.LoadLibrary('C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.1\\bin\\cusolver64_11.dll')
+
+    if os.name == 'nt':
+        _libcusolver = ctypes.cdll.LoadLibrary('cusolver64_11.dll')
+    else:
+        _libcusolver = ctypes.cdll.LoadLibrary('libcusolver.so')
+
     #_libcusolver = ctypes.cdll.LoadLibrary('libcusolver.dll')
 
     _libcusolver.cusolverDnCreate.restype = int
