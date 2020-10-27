@@ -5,8 +5,8 @@ import src.fft.index6Dto1D as index6Dto1D
 import src.fft.index3Dto1D as index3Dto1D
 import src.fft.index1DtoND as index1DtoND
 import src.fft.indexNDto1D as indexNDto1D
-from src.fft.electrostaticPotential import electrostaticPotential
-from src.fft.coulombPotential import CoulombPotential
+from src.input.electrostaticPotential import electrostaticPotential
+from src.input.coulombPotential import CoulombPotential
 
 class potential():
     def dtoh(self):
