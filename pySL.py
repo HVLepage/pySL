@@ -21,6 +21,7 @@ import src.get_gpu_info as gpuinfo
 from src.input.parameters import getparams
 from src.input.wavefunction import Wavefunction
 from src.fft.fftauxV import Potential
+from src.export.makepath import makepath
 
 
 print("\n----------------------------------------------------------------")
@@ -55,20 +56,17 @@ else:
 # Staggered Leapfrog Setup
 ################################################################################################################################
 
-v_si2nu = 1.312342066e-2  #natural unit conversion factors
+# Conversion between SI units and natural units (hbar = 1, m_e = 1)
+v_si2nu = 1.312342066e-2
 t_si2nu = 1.157676458e2
 
 # Import parameters
 params = getparams()
 
 
-# create output dir
-dirPath = ".\\" + params["SimName"]
-if not os.path.isdir(dirPath):
-    os.mkdir(dirPath)
-dirPath = dirPath + "\\waves"
-if not os.path.isdir(dirPath):
-    os.mkdir(dirPath)
+# Create output directory
+makepath(params)
+
 
 #test_cpu = np.ones([4,4])
 
