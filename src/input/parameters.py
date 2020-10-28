@@ -64,10 +64,10 @@ def getparams():
         ################################################################
 
         
-        "dt": 0.0005, # duration of a single time step in [ps]
+        "dt": 0.0002, # duration of a single time step in [ps]
         "StartTime": 0.0,
-        "TimeSteps": 100000,
-        "PrintStep": 5000, # How often the wave function is saved to a file
+        "TimeSteps": 2000000,
+        "PrintStep": 10000, # How often the wave function is saved to a file
 
         ################################################################
         # Simulation domain
