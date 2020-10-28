@@ -182,5 +182,3 @@ def rSpaceSparseSolverGPU(params, PsiOut, V): #Real space solver GPU
     PsiOut.exportFull( params, -1, "wave")
 	
     #ExportEigenvalues(params, D, 5)
-
-    print("EigenSolver finished!  \n")
