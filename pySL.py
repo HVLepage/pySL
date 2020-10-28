@@ -20,6 +20,7 @@ import pycuda.gpuarray as gpuarray
 import src.get_gpu_info as gpuinfo
 from src.input.parameters import getparams
 from src.input.wavefunction import wavefunction
+from src.input.convWavefunction import convWavefunction
 from src.fft.domain import Domain
 from src.fft.kernelInds import kernelInds
 
@@ -133,9 +134,10 @@ print("\n----------------------------------------------------------------")
 print("GPU-accelerated Simulation")
 print("----------------------------------------------------------------")
 
-func_re = mod.get_function("gqsl_x_re")
-func_im = mod.get_function("gqsl_x_im")
+#func_re = mod.get_function("gqsl_x_re")
+#func_im = mod.get_function("gqsl_x_im")
 iterateGPUR = mod.get_function("iterateGPUR")
+iterateGPUK = mod.get_function("iterateGPUK")
 
 blockSize = 256 
 numBlocks = math.ceil(N / blockSize) #how many blocks you need to go over all the points -N
@@ -151,8 +153,13 @@ for i in range(0, TimeSteps):
     #iterate the leapfrog kernel over the wavefunction
     #func_re(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1)) 
     #func_im(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
-    iterateGPUR(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
-
+    if (params["TDSESolver"] == "rSpace"):
+        iterateGPUR(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
+    #elif (params["TDSESolver"] == "kSpace"):
+     #   convFFT
+      #  iterateGPUK()
+        
+        
     if (i % PrintStep) == 0:
       #Print to file / record to plot every printStep
       psi.dtoh()

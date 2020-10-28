@@ -117,15 +117,6 @@ class wavefunction:
         #self.wave=np.zeros(self.size, dtype = np.complex64)
         self.wave=np.zeros(self.N, dtype = np.complex64)
         
-        if (params["TDSESolver"] == "kSpace"):
-            self.wave_gpu=gpuarray.to_gpu(self.wave)
-            self.api = cluda.cuda_api()
-            self.thr = self.api.Thread.create()
-            fft_h = rfft.FFT(self.wave)
-            self.fftc=fft_h.compile(self.thr)
-        else:
-            self.re_gpu=cuda.mem_alloc_like(self.wave.real)
-            self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
         
         if (not params["ImportWavefunction"]):
             self.solve(params,V)
@@ -140,6 +131,16 @@ class wavefunction:
             self.wave = (2**(0.5))*((w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2))/2  # Initial wave function
         
         
-        self.wave = self.wave.astype(np.complex64)
+        #self.wave = self.wave.astype(np.complex64)
+        if (params["TDSESolver"] == "kSpace"):
+            self.wave = np.reshape(self.wave, self.size)
+            self.wave_gpu=gpuarray.to_gpu(self.wave)
+            self.api = cluda.cuda_api()
+            self.thr = self.api.Thread.create()
+            fft_h = rfft.FFT(self.wave)
+            self.fftc=fft_h.compile(self.thr)
+        else:
+            self.re_gpu=cuda.mem_alloc_like(self.wave.real)
+            self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
         
         self.htod()

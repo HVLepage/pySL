@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import sys
 
 def getparams():
     
@@ -14,7 +15,7 @@ def getparams():
         "Np": 1, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
-        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "TDSESolver": "kSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
         "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
@@ -87,16 +88,16 @@ def getparams():
         "Ny": 1,
         "Nz": 1,
 
-        "NxOutK": 43,
-        "NyOutK": 41,
+        "NxOutK": 801,
+        "NyOutK": 1,
         "NzOutK": 1,
 
         # Momentum Solver Inputs
-        "KxECO": 6,
-        "KyECO": 6,
+        "KxECO": 400,
+        "KyECO": 0,
         "KzECO": 0,
-        "KxKCO": 6,
-        "KyKCO": 6,
+        "KxKCO": 400,
+        "KyKCO": 0,
         "KzKCO": 0,
 
 
@@ -161,11 +162,6 @@ def getparams():
         params["dz"] = (params["Zb"] - params["Za"]) / (params["Nz"] - 1)
         
         
-    if (params["TDSESolver"] == "kSpace"):
-        params["KxECO"] = 0
-        params["KyECO"] = 0
-        params["KzECO"] = 0
-	
 
     if (params["TDSESolver"] != "kSpace"):
         params["NxOutK"] = 1
@@ -196,11 +192,11 @@ def getparams():
 	# Check if padded output is greater than Psi
     if ((params["TDSESolver"] == "kSpace") and (params["NxOutK"] < params["Nx"] or params["NyOutK"] < params["Ny"] or params["NzOutK"] < params["Nz"])) :
         print("NOut parameters cannot be smaller than N for KSpaceLeapfrog")
-        exit(1)
+        sys.exit(1)
 	
     if ((params["TDSESolver"] == "kSpace") and ((2 * params["KxKCO"] + 1) >params["Nx"] or (2 * params["KyKCO"] + 1) > params["Ny"] or (2 * params["KzKCO"] + 1) > params["Nz"])):
         print("(2 * Kx/y/zKCO + 1)  cannot be greater than Nx/y/z for KSpaceLeapfrog")
-        exit(1)
+        sys.exit(1)
 
     params["Kx"] = 2 * params["KxKCO"]  + 1
     params["Ky"]  = 2 * params["KyKCO"]  + 1

@@ -1,36 +1,78 @@
 // #include <pycuda-complex.hpp>
 //#include <math.h>
 
+/*
+__global__ void Axpy(complex64* Psi, float* V, int N, float t, int* kernelInds, float Nm1, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float* dXs) {
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	if (index < N) {
+
+		float Vt = 0.0; //some potentially time depentent part of V
+
+		// if (ASAW > 0.0) { // add SAW potential if necessary
+			for (int p = 0; p < Np; p++) {
+				// Set current coordinates
+			
+				int ind = ((index / (int)powf(N1, Np - p - 1)) % (N1)) * dim;
+				float x = Xa + kernelInds[ind] * dx;
+				float y = dim > 1 ? Ya + kernelInds[ind + 1] * dy : 0.0;
+				// Add SAW potential
+				Vt += ASAW * (1.0 - cosf(kSAW * (x - SAWoffset) - wSAW * t));
+				float TBRamp = 0.5 * (tanhf(RS * (y + (t - DRt0) * cSAW)) + tanhf(-RS * (y + (t - URt0) * cSAW)));
+				Vt -= ATB2 * Mass[p] * expf(-s2TB2 * powf(x, 2.0) / 2.0) * TBRamp;
+			}
+		// }
+
+		Psi[index] *= (V[index] + Vt) * Nm1;
+		//Psi[index].y *= (V[index] + Vt) * Nm1;
+	}
+}
+
+__global__ void IterateGPUK(int N, cufftComplex* Psi, cufftComplex* PsiConv, float t, int Np, int N1K, int dim, float value, int* Sizes, float* Mass, float* dKs, int iterateRe, int* kernelIndsK) {
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	//int stride = blockDim.x * gridDim.x;
+	//float reC, imC;
 
 
-__device__ int IndexNDto1Dkernel(int* inds, int* sizes, int Np, int dim, int offset) {
-	int indOut = 0;
-	int l = Np * dim;
-	for (int i = 0; i < l; i++) {
-		int stride = 1;
-		for (int j = i + 1; j < l; j++) {
-			stride *= sizes[j % dim];
+	if (index < n) {
+		
+		int indN = 0;
+
+		int l = (int)pow((float)dim, (float)Np);
+		for (int i = 0; i < l; i++) {
+			int stride = 1;
+			for (int j = i + 1; j < l; j++) {
+				stride *= Sizes[j % dim];
+			}
+			int p = (i ) / dim;
+			int indp = ((index / (int)powf(N1K, Np - p - 1)) % (N1K)) * dim;
+			int ind = kernelIndsK[indp + (i % dim)] < 0 ? kernelIndsK[indp + (i % dim)] + Sizes[i % dim] : kernelIndsK[indp + (i % dim)];
+			indN += ind * stride;
 		}
-		indOut += inds[i + offset] * stride;
-	}
-	return indOut;
-}
 
-//// Return a 1D index from an ND row major array. Offset tells where to look in a big index memory block
-__device__ void Index1DtoNDkernel(int ind, int* inds, int* sizes, int Np, int dim, int offset) {
-	int l = Np * dim;
-	int N = 1;
-	for (int i = 0; i < dim; i++)
-		N *= sizes[i];
-	N = (int)pow((float)N, (float)Np);
-	long stride = N;
-	for (int i = 0; i < l; i++) {
-		long temp = stride;
-		stride = (long)((double)temp / (double)sizes[i % dim]);
-		inds[i + offset] = ind / stride;
-		ind = ind - inds[i + offset] * stride;
+		float value = dt * hbar;
+
+		//Staggered leapfrog in K space
+		if (iterateRe == 0) {
+			Psi[indN].x += 2.0 * dt * (PsiConv[indN].y);
+			for (int d = 0; d < dim; d++) {
+				for (int p = 0; p < Np; p++) {
+					int indK = ((index / (int)powf(N1K, Np - p - 1)) % (N1K)) * dim;
+					Psi[indN].x += (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].y;
+				}
+			}
+		}
+		else {
+			Psi[indN].y += -2.0 * dt * (PsiConv[indN].x);
+			for (int d = 0; d < dim; d++) {
+				for (int p = 0; p < Np; p++) {
+					int indK = ((index / (int)powf(N1K, Np - p - 1)) % (N1K)) * dim;
+					Psi[indN].y -= (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].x;
+				}
+			}
+		}
 	}
 }
+*/
 
 __global__ void iterateGPUR(int N, float* PsiRe, float* PsiIm, float* V, bool* domain, float t, int iterateRe, int* kernelInds, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -126,7 +168,7 @@ __global__ void iterateGPUR(int N, float* PsiRe, float* PsiIm, float* V, bool* d
 
 
 
-__global__ void gqsl_x_re(float *re, float *im, float *V, float bb, float aa, int N)
+/*__global__ void gqsl_x_re(float *re, float *im, float *V, float bb, float aa, int N)
 {
   int idx = threadIdx.x + blockDim.x * blockIdx.x;
   if (idx > 0 && idx < N-1){
@@ -143,7 +185,7 @@ __global__ void gqsl_x_im(float *re, float *im, float *V, float bb, float aa, in
     im[idx] = im[idx] +  V[idx]*bb*re[idx] + aa*(2*re[idx] - (re[idx-1] + re[idx+1]));
   }
 }
-
+*/
 
 
 
