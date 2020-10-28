@@ -20,14 +20,6 @@ __global__ void gqsl_x_im(float *re, float *im, float *V, float bb, float aa, in
 }
 
 
-__global__ void gputest(float* arr, int N)
-{
-  int idx = threadIdx.x + blockDim.x * blockIdx.x;
-  if (idx >= 0 && idx < N){
-    printf("Element %i is %f \n", idx, arr[idx]);
-  }
-}
-
 
 
 

@@ -20,6 +20,7 @@ import pycuda.gpuarray as gpuarray
 import src.get_gpu_info as gpuinfo
 from src.input.parameters import getparams
 from src.input.wavefunction import wavefunction
+from src.fft.domain import Domain
 from src.input.potential import potential
 from src.export.makepath import makepath
 
@@ -64,6 +65,7 @@ makepath(params)
 
 
 V = potential(params) # Static potential
+dom=Domain(params)
 psi = wavefunction(params,V)
 
 dt = params["dt"] # Time step

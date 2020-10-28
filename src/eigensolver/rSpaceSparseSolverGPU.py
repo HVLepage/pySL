@@ -22,7 +22,6 @@ def rSpaceSparseSolverGPU(params, PsiOut, V): #Real space solver GPU
 	
 	#Init Hamiltonian
     H = np.zeros([PsiSize, PsiSize], dtype=np.float32)
-    Vflat = V.pot.ravel()
     
     H2 = params["hbar"] ** 2 #hbar squared
 
@@ -33,7 +32,7 @@ def rSpaceSparseSolverGPU(params, PsiOut, V): #Real space solver GPU
 		#fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
 
 		#on-site potential
-        H[k,k] += Vflat[k] #!!!!!!!!!!!!!!!!!!!!!!!
+        H[k,k] += V.pot[k] #!!!!!!!!!!!!!!!!!!!!!!!
         for d in range(0,dim):
             for p in range(0,Np):
                 H[k,k] += H2 / (params["Mass"][p] * params["dXs"][d] ** 2) # on-site kinetic part
@@ -133,15 +132,15 @@ def rSpaceSparseSolverGPU(params, PsiOut, V): #Real space solver GPU
                                          m,
                                          nnz,
                                          descrA,
-                                         dcsrVal.gpudata.__int__(),
-                                         dcsrIndPtr.gpudata.__int__(),
-                                         dcsrColInd.gpudata.__int__(),
+                                         int(dcsrVal.gpudata),
+                                         int(dcsrIndPtr.gpudata),
+                                         int(dcsrColInd.gpudata),
                                          mu0,
-                                         x0.gpudata.__int__(),
+                                         int(x0.gpudata),
                                          maxite,
                                          tol,
-                                         mu.gpudata.__int__(),
-                                         x.gpudata.__int__())
+                                         int(mu.gpudata),
+                                         int(x.gpudata))
 
     
     mu.get(Hmu)
