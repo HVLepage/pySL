@@ -22,15 +22,13 @@ def getparams():
         # The second two elements are the real and imaginary components of the first excited state. 
         "InputStates": [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 
-
-        "NormalizeWaveFunction": True, # Set to false if looking at 
-
         # Import external files (if set to sal)
         "ImportPotential": False, # If set to false, the potential will be created functionally in fftauxV.py
         "PotentialFileName": "potential.txt",
 
         "ImportWavefunction": False, # If set to false, the wave function will be solved using the specified eigensolver
         "WaveFileName": "wave.txt",
+        "NormalizeWaveFunction": True, # Set to false if importing a partial wave function
 
         "ExportTrace": False, # Export a reduced wave function for speed and smaller disk usage
 
