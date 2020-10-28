@@ -1,5 +1,6 @@
 import numpy as np
 import src.fft.index1DtoND as index1DtoND
+import pycuda.driver as cuda
 
 class Domain:
      def __init__(self,params):
@@ -11,3 +12,6 @@ class Domain:
                  if (inds[j]==0 or inds[j]==(params["Sizes"][j%params["dim"]] - 1)):
                      self.domain[i] = 0
                      break
+                 
+         self.domain_gpu = cuda.mem_alloc_like(self.domain)
+         cuda.memcpy_htod(self.domain_gpu, self.domain)

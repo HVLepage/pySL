@@ -21,6 +21,8 @@ import src.get_gpu_info as gpuinfo
 from src.input.parameters import getparams
 from src.input.wavefunction import wavefunction
 from src.fft.domain import Domain
+from src.fft.kernelInds import kernelInds
+
 from src.input.potential import potential
 from src.export.makepath import makepath
 
@@ -66,6 +68,7 @@ makepath(params)
 
 V = potential(params) # Static potential
 dom=Domain(params)
+kerInds = kernelInds(params)
 psi = wavefunction(params,V)
 
 dt = params["dt"] # Time step
@@ -89,6 +92,36 @@ aa = np.float32(aa) #convert to singles for the GPU kernel
 bb = np.float32(bb)
 N = np.int32(params["N"])
 
+Np = np.int32(params["Np"])
+N1 = np.int32(params["N1"])
+dim = np.int32(params["dim"])
+ASAW = np.float32(params["ASAW"])
+kSAW = np.float32(params["kSAW"])
+SAWoffset = np.float32(params["SAWoffset"])
+wSAW = np.float32(params["wSAW"])
+cSAW = np.float32(params["cSAW"])
+RS = np.float32(params["RS"])
+DRt0 = np.float32(params["DRt0"])
+URt0 = np.float32(params["URt0"])
+ATB2 = np.float32(params["ATB2"])
+s2TB2 = np.float32(params["s2TB2"])
+fbb = np.float32(params["fbb"])
+
+Xa = np.float32(params["Xa"])
+Ya = np.float32(params["Ya"])
+
+faa = cuda.mem_alloc_like(params["faa"])
+cuda.memcpy_htod(faa, params["faa"])
+
+Sizes = cuda.mem_alloc_like(params["Sizes"])
+cuda.memcpy_htod(Sizes, params["Sizes"])
+
+Mass = cuda.mem_alloc_like(params["Mass"])
+cuda.memcpy_htod(Mass, params["Mass"])
+
+dXs = cuda.mem_alloc_like(params["dXs"])
+cuda.memcpy_htod(dXs, params["dXs"])
+
 
 
 
@@ -102,6 +135,7 @@ print("----------------------------------------------------------------")
 
 func_re = mod.get_function("gqsl_x_re")
 func_im = mod.get_function("gqsl_x_im")
+iterateGPUR = mod.get_function("iterateGPUR")
 
 blockSize = 256 
 numBlocks = math.ceil(N / blockSize) #how many blocks you need to go over all the points -N
@@ -110,26 +144,27 @@ k=0
 t0 = time.time()
 t1 = t0
 for i in range(0, TimeSteps):
-
+    t = np.float32(i*dt)
   # func_re(psi_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
   # func_im(psi_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
 
     #iterate the leapfrog kernel over the wavefunction
-  func_re(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1)) 
-  func_im(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
+    #func_re(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1)) 
+    #func_im(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
+    #iterateGPUR(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
 
-  if (i % PrintStep) == 0:
+    if (i % PrintStep) == 0:
       #Print to file / record to plot every printStep
-    psi.dtoh()
-    psi2[k] = psi.wave.real**2 + psi.wave.imag**2
-    k = k + 1
-    t2 = time.time()
-    t_print = t2-t1
-    t1 = t2
-    norm = psi.norm()
-    n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
-    print("Iteration: ", str(i).zfill(int(n_zero)), "    Time Elapsed: %.4f"%t_print, "    NORM: %.8f"%norm)
-    psi.exportFull(params,i)
+      psi.dtoh()
+      psi2[k] = psi.wave.real**2 + psi.wave.imag**2
+      k = k + 1
+      t2 = time.time()
+      t_print = t2-t1
+      t1 = t2
+      norm = psi.norm()
+      n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
+      print("Iteration: ", str(i).zfill(int(n_zero)), "    Time Elapsed: %.4f"%t_print, "    NORM: %.8f"%norm)
+      psi.exportFull(params,i)
 
 t2 = time.time()
 t_print = t2-t0

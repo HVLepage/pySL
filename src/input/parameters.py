@@ -15,7 +15,7 @@ def getparams():
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
         "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
-        "Eignesolver": "GPUrSpaceSparse", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
+        "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
         # The first two elements are the real and imaginary components of the ground state. 
@@ -37,10 +37,10 @@ def getparams():
         ################################################################
 
         # Mass is quoted in [electron masses] (so 1 for a free electron in a vacuum)
-        "Mass": [1.0],
+        "Mass": np.array([1.0], dtype=np.float32),
         
         # Charge in [electron charges]
-        "Charge": [1.0],
+        "Charge": np.array([1.0], dtype=np.float32),
 
         # Relative permittivity of quantum well material
         "RelPerm": 13.1,
@@ -210,13 +210,13 @@ def getparams():
     params["dKy"] =  2 * math.pi / (params["Yb"] - params["Ya"]) if (params["Yb"] - params["Ya"])>0 else 1.0
     params["dKz"] =  2 * math.pi / (params["Zb"] - params["Za"]) if (params["Zb"] - params["Za"])>0 else 1.0
     
-    params["Sizes"] = np.zeros( params["dim"])
-    params["SizesK"] = np.zeros( params["dim"])
-    params["SizesOutK"] = np.zeros( params["dim"])
-    params["KCOs"] = np.zeros( params["dim"])
-    params["dKs"] = np.zeros( params["dim"])
-    params["dXs"] = np.zeros( params["dim"])
-    params["faa"] = np.zeros( params["dim"])
+    params["Sizes"] = np.zeros( params["dim"], dtype = np.int32)
+    params["SizesK"] = np.zeros( params["dim"], dtype = np.int32)
+    params["SizesOutK"] = np.zeros( params["dim"], dtype = np.int32)
+    params["KCOs"] = np.zeros( params["dim"], dtype = np.int32)
+    params["dKs"] = np.zeros( params["dim"], dtype = np.float32)
+    params["dXs"] = np.zeros( params["dim"], dtype = np.float32)
+    params["faa"] = np.zeros( params["dim"], dtype = np.float32)
 
     params["hbar"] = 1
     
