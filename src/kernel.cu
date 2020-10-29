@@ -89,9 +89,6 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 
 	if (index < N && domain[index]==1) { //check if index is within the wavefunction ant NOT on a boundary
 
-
-		int indPMone; //index of plus/minus one site in some dimension
-
 		float Vt = 0.0; //some potentially time depentent part of V
 
 		for (int p = 0; p < Np; p++) {
@@ -107,7 +104,7 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 		}
 		
 		
-		int indPMoneOffset=1;
+		int idxNearestNeighbor=1;
 		if (iterateRe) { // iterate real/imag parts interchangably - leapfrog
 			PsiRe[index] += (V[index] + Vt) * fbb * PsiIm[index]; // The potential part
 			for (int d = 0; d < dim; d++) {
@@ -116,26 +113,21 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 
           // here we calculate how much we need to offset index to get to indPMone
 					if (d == (dim - 1))
-						indPMoneOffset = 1;
+						idxNearestNeighbor = 1;
 					else if (d == (dim - 2))
-						indPMoneOffset = Sizes[dim - 1];
+						idxNearestNeighbor = Sizes[dim - 1];
 					else if (d == (dim - 3))
-						indPMoneOffset = Sizes[dim - 1]* Sizes[dim - 2];
+						idxNearestNeighbor = Sizes[dim - 1]* Sizes[dim - 2];
 
 					
 					int pp = Np - p -1;
 					while (pp > 0) {
-						indPMoneOffset *= N1;
+						idxNearestNeighbor *= N1;
 						pp--;
 					}
 
-					indPMone = index - indPMoneOffset;
-
-					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[indPMone]; //off by one bit to the left
-
-					indPMone = index + indPMoneOffset;
-					
-					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[indPMone];//off by one bit to the right
+					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index - idxNearestNeighbor]; //off by one bit to the left					
+					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index + idxNearestNeighbor];//off by one bit to the right
 					
 				}
 			}
@@ -147,24 +139,20 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 					PsiIm[index] -= (faa[d] / Mass[p]) * (2.0 * PsiRe[index]);
 
 					if (d == (dim - 1))
-						indPMoneOffset = 1;
+						idxNearestNeighbor = 1;
 					else if (d == (dim - 2))
-						indPMoneOffset = Sizes[dim - 1];
+						idxNearestNeighbor = Sizes[dim - 1];
 					else if (d == (dim - 3))
-						indPMoneOffset = Sizes[dim - 1] * Sizes[dim - 2];
+						idxNearestNeighbor = Sizes[dim - 1] * Sizes[dim - 2];
 
 					int pp = Np - p -1;
 					while (pp > 0) {
-						indPMoneOffset *= N1;
+						idxNearestNeighbor *= N1;
 						pp--;
 					}
-					indPMone = index - indPMoneOffset;
 
-    				PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[indPMone];
-					
-					indPMone = index + indPMoneOffset;
-					
-					PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[indPMone];
+    			PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index - idxNearestNeighbor];
+					PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index + idxNearestNeighbor];
 					
 				}
 			}
