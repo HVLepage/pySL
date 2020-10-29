@@ -74,7 +74,7 @@ __global__ void IterateGPUK(int N, cufftComplex* Psi, cufftComplex* PsiConv, flo
 }
 */
 
-__global__ void iterateGPUR(int N, float* PsiRe, float* PsiIm, float* V, bool* domain, float t, int iterateRe, int* kernelInds, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
+__global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* domain, float t, int iterateRe, int* kernelInds, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	//int stride = blockDim.x * gridDim.x;
 	//float TBRamp1, TBRamp2;

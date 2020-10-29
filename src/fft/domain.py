@@ -9,7 +9,7 @@ import numpy as np
 import src.fft.index1DtoND as index1DtoND
 import pycuda.driver as cuda
 
-class Domain:
+class domain:
      def __init__(self,params):
          self.domain = np.ones(params["N"], dtype=np.bool_)
          inds = np.zeros(params["Np"] * params["dim"], dtype=np.int32)

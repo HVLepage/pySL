@@ -21,7 +21,7 @@ import src.get_gpu_info as gpuinfo
 from src.input.parameters import getparams
 from src.input.wavefunction import wavefunction
 from src.input.convWavefunction import convWavefunction
-from src.fft.domain import Domain
+from src.fft.domain import domain
 from src.fft.kernelInds import kernelInds
 
 from src.input.potential import potential
@@ -68,7 +68,7 @@ makepath(params)
 
 
 V = potential(params) # Static potential
-dom=Domain(params)
+dom = domain(params)
 kerInds = kernelInds(params)
 psi = wavefunction(params,V)
 
@@ -78,9 +78,12 @@ PrintStep = params["PrintStep"]  # Used for saving the wave function
 
 psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N)) #output plot data
 
-dx = params["dx"]
-aa = dt/(dx**2) # define constants for staggered leapfrog
-bb = 2*dt
+
+# MADE OBSOLETE BY faa AND fbb IN INPUT PARAMETERS#######
+# dx = params["dx"]
+# aa = dt/(dx**2) # define constants for staggered leapfrog
+# bb = 2*dt
+##########################################################
 
 k = 0
 
@@ -89,8 +92,14 @@ k = 0
 ################################################################################################################################
 
 
-aa = np.float32(aa) #convert to singles for the GPU kernel
-bb = np.float32(bb)
+
+
+# MADE OBSOLETE BY faa AND fbb IN INPUT PARAMETERS#######
+# aa = np.float32(aa) #convert to singles for the GPU kernel
+# bb = np.float32(bb)
+##########################################################
+
+
 N = np.int32(params["N"])
 
 Np = np.int32(params["Np"])
