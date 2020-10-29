@@ -73,7 +73,10 @@ dom = domain(params) # Simulation domain boundary conditions
 kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avoid calculating this every time
 psi = wavefunction(params,V) #create wavefunction as per parameters
 
-dt = params["dt"] # Time step
+if (params["TDSESolver"] == "kSpace"):
+    phi = convWavefunction(psi, params)
+
+dt =  np.float32(params["dt"]) # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
 PrintStep = params["PrintStep"]  # Used for saving the wave function
 
@@ -91,6 +94,7 @@ N = np.int32(params["N"])
 
 Np = np.int32(params["Np"])
 N1 = np.int32(params["N1"])
+N1K = np.int32(params["N1K"])
 dim = np.int32(params["dim"])
 ASAW = np.float32(params["ASAW"])
 kSAW = np.float32(params["kSAW"])
@@ -103,9 +107,12 @@ URt0 = np.float32(params["URt0"])
 ATB2 = np.float32(params["ATB2"])
 s2TB2 = np.float32(params["s2TB2"])
 fbb = np.float32(params["fbb"])
+value = np.float32(params["dt"] * params["hbar"])
 
 Xa = np.float32(params["Xa"])
 Ya = np.float32(params["Ya"])
+
+Nm1 = np.float32(N ** -1)
 
 faa = cuda.mem_alloc_like(params["faa"])
 cuda.memcpy_htod(faa, params["faa"])
@@ -119,6 +126,8 @@ cuda.memcpy_htod(Mass, params["Mass"])
 dXs = cuda.mem_alloc_like(params["dXs"])
 cuda.memcpy_htod(dXs, params["dXs"])
 
+dKs = cuda.mem_alloc_like(params["dKs"])
+cuda.memcpy_htod(dKs, params["dKs"])
 
 ################################################################################################################################
 # IterateGPU
@@ -130,7 +139,7 @@ print("Simulation Name:", params["SimName"])
 print("----------------------------------------------------------------")
 
 rSpaceSL = mod.get_function("rSpaceSL")
-# iterateGPUK = mod.get_function("iterateGPUK")
+kSpaceSL = mod.get_function("kSpaceSL")
 
 blockSize = 256 
 numBlocks = math.ceil(N / blockSize) # Number of blocks needed to go over all N lattice sites
@@ -144,9 +153,9 @@ for i in range(0, TimeSteps):
     # Iterate the staggered leapfrog kernel over the wavefunction
     if (params["TDSESolver"] == "rSpace"):
         rSpaceSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
-    #elif (params["TDSESolver"] == "kSpace"):
-     #   convFFT
-      #  iterateGPUK()
+    elif (params["TDSESolver"] == "kSpace"):
+        phi.convFFT(psi, V.pot_gpu, mod, kernelInds, t, params,  N, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2,  dXs,  Xa,  Ya)
+        kSpaceSL(N, psi.wave_gpu, phi.wave_gpu, t, dt, Np, N1K,  dim,  value,  Sizes,  Mass,  dKs,  np.int32(i%2),  kernelInds)
         
         
     if (i % PrintStep) == 0:

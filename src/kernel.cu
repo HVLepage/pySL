@@ -1,8 +1,9 @@
 // #include <pycuda-complex.hpp>
-//#include <math.h>
+#include <math.h>
+#include <complex>
+#include <cmath>
 
-/*
-__global__ void Axpy(complex64* Psi, float* V, int N, float t, int* kernelInds, float Nm1, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float* dXs) {
+__global__ void Axpy(complex<float>* Psi, float* V, int N, float t, int* kernelInds, float Nm1, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float* dXs, float Xa, float Ya) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	if (index < N) {
 
@@ -13,8 +14,8 @@ __global__ void Axpy(complex64* Psi, float* V, int N, float t, int* kernelInds, 
 				// Set current coordinates
 			
 				int ind = ((index / (int)powf(N1, Np - p - 1)) % (N1)) * dim;
-				float x = Xa + kernelInds[ind] * dx;
-				float y = dim > 1 ? Ya + kernelInds[ind + 1] * dy : 0.0;
+				float x = Xa + kernelInds[ind] * dXs[0];
+				float y = dim > 1 ? Ya + kernelInds[ind + 1] * dXs[1] : 0.0;
 				// Add SAW potential
 				Vt += ASAW * (1.0 - cosf(kSAW * (x - SAWoffset) - wSAW * t));
 				float TBRamp = 0.5 * (tanhf(RS * (y + (t - DRt0) * cSAW)) + tanhf(-RS * (y + (t - URt0) * cSAW)));
@@ -27,14 +28,15 @@ __global__ void Axpy(complex64* Psi, float* V, int N, float t, int* kernelInds, 
 	}
 }
 
-__global__ void IterateGPUK(int N, cufftComplex* Psi, cufftComplex* PsiConv, float t, int Np, int N1K, int dim, float value, int* Sizes, float* Mass, float* dKs, int iterateRe, int* kernelIndsK) {
+__global__ void kSpaceSL(int N, complex<float>* Psi, complex<float>* PsiConv, float t, float dt, int Np, int N1K, int dim, float value, int* Sizes, float* Mass, float* dKs, int iterateRe, int* kernelIndsK) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	//int stride = blockDim.x * gridDim.x;
 	//float reC, imC;
 
 
-	if (index < n) {
+	if (index < N) {
 		
+		const   complex<float> j(0.0,1.0);    
 		int indN = 0;
 
 		int l = (int)pow((float)dim, (float)Np);
@@ -49,30 +51,29 @@ __global__ void IterateGPUK(int N, cufftComplex* Psi, cufftComplex* PsiConv, flo
 			indN += ind * stride;
 		}
 
-		float value = dt * hbar;
 
 		//Staggered leapfrog in K space
 		if (iterateRe == 0) {
-			Psi[indN].x += 2.0 * dt * (PsiConv[indN].y);
+			Psi[indN] += 2.0 * dt * (PsiConv[indN].imag);
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
 					int indK = ((index / (int)powf(N1K, Np - p - 1)) % (N1K)) * dim;
-					Psi[indN].x += (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].y;
+					Psi[indN] += (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].imag;
 				}
 			}
 		}
 		else {
-			Psi[indN].y += -2.0 * dt * (PsiConv[indN].x);
+			Psi[indN] += -2.0 * dt * (PsiConv[indN].real) *j;
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
 					int indK = ((index / (int)powf(N1K, Np - p - 1)) % (N1K)) * dim;
-					Psi[indN].y -= (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].x;
+					Psi[indN] -= j * (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].real;
 				}
 			}
 		}
 	}
 }
-*/
+
 
 
 /*******************************************************************************************************************************
