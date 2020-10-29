@@ -11,7 +11,7 @@ import pycuda.driver as cuda
 import reikna.fft as rfft
 import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
-import time
+#import time
 
 
 class convWavefunction:
@@ -21,20 +21,18 @@ class convWavefunction:
         self.fftc(self.wave_gpu, self.wave_gpu, inv)
         self.thr.synchronize()
     
-    def convFFT(self, psi, V, mod, kernelInds, t, params):
-        N = np.int32(params["N"])
+    def convFFT(self, psi, V, mod, kernelInds, t, params,  N, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2,  dXs,  Xa,  Ya):
         psi.wave_gpu.get(self.wave_gpu)
-        self.fft(0)
+        self.fft(1)
 
         blockSize = 256
         numBlocks = math.ceil(N / blockSize)
         
-        Nm1 = np.float32(N ** -1)
         Axpy = mod.get_function("Axpy")
         
-        Axpy(psi,  V,  N,  t,  kernelInds,  Nm1, block=(blockSize,1,1), grid=(numBlocks,1))
+        Axpy(self.wave_gpu, V,  N,  t, kernelInds, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2,  dXs,  Xa,  Ya, block=(blockSize,1,1), grid=(numBlocks,1))
         
-        self.fft(1)
+        self.fft(0)
     
     def __init__(self, psi, params):
          self.dV = psi.dV

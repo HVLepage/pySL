@@ -174,15 +174,12 @@ def rSpaceSparseSolverGPU(params, PsiOut, V): #Real space solver GPU
 
     PsiOut.wave /= np.sqrt(norm)
     
-		
-
-
 	# Write wave and eigenvalues to file as appropriate
-    #if (KSpaceLeapfrog):
-	#	ExportFullWave(PsiOut, params, -1, PsiSize, params["SimName, "wave")
-	#	FFTAuxPsi(params, PsiOut, planConvND, true, false)
-	#	ExportFullWave(PsiOut, params, -1, PsiSize, params["SimName, "Kwave")
-	#else:
-    PsiOut.exportFull( params, -1, "wave")
+    PsiOut.exportFull( params, -1, "wave")    
+    
+    if (params["TDSESolver"] == "kSpace"):
+        PsiOut.wave = np.reshape(PsiOut.wave, PsiOut.size)
+        PsiOut.fft(0)
+        PsiOut.exportFull( params, -1, "Kwave")
 	
     #ExportEigenvalues(params, D, 5)
