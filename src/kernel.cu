@@ -1,9 +1,9 @@
-// #include <pycuda-complex.hpp>
-#include <math.h>
-#include <complex>
-#include <cmath>
+#include <pycuda-complex.hpp>
+//#include <math.h>
+//#include <complex>
+//#include <cmath>
 
-__global__ void Axpy(complex<float>* Psi, float* V, int N, float t, int* kernelInds, float Nm1, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float* dXs, float Xa, float Ya) {
+__global__ void Axpy(pycuda::complex<float>* Psi, float* V, int N, float t, int* kernelInds, float Nm1, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float* Mass, float* dXs, float Xa, float Ya) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	if (index < N) {
 
@@ -28,7 +28,7 @@ __global__ void Axpy(complex<float>* Psi, float* V, int N, float t, int* kernelI
 	}
 }
 
-__global__ void kSpaceSL(int N, complex<float>* Psi, complex<float>* PsiConv, float t, float dt, int Np, int N1K, int dim, float value, int* Sizes, float* Mass, float* dKs, int iterateRe, int* kernelIndsK) {
+__global__ void kSpaceSL(int N, pycuda::complex<float>* Psi, pycuda::complex<float>* PsiConv, float t, float dt, int Np, int N1K, int dim, float value, int* Sizes, float* Mass, float* dKs, int iterateRe, int* kernelIndsK) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	//int stride = blockDim.x * gridDim.x;
 	//float reC, imC;
@@ -36,7 +36,7 @@ __global__ void kSpaceSL(int N, complex<float>* Psi, complex<float>* PsiConv, fl
 
 	if (index < N) {
 		
-		const   complex<float> j(0.0,1.0);    
+		const   pycuda::complex<float> j(0.0,1.0);    
 		int indN = 0;
 
 		int l = (int)pow((float)dim, (float)Np);
@@ -54,20 +54,20 @@ __global__ void kSpaceSL(int N, complex<float>* Psi, complex<float>* PsiConv, fl
 
 		//Staggered leapfrog in K space
 		if (iterateRe == 0) {
-			Psi[indN] += 2.0 * dt * (PsiConv[indN].imag);
+			Psi[indN] += 2.0 * dt * (PsiConv[indN].imag());
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
 					int indK = ((index / (int)powf(N1K, Np - p - 1)) % (N1K)) * dim;
-					Psi[indN] += (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].imag;
+					Psi[indN] += (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].imag();
 				}
 			}
 		}
 		else {
-			Psi[indN] += -2.0 * dt * (PsiConv[indN].real) *j;
+			Psi[indN] += pycuda::complex<float>(0.0, -2.0 * dt * (PsiConv[indN].real()));
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
 					int indK = ((index / (int)powf(N1K, Np - p - 1)) % (N1K)) * dim;
-					Psi[indN] -= j * (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].real;
+					Psi[indN] -=  pycuda::complex<float>(0.0, (value / Mass[p]) * powf(kernelIndsK[indK + d] * dKs[d], 2) * Psi[indN].real());
 				}
 			}
 		}

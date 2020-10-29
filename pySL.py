@@ -154,7 +154,7 @@ for i in range(0, TimeSteps):
     if (params["TDSESolver"] == "rSpace"):
         rSpaceSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
     elif (params["TDSESolver"] == "kSpace"):
-        phi.convFFT(psi, V.pot_gpu, mod, kernelInds, t, params,  N, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2,  dXs,  Xa,  Ya)
+        phi.convFFT(psi, V.pot_gpu, mod, kernelInds, t, params,  N, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2, Mass, dXs,  Xa,  Ya)
         kSpaceSL(N, psi.wave_gpu, phi.wave_gpu, t, dt, Np, N1K,  dim,  value,  Sizes,  Mass,  dKs,  np.int32(i%2),  kernelInds)
         
         
