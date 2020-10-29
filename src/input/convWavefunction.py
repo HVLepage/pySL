@@ -1,3 +1,9 @@
+################################################################################################################################
+# Create the auxillary wavefunction class for use in convolutions with the potential for k-Space leapfrog
+################################################################################################################################
+
+
+
 #from src.input.wavefunction import wavefunction
 import math
 import numpy as np

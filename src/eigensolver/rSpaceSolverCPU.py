@@ -1,3 +1,7 @@
+################################################################################################################################
+# Real space eigensolver using the CPU
+################################################################################################################################
+
 import numpy as np
 from numpy import linalg as LA
 from src.export.exportEigenvalues import exportEigenvalues

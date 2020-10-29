@@ -1,3 +1,8 @@
+################################################################################################################################
+# Create the potential class for storing the time-independent potential of the problem, including 2-particle interactions like Coulomb
+################################################################################################################################
+
+
 import numpy as np
 import pycuda.driver as cuda
 import math
@@ -9,12 +14,16 @@ from src.input.electrostaticPotential import electrostaticPotential
 from src.input.coulombPotential import CoulombPotential
 
 class potential():
+    
+    #copy data from device to host
     def dtoh(self):
         cuda.memcpy_dtoh(self.pot, self.pot_gpu)
     
+    #copy data from host to device
     def htod(self):
         cuda.memcpy_htod(self.pot_gpu, self.pot)
         
+    #read potential from file specified in params
     def readFromFile(self,params):
         file = open(".\src\\" + params["PotentialFileName"])
         self.filePot = np.zeros(params["N1"])
@@ -22,7 +31,7 @@ class potential():
         for i in range(0,params["N1"]):
             self.filePot[i] = float(lines[i+3].split()[0])
         
-        
+    # Build the potential from analytically
     def construct(self,params):
         Xa = params["Xa"]
         Xb = params["Xb"]
@@ -50,8 +59,8 @@ class potential():
         inds = np.zeros([dim,Np])
 
         if (Np > 1):
-            interactionsNr = (Np**2 - Np) / 2
-            interactionsMap = np.zeros(interactionsNr,2)
+            interactionsNr = (Np**2 - Np) / 2 #Nr of onteractions between particle pairs
+            interactionsMap = np.zeros(interactionsNr,2) #map of which particle interacts with which
 		
 
 
@@ -63,7 +72,7 @@ class potential():
             interactionsNr = 0
 
         if (interactionsNr > 0):
-            V2P=np.zeros((Nx * Ny * Nz)**2)
+            V2P=np.zeros((Nx * Ny * Nz)**2) #store 2-particle potential
 
             for i1 in range(0,Nx):
                 for j1 in range(0,Ny):
@@ -71,13 +80,14 @@ class potential():
                         for i2 in range(0,Nx):
                             for j2 in range(0,Ny):
                                 for k2 in range(0,Nz):
+                                    #calculate 2-particle potential using Coulomb ionteraction
                                     VVal = CoulombPotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
                                     if (VVal > 100):
                                         VVal = 100.0
-    
+                                            
                                     V2P[index6Dto1D.index(i1, j1, k1, i2, j2, k2, Nx, Ny, Nz, Nx, Ny, Nz)] = VVal
 
-		
+    		#for each pair, fill the potential with their corresponding 2-particle interaction potential
             for p in range(0,interactionsNr):
 
                 p1 = interactionsMap[p]
@@ -96,7 +106,7 @@ class potential():
 
 
 
-	#Add 1 particle static V
+	#Add 1 particle static potential
         V1P = np.zeros(Nx * Ny * Nz)
         
         for p in range(0, params["Np"]):
@@ -107,6 +117,7 @@ class potential():
                         VVal = 0.0;
                         ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
                         
+                        #either import from file, or calculate from electrostatic equations
                         if (params["ImportPotential"]):
                             VVal= self.filePot[ind]
                         else:
