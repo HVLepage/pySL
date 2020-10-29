@@ -74,7 +74,15 @@ __global__ void IterateGPUK(int N, cufftComplex* Psi, cufftComplex* PsiConv, flo
 }
 */
 
-__global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* domain, float t, int iterateRe, int* kernelInds, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
+
+/*******************************************************************************************************************************
+Real-space Staggered Leapfrog solver
+*******************************************************************************************************************************/
+__global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* domain, 
+                        float t, int iterateRe, int* kernelInds, int Np, int N1, int dim, 
+                        float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, 
+                        float RS, float DRt0, float URt0, float ATB2, float s2TB2, 
+                        float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	//int stride = blockDim.x * gridDim.x;
 	//float TBRamp1, TBRamp2;
@@ -102,7 +110,7 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 		
 		
 		int indPMoneOffset=1;
-		if (iterateRe == 0) {
+		if (iterateRe) {
 			PsiRe[index] += (V[index] + Vt) * fbb * PsiIm[index]; // The potential part
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
