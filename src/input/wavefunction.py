@@ -24,7 +24,7 @@ class wavefunction:
     #use appropriate eigensolver to get wavefunction
     def solve(self,params,V):
         print("\n----------------------------------------------------------------")
-        print("Solving eigenvalue problem using ", str(params["Eignesolver"]))
+        print("Solving eigenvalue problem using:", str(params["Eignesolver"]))
         print("----------------------------------------------------------------\n")
         print("Eigenvalues:\n")
         t0 = time.time()
