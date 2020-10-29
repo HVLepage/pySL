@@ -2,7 +2,7 @@
 # Create the main wavefunction class
 ################################################################################################################################
 
-
+import os
 import math
 import numpy as np
 import pycuda.driver as cuda
@@ -129,7 +129,11 @@ class wavefunction:
             self.api = cluda.cuda_api()
             self.thr = self.api.Thread.create()
             fft_h = rfft.FFT(self.wave_gpu)
-            self.fftc=fft_h.compile(self.thr) # This line is causing errors on the server. Is nvcc called here?
+            if os.name == 'nt':
+             self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', 'cl.exe'])
+            else:
+             self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', 'cuda-g++'])
+             
         else:
             self.re_gpu=cuda.mem_alloc_like(self.wave.real)
             self.im_gpu=cuda.mem_alloc_like(self.wave.imag)

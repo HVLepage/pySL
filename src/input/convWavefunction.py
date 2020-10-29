@@ -5,6 +5,7 @@
 
 
 #from src.input.wavefunction import wavefunction
+import os
 import math
 import numpy as np
 import pycuda.driver as cuda
@@ -40,4 +41,7 @@ class convWavefunction:
          self.api = cluda.cuda_api()
          self.thr = self.api.Thread.create()
          fft_h = rfft.FFT(self.wave_gpu)
-         self.fftc=fft_h.compile(self.thr)
+         if os.name == 'nt':
+             self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', 'cl.exe'])
+         else:
+             self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', 'cuda-g++'])
