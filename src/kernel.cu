@@ -83,9 +83,8 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
                         float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, 
                         float RS, float DRt0, float URt0, float ATB2, float s2TB2, 
                         float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
-	int index = blockIdx.x * blockDim.x + threadIdx.x;
-	//int stride = blockDim.x * gridDim.x;
-	//float TBRamp1, TBRamp2;
+
+	int index = blockIdx.x * blockDim.x + threadIdx.x; // CUDA index
 
 	if (index < N && domain[index]==1) { //check if index is within the wavefunction ant NOT on a boundary
 
@@ -93,17 +92,15 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 		int indPMone; //index of plus/minus one site in some dimension
 
 		float Vt = 0.0; //some potentially time depentent part of V
-		//int i = (index / (Nz * Ny)) % Nx;
 
 		for (int p = 0; p < Np; p++) {
 			// Set current coordinates
-			//float x = Xa + i * dx;
 			int ind = ((index / (int)powf(N1, Np - p - 1)) % (N1)) * dim;
 			float x = Xa + kernelInds[ind] * dXs[0];
 			float y = dim > 1 ? Ya + kernelInds[ind + 1] * dXs[1] : 0.0;
-			// Add SAW potential
+			// Add time-dependent SAW potential
 			Vt += ASAW * (1.0 - cosf(kSAW * (x - SAWoffset) - wSAW * t));
-            // time dependent ramp potential
+      // time-dependent ramp potential
 			float TBRamp = 0.5 * (tanhf(RS * (y + (t - DRt0) * cSAW)) + tanhf(-RS * (y + (t - URt0) * cSAW)));
 			Vt -= ATB2 * Mass[p] * expf(-s2TB2 * powf(x, 2.0) / 2.0) * TBRamp;
 		}
@@ -114,9 +111,9 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 			PsiRe[index] += (V[index] + Vt) * fbb * PsiIm[index]; // The potential part
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
-					PsiRe[index] += (faa[d] / Mass[p]) * (2.0 * PsiIm[index]); // On-site kinetic bit
+					PsiRe[index] += (faa[d] / Mass[p]) * (2.0 * PsiIm[index]); // On-site kinetic term
 
-                    // here we calculate how much we need to offset index to get to indPMone
+          // here we calculate how much we need to offset index to get to indPMone
 					if (d == (dim - 1))
 						indPMoneOffset = 1;
 					else if (d == (dim - 2))
