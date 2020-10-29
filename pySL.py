@@ -68,7 +68,7 @@ makepath(params)
 
 
 V = potential(params) # Static potential
-dom = domain(params)
+dom = domain(params) # Simulation domain boundary conditions
 kerInds = kernelInds(params)
 psi = wavefunction(params,V)
 
