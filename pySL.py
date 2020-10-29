@@ -126,25 +126,19 @@ print("\n----------------------------------------------------------------")
 print("GPU-accelerated simulation using:", params["TDSESolver"])
 print("----------------------------------------------------------------")
 
-#func_re = mod.get_function("gqsl_x_re")
-#func_im = mod.get_function("gqsl_x_im")
 rSpaceSL = mod.get_function("rSpaceSL")
 # iterateGPUK = mod.get_function("iterateGPUK")
 
 blockSize = 256 
-numBlocks = math.ceil(N / blockSize) #how many blocks you need to go over all the points -N
+numBlocks = math.ceil(N / blockSize) # Number of blocks needed to go over all N lattice sites
 
 k=0
 t0 = time.time()
 t1 = t0
 for i in range(0, TimeSteps):
     t = np.float32(i*dt)
-  # func_re(psi_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
-  # func_im(psi_gpu,V_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
 
-    #iterate the leapfrog kernel over the wavefunction
-    #func_re(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1)) 
-    #func_im(psi.re_gpu,psi.im_gpu,V.pot_gpu,bb,aa,N, block=(blockSize,1,1), grid=(numBlocks,1))
+    # Iterate the staggered leapfrog kernel over the wavefunction
     if (params["TDSESolver"] == "rSpace"):
         rSpaceSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
     #elif (params["TDSESolver"] == "kSpace"):
