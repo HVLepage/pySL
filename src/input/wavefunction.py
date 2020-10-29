@@ -86,8 +86,8 @@ class wavefunction:
             OutputFileName = "./out/" + params["SimName"] + "/" + Filename + ".txt"
 	
         with open(OutputFileName, 'w+') as OutputFile:
-            for i in range(0, self.N):
-                OutputFile.write("{:e} {:e} \n".format(self.wave.real[i], self.wave.imag[i]))
+            for x in np.nditer(self.wave):
+                OutputFile.write("{:e} {:e} \n".format(x.real, x.imag))
 	
 
 
