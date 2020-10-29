@@ -138,7 +138,7 @@ class wavefunction:
             self.api = cluda.cuda_api()
             self.thr = self.api.Thread.create()
             fft_h = rfft.FFT(self.wave)
-            self.fftc=fft_h.compile(self.thr)
+            self.fftc=fft_h.compile(self.thr) # This line is causing errors on the server. Is nvcc called here?
         else:
             self.re_gpu=cuda.mem_alloc_like(self.wave.real)
             self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
