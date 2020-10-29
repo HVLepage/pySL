@@ -172,8 +172,13 @@ def getparams():
         params["KzKCO"] = 0
 	
         
+    params["Kx"] = 2 * params["KxKCO"]  + 1
+    params["Ky"]  = 2 * params["KyKCO"]  + 1
+    params["Kz"] = 2 * params["KzKCO"]  + 1
+    
     params["N"] =(params["Nx"] * params["Ny"] * params["Nz"]) ** params["Np"]
     params["N1"] = params["Nx"] * params["Ny"] * params["Nz"]
+    params["N1K"] = params["Kx"] * params["Ky"] * params["Kz"]
     params["NOut"] = (params["NxOutK"] * params["NyOutK"] * params["NzOutK"])**params["Np"]
     params["NK"] = ((2 * params["KxKCO"] + 1) * (2 * params["KyKCO"] + 1) * (2 * params["KzKCO"] + 1))**params["Np"]
     
@@ -198,9 +203,6 @@ def getparams():
         print("(2 * Kx/y/zKCO + 1)  cannot be greater than Nx/y/z for KSpaceLeapfrog")
         sys.exit(1)
 
-    params["Kx"] = 2 * params["KxKCO"]  + 1
-    params["Ky"]  = 2 * params["KyKCO"]  + 1
-    params["Kz"] = 2 * params["KzKCO"]  + 1
 	
     params["dKx"] =  2 * math.pi / (params["Xb"] - params["Xa"]) if (params["Xb"] - params["Xa"])>0 else 1.0 #delta momentum
     params["dKy"] =  2 * math.pi / (params["Yb"] - params["Ya"]) if (params["Yb"] - params["Ya"])>0 else 1.0
