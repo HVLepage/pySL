@@ -1,3 +1,10 @@
+################################################################################################################################
+# Create ND index lookup
+################################################################################################################################
+
+# This function returns an array that maps a 1D index of the wave function to the indices for each dimension corresponding to that point. 
+# It is done for 1 particle only here, since for many particles it's relatively cheap to calculate the indices from that
+
 import numpy as np
 import src.fft.index1DtoND as index1DtoND
 import pycuda.driver as cuda

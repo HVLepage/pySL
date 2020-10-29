@@ -1,4 +1,4 @@
-from src.input.wavefunction import wavefunction
+#from src.input.wavefunction import wavefunction
 import math
 import numpy as np
 import pycuda.driver as cuda
@@ -8,8 +8,12 @@ import pycuda.gpuarray as gpuarray
 import time
 
 
-class convWavefunction(wavefunction):
-    
+class convWavefunction:
+   
+    def fft(self, inv = 0):
+        #Perform fft or ifft
+        self.fftc(self.wave_gpu, self.wave_gpu, inv)
+        self.thr.synchronize()
     
     def convFFT(self, psi, V, mod, kernelInds, t, params):
         N = np.int32(params["N"])

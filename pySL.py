@@ -69,8 +69,8 @@ makepath(params)
 
 V = potential(params) # Static potential
 dom = domain(params) # Simulation domain boundary conditions
-kerInds = kernelInds(params)
-psi = wavefunction(params,V)
+kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avoid calculating this every time
+psi = wavefunction(params,V) #create wavefunction as per parameters
 
 dt = params["dt"] # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
@@ -85,6 +85,7 @@ k = 0 # Keeps track of print step, will be made obsolete in future release
 # CUDA malloc
 ################################################################################################################################
 
+# Get all values from parameters that need to be passed to GPU kernels
 N = np.int32(params["N"])
 
 Np = np.int32(params["Np"])
