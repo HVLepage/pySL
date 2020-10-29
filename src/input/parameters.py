@@ -74,7 +74,7 @@ def getparams():
         # Simulation domain
         ################################################################
 
-        # Lattice boundaries
+        # Lattice boundaries [nm]
         "Xa": -200.0,
         "Xb": 200.0,
         "Ya": 0.0,
