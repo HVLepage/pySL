@@ -10,6 +10,7 @@ import tracemalloc
 if (len(sys.argv) > 1):
   print("\nTarget CUDA device: ",str(sys.argv[1]))
   os.environ['CUDA_DEVICE'] = str(sys.argv[1])
+
 # Import pyCUDA modules
 import pycuda.driver as cuda
 import pycuda.autoinit
@@ -125,6 +126,7 @@ cuda.memcpy_htod(dXs, params["dXs"])
 
 print("\n----------------------------------------------------------------")
 print("GPU-accelerated simulation using:", params["TDSESolver"])
+print("Simulation Name:", params["SimName"])
 print("----------------------------------------------------------------")
 
 rSpaceSL = mod.get_function("rSpaceSL")
@@ -157,7 +159,7 @@ for i in range(0, TimeSteps):
       t1 = t2
       norm = psi.norm()
       n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
-      print("Iteration: ", str(i).zfill(int(n_zero)), "    Time Elapsed: %.4f"%t_print, "    NORM: %.8f"%norm)
+      print("Iteration:", str(i).zfill(int(n_zero)), "    Time Elapsed: %.2f"%t_print, "    NORM: %.8f"%norm)
       psi.exportFull(params,i)
 
 t2 = time.time()
