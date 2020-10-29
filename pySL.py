@@ -79,26 +79,11 @@ PrintStep = params["PrintStep"]  # Used for saving the wave function
 psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N)) #output plot data
 
 
-# MADE OBSOLETE BY faa AND fbb IN INPUT PARAMETERS#######
-# dx = params["dx"]
-# aa = dt/(dx**2) # define constants for staggered leapfrog
-# bb = 2*dt
-##########################################################
-
-k = 0
+k = 0 # Keeps track of print step, will be made obsolete in future release
 
 ################################################################################################################################
 # CUDA malloc
 ################################################################################################################################
-
-
-
-
-# MADE OBSOLETE BY faa AND fbb IN INPUT PARAMETERS#######
-# aa = np.float32(aa) #convert to singles for the GPU kernel
-# bb = np.float32(bb)
-##########################################################
-
 
 N = np.int32(params["N"])
 
@@ -131,8 +116,6 @@ cuda.memcpy_htod(Mass, params["Mass"])
 
 dXs = cuda.mem_alloc_like(params["dXs"])
 cuda.memcpy_htod(dXs, params["dXs"])
-
-
 
 
 ################################################################################################################################
