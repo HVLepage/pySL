@@ -104,13 +104,13 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 		
 		
 		int idxNearestNeighbor=1;
-		if (iterateRe) { // iterate real/imag parts interchangably - leapfrog
+		if (iterateRe) { // Iterate real part of the wave function
 			PsiRe[index] += (V[index] + Vt) * fbb * PsiIm[index]; // The potential part
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
 					PsiRe[index] += (faa[d] / Mass[p]) * (2.0 * PsiIm[index]); // On-site kinetic term
 
-          // here we calculate how much we need to offset index to get to indPMone
+          // Calculate the index offset of the nearest neighbor lattice site
 					if (d == (dim - 1))
 						idxNearestNeighbor = 1;
 					else if (d == (dim - 2))
@@ -118,25 +118,25 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 					else if (d == (dim - 3))
 						idxNearestNeighbor = Sizes[dim - 1]* Sizes[dim - 2];
 
-					
 					int pp = Np - p -1;
 					while (pp > 0) {
 						idxNearestNeighbor *= N1;
 						pp--;
 					}
 
-					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index - idxNearestNeighbor]; //off by one bit to the left					
-					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index + idxNearestNeighbor];//off by one bit to the right
+					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index - idxNearestNeighbor]; 
+					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index + idxNearestNeighbor];
 					
 				}
 			}
 		}
-		else {// same as above but imaginary part
+		else { // Iterate imaginary part of the wave function
 			PsiIm[index] -= (V[index] + Vt) * fbb * PsiRe[index];
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
-					PsiIm[index] -= (faa[d] / Mass[p]) * (2.0 * PsiRe[index]);
-
+          PsiIm[index] -= (faa[d] / Mass[p]) * (2.0 * PsiRe[index]); // On-site kinetic term
+          
+          // Calculate the index offset of the nearest neighbor lattice site
 					if (d == (dim - 1))
 						idxNearestNeighbor = 1;
 					else if (d == (dim - 2))
