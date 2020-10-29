@@ -140,13 +140,13 @@ cuda.memcpy_htod(dXs, params["dXs"])
 ################################################################################################################################
 
 print("\n----------------------------------------------------------------")
-print("GPU-accelerated Simulation")
+print("GPU-accelerated simulation using:", params["TDSESolver"])
 print("----------------------------------------------------------------")
 
 #func_re = mod.get_function("gqsl_x_re")
 #func_im = mod.get_function("gqsl_x_im")
 rSpaceSL = mod.get_function("rSpaceSL")
-iterateGPUK = mod.get_function("iterateGPUK")
+# iterateGPUK = mod.get_function("iterateGPUK")
 
 blockSize = 256 
 numBlocks = math.ceil(N / blockSize) #how many blocks you need to go over all the points -N

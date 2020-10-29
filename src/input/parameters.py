@@ -15,7 +15,7 @@ def getparams():
         "Np": 1, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
-        "TDSESolver": "kSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
         "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
