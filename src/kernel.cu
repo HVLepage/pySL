@@ -9,7 +9,7 @@ __global__ void Axpy(pycuda::complex<float>* Psi, float* V,
 					float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, 
 					float RS, float DRt0, float URt0, float ATB2, float s2TB2, 
 					float* Mass, float* dXs, float Xa, float Ya) {
-						
+
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	if (index < N) {
 
@@ -34,6 +34,10 @@ __global__ void Axpy(pycuda::complex<float>* Psi, float* V,
 	}
 }
 
+
+/*******************************************************************************************************************************
+Momentum-space Staggered Leapfrog solver
+*******************************************************************************************************************************/
 __global__ void kSpaceSL(int N, pycuda::complex<float>* Psi, pycuda::complex<float>* PsiConv, 
 						float t, float dt, int Np, int N1K, int dim, float value, int* Sizes, 
 						float* Mass, float* dKs, int iterateRe, int* kernelIndsK) {
@@ -120,7 +124,7 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 				for (int p = 0; p < Np; p++) {
 					PsiRe[index] += (faa[d] / Mass[p]) * (2.0 * PsiIm[index]); // On-site kinetic term
 
-          // Calculate the index offset of the nearest neighbor lattice site
+					// Calculate the index offset of the nearest neighbor lattice site
 					if (d == (dim - 1))
 						idxNearestNeighbor = 1;
 					else if (d == (dim - 2))
@@ -144,9 +148,9 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 			PsiIm[index] -= (V[index] + Vt) * fbb * PsiRe[index];
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
-          PsiIm[index] -= (faa[d] / Mass[p]) * (2.0 * PsiRe[index]); // On-site kinetic term
+					PsiIm[index] -= (faa[d] / Mass[p]) * (2.0 * PsiRe[index]); // On-site kinetic term
           
-          // Calculate the index offset of the nearest neighbor lattice site
+					// Calculate the index offset of the nearest neighbor lattice site
 					if (d == (dim - 1))
 						idxNearestNeighbor = 1;
 					else if (d == (dim - 2))
@@ -160,9 +164,8 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 						pp--;
 					}
 
-    			PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index - idxNearestNeighbor];
+    				PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index - idxNearestNeighbor];
 					PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index + idxNearestNeighbor];
-					
 				}
 			}
 		}
