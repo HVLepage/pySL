@@ -19,6 +19,7 @@ import pycuda.gpuarray as gpuarray
 
 # Import project modules
 import src.get_gpu_info as gpuinfo
+from src.get_ccbin import get_ccbin
 from src.input.parameters import getparams
 from src.input.wavefunction import wavefunction
 from src.input.convWavefunction import convWavefunction
@@ -45,23 +46,25 @@ gpuinfo.print_gpu_info()
 # CUDA Module
 ################################################################################################################################
 
+# Specify C++ compiler
+ccbin = get_ccbin()
+
 # Read CUDA kernel
 with open('./src/kernel.cu', 'r') as file:
     source = file.read()
 
-# Compile kernel using "nvcc". Note: the -ccbin option should be changed to reflect the C++ compiler installed on your system.
+# Compile kernel using nvcc
 if os.name == 'nt': # Compatibility with Windows
-    mod = SourceModule(source, options=['-ccbin', 'cl.exe'])
+    mod = SourceModule(source, options=['-ccbin', ccbin])
 else:
-    mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
+    mod = SourceModule(source, options=['-ccbin', ccbin])
 
 # Load CUDA function into python
 rSpaceSL = mod.get_function("rSpaceSL")
 kSpaceSL = mod.get_function("kSpaceSL")
 
-# Block size and number of blocks determine how the GPU parallelizes the problem. This shouldn't need to change.
+# Block size determines how the GPU parallelizes the problem. This shouldn't need to change.
 blockSize = 256 
-numBlocks = math.ceil(N / blockSize) # Number of blocks needed to go over all N lattice sites
 
 ################################################################################################################################
 # Staggered Leapfrog Setup
@@ -143,6 +146,9 @@ print("\n----------------------------------------------------------------")
 print("GPU-accelerated simulation using:", params["TDSESolver"])
 print("Simulation Name:", params["SimName"])
 print("----------------------------------------------------------------")
+
+# Number of blocks needed to go over all N lattice sites
+numBlocks = math.ceil(N / blockSize) 
 
 k=0
 t0 = time.time()
