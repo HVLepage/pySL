@@ -3,7 +3,13 @@
 //#include <complex>
 //#include <cmath>
 
-__global__ void Axpy(pycuda::complex<float>* Psi, float* V, int N, float t, int* kernelInds, float Nm1, int Np, int N1, int dim, float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, float RS, float DRt0, float URt0, float ATB2, float s2TB2, float* Mass, float* dXs, float Xa, float Ya) {
+__global__ void Axpy(pycuda::complex<float>* Psi, float* V, 
+					int N, float t, 
+					int* kernelInds, float Nm1, int Np, int N1, int dim, 
+					float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, 
+					float RS, float DRt0, float URt0, float ATB2, float s2TB2, 
+					float* Mass, float* dXs, float Xa, float Ya) {
+						
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	if (index < N) {
 
@@ -28,7 +34,10 @@ __global__ void Axpy(pycuda::complex<float>* Psi, float* V, int N, float t, int*
 	}
 }
 
-__global__ void kSpaceSL(int N, pycuda::complex<float>* Psi, pycuda::complex<float>* PsiConv, float t, float dt, int Np, int N1K, int dim, float value, int* Sizes, float* Mass, float* dKs, int iterateRe, int* kernelIndsK) {
+__global__ void kSpaceSL(int N, pycuda::complex<float>* Psi, pycuda::complex<float>* PsiConv, 
+						float t, float dt, int Np, int N1K, int dim, float value, int* Sizes, 
+						float* Mass, float* dKs, int iterateRe, int* kernelIndsK) {
+
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	//int stride = blockDim.x * gridDim.x;
 	//float reC, imC;
