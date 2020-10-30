@@ -49,13 +49,23 @@ gpuinfo.print_gpu_info()
 # CUDA Module
 ################################################################################################################################
 
+# Read CUDA kernel
 with open('./src/kernel.cu', 'r') as file:
     source = file.read()
 
+# Compile kernel using "nvcc". Note: the -ccbin option should be changed to reflect the C++ compiler installed on your system.
 if os.name == 'nt': # Compatibility with Windows
     mod = SourceModule(source, options=['-ccbin', 'cl.exe'])
 else:
     mod = SourceModule(source, options=['-ccbin', 'cuda-g++'])
+
+# Load CUDA function into python
+rSpaceSL = mod.get_function("rSpaceSL")
+kSpaceSL = mod.get_function("kSpaceSL")
+
+# Block size and number of blocks determine how the GPU parallelizes the problem. This shouldn't need to change.
+blockSize = 256 
+numBlocks = math.ceil(N / blockSize) # Number of blocks needed to go over all N lattice sites
 
 ################################################################################################################################
 # Staggered Leapfrog Setup
@@ -137,12 +147,6 @@ print("\n----------------------------------------------------------------")
 print("GPU-accelerated simulation using:", params["TDSESolver"])
 print("Simulation Name:", params["SimName"])
 print("----------------------------------------------------------------")
-
-rSpaceSL = mod.get_function("rSpaceSL")
-kSpaceSL = mod.get_function("kSpaceSL")
-
-blockSize = 256 
-numBlocks = math.ceil(N / blockSize) # Number of blocks needed to go over all N lattice sites
 
 k=0
 t0 = time.time()
