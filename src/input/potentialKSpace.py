@@ -15,6 +15,7 @@ from src.input.coulombPotential import CoulombPotential
 import reikna.fft as rfft
 import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
+from src.get_ccbin import get_ccbin
 
 class potentialKSpace():
     
@@ -39,7 +40,7 @@ class potentialKSpace():
         
         self.api = cluda.cuda_api()
         self.thr = self.api.Thread.create()
-        
+        ccbin = get_ccbin
         
         Xa = params["Xa"]
         Xb = params["Xb"]
@@ -102,10 +103,7 @@ class potentialKSpace():
             V2P_gpu=gpuarray.to_gpu(V2P)
             
             fft_h2P = rfft.FFT(V2P_gpu)
-            if os.name == 'nt':
-                self.fftc2P=fft_h2P.compile(self.thr, compiler_options = ['-ccbin', 'cl.exe'])
-            else:
-                self.fftc2P=fft_h2P.compile(self.thr, compiler_options = ['-ccbin', 'cuda-g++'])
+            self.fftc2P=fft_h2P.compile(self.thr, compiler_options = ['-ccbin', ccbin])
             
             self.fftc2P(V2P_gpu, V2P_gpu, 0)
             self.thr.synchronize()
@@ -161,10 +159,7 @@ class potentialKSpace():
             V1P_gpu=gpuarray.to_gpu(V1P)
             
             fft_h1P = rfft.FFT(V1P_gpu)
-            if os.name == 'nt':
-                self.fftc1P=fft_h1P.compile(self.thr, compiler_options = ['-ccbin', 'cl.exe'])
-            else:
-                self.fftc1P=fft_h1P.compile(self.thr, compiler_options = ['-ccbin', 'cuda-g++'])
+            self.fftc1P=fft_h1P.compile(self.thr, compiler_options = ['-ccbin', ccbin])
             
             self.fftc1P(V1P_gpu, V1P_gpu, 0)
             self.thr.synchronize()

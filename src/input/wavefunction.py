@@ -13,6 +13,7 @@ from  src.eigensolver.rSpaceSparseSolverGPU import rSpaceSparseSolverGPU
 import reikna.fft as rfft
 import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
+from src.get_ccbin import get_ccbin
 import time
 
 class wavefunction:
@@ -132,10 +133,7 @@ class wavefunction:
             self.api = cluda.cuda_api()
             self.thr = self.api.Thread.create()
             fft_h = rfft.FFT(self.wave_gpu)
-            if os.name == 'nt':
-             self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', 'cl.exe'])
-            else:
-             self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', 'cuda-g++'])
+            self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', get_ccbin()])
              
         else:
             self.re_gpu=cuda.mem_alloc_like(self.wave.real)

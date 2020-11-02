@@ -83,14 +83,14 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
         if (i == j): #on - diagonal element
             for p in range(0,Np):
                 for d in range(0,dim):
-                    H[j + Msize * i] +=  ((indsRow[p * dim + d] - KCOs[d]) * dKs[d]) ** 2 / (2 * params["Mass"][p])
-		#else:
-            #H[i - 1 + Msize*(j - 1)].real = H[j - 1 + Msize*(i - 1)].real;
-			#H[i - 1 + Msize*(j - 1)].imag = -H[j - 1 + Msize*(i - 1)].imag;
+                    H[j + PsiSize * i] +=  ((indsRow[p * dim + d] - KCOs[d]) * dKs[d]) ** 2 / (2 * params["Mass"][p])
+        else:
+            H[i - 1 + PsiSize*(j - 1)] = H[j - 1 + PsiSize*(i - 1)].conj
+			
 			
 		#on-site potential
         
-				
+    H = H.reshape([PsiSize,PsiSize])			
 
     D, eV = LA.eigh(H)
 
