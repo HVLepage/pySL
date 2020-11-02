@@ -56,7 +56,7 @@ class potential():
             self.readFromFile(params)
 
 
-        inds = np.zeros([dim,Np])
+        inds = np.zeros(dim*Np)
 
         if (Np > 1):
             interactionsNr = (Np**2 - Np) / 2 #Nr of onteractions between particle pairs
@@ -92,14 +92,14 @@ class potential():
 
                 p1 = interactionsMap[p]
                 p2 = interactionsMap[p + 1]
-                inds2P = np.zeros([dim,2])
+                inds2P = np.zeros(dim*2)
 
                 for i in range(0,params["N"]):
                     index1DtoND.index(i, inds, params["Sizes"], params)
 
-                    for j in range(0,params["dim"]):
-                        inds2P[j,0] = inds[p1 * params["dim"] + j]
-                        inds2P[j,1] = inds[p2 * params["dim"] + j]
+                    for j in range(0,dim):
+                        inds2P[j] = inds[p1 * dim + j]
+                        inds2P[j + dim] = inds[p2 * dim + j]
 				
                     ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
                     self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
@@ -136,8 +136,8 @@ class potential():
         for i in range(0,params["N"]):
             index1DtoND.index(i, inds, params["Sizes"], params)
 
-            for j in range(0, params["dim"]):
-                inds1P[j] = inds[p * params["dim"] + j]
+            for j in range(0, dim):
+                inds1P[j] = inds[p * dim + j]
 			
             ind1P = indexNDto1D.index(inds1P, params["Sizes"], params, 1)
             self.pot[i] += V1P[int(ind1P)]

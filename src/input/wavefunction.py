@@ -8,6 +8,7 @@ import numpy as np
 import pycuda.driver as cuda
 from  src.eigensolver.rSpaceSolverCPU import rSpaceSolverCPU
 from  src.eigensolver.rSpaceSolverGPU import rSpaceSolverGPU
+from  src.eigensolver.kSpaceSolverCPU import kSpaceSolverCPU
 from  src.eigensolver.rSpaceSparseSolverGPU import rSpaceSparseSolverGPU
 import reikna.fft as rfft
 import reikna.cluda as cluda
@@ -37,6 +38,8 @@ class wavefunction:
             rSpaceSolverCPU(params,self,V)
         elif params["Eignesolver"] == "GPUrSpace":
             rSpaceSolverGPU(params,self,V)
+        elif params["Eignesolver"] == "CPUkSpace":
+            kSpaceSolverCPU(params,self,V)
         elif params["Eignesolver"] == "GPUrSpaceSparse":
             rSpaceSparseSolverGPU(params,self,V)
         time_eig = time.time() - t0
