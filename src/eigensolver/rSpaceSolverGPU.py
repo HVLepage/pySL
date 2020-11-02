@@ -75,18 +75,20 @@ def rSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
 
 	
 							# do a final normalisation
-    norm = PsiOut.norm()
-
-    PsiOut.wave /= np.sqrt(norm)
-    
-    # Write wave and eigenvalues to file as appropriate
-    PsiOut.exportFull( params, -1, "wave")    
-    
-    if (params["TDSESolver"] == "kSpace"):
+    if (params["TDSESolver"] == "rSpace"):		# do a final normalisation
+        norm = PsiOut.norm()
+        PsiOut.wave /= np.sqrt(norm)
+    	# Write wave and eigenvalues to file as appropriate
+        PsiOut.exportFull( params, -1, "wave")
+    elif (params["TDSESolver"] == "kSpace"):
+        PsiOut.exportFull( params, -1, "wave")
         PsiOut.wave = np.reshape(PsiOut.wave, PsiOut.size)
         PsiOut.htod()
         PsiOut.fft(0)
         PsiOut.dtoh()
+        norm = PsiOut.norm()
+        PsiOut.wave /= np.sqrt(norm)
         PsiOut.exportFull( params, -1, "Kwave")
+
 	
     exportEigenvalues(params, D, 5)
