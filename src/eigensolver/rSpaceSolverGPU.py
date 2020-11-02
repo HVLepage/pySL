@@ -84,7 +84,9 @@ def rSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
     
     if (params["TDSESolver"] == "kSpace"):
         PsiOut.wave = np.reshape(PsiOut.wave, PsiOut.size)
+        PsiOut.htod()
         PsiOut.fft(0)
+        PsiOut.dtoh()
         PsiOut.exportFull( params, -1, "Kwave")
 	
     exportEigenvalues(params, D, 5)
