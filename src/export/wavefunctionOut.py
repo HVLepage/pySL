@@ -1,0 +1,90 @@
+import numpy as np
+import src.fft.index1DtoND as index1DtoND
+import src.fft.indexNDto1D as indexNDto1D
+import reikna.fft as rfft
+import pycuda.gpuarray as gpuarray
+from src.get_ccbin import get_ccbin
+
+class WavefunctionOut:
+    
+    def dtoh(self):
+        self.wave_gpu.get(self.wave)
+    
+    # Copy wave function array from host to GPU device
+    def htod(self):
+        self.wave_gpu.set(self.wave)
+        
+            
+    def norm(self):
+        norm = sum(self.wave.real**2 + self.wave.imag**2) *self.dV
+        return norm
+    
+    def exportWaveKtoReal(self,  PsiK, thr,  params):
+
+        dim = params["dim"]
+        Np = params["Np"]
+        Nx = params["Nx"]
+        Ny = params["Ny"]
+        Nz = params["Nz"]
+        
+        
+
+        NxLim = int((Nx - 1) / 2)
+        NyLim = int((Ny - 1) / 2)
+        NzLim = int((Nz - 1) / 2)
+
+        for i in range(0,  params["NOut"]):
+            self.wave[i] = 0.0
+		
+
+        NLims = np.zeros(dim)
+        
+        ik = 0
+        if (Nx > 1):
+            NLims[ik] = NxLim
+            ik+=1
+        if (Ny > 1):
+            NLims[ik] = NyLim
+            ik+=1
+        if (Nz > 1):
+            NLims[ik] = NzLim
+
+        indsR = np.zeros(dim*Np)
+        indsK = np.zeros(dim*Np)
+	
+
+        for i in range(0, params["N"]):
+            index1DtoND.index(i, indsK, params["Sizes"], params)
+		# Fill in the padded wave funtion
+            for j in range(0, dim*Np):
+               indsR[j] =  indsK[j] if indsK[j] <= NLims[j % dim] else indsK[j] - params["Sizes"][j % dim] + self.SizesOutK[j % dim] #indsR[j] = indsK[j] <= NLims[j % params["dim] ? indsK[j] : indsK[j] - params["Sizes[j % params["dim] + SizesOut[j % params["dim];
+		
+            indNP = indexNDto1D.index(indsR, self.SizesOutK, params)
+		#Divide by elements here?
+            self.wave[indNP] += PsiK.wave.flat[i]
+		
+
+    	#Do the FFT
+        #FFTAuxPsi(params, PsiReal, planConvND, false, false, true)
+        self.wave_gpu.set(self.wave)
+        
+        self.fftc(self.wave_gpu, self.wave_gpu, 1)
+        thr.synchronize()
+        self.wave_gpu.get(self.wave)
+        
+        def __init__(self, PsiK, params, thr):
+            self.NxOut = params["NxOutK"]	#Padded real wave function size
+            self.NyOut = params["NyOutK"]
+            self.NzOut = params["NzOutK"]
+            self.SizesOutK = params["SizesOutK"]
+            self.size=[]
+            for i in range(0,params["Np"]):
+                self.size += self.SizesOutK
+            
+            self.wave = np.zeros(self.size, dtype = np.complex64)
+            self.wave_gpu=gpuarray.to_gpu(self.wave)
+            
+            fft_h = rfft.FFT(self.wave_gpu)
+            self.fftc=fft_h.compile(thr, compiler_options = ['-ccbin', get_ccbin()])
+            
+            self.exportWaveKtoReal(PsiK, thr, params)

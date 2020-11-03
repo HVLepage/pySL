@@ -2,7 +2,6 @@
 # Create the main wavefunction class
 ################################################################################################################################
 
-import os
 import math
 import numpy as np
 import pycuda.driver as cuda
@@ -12,13 +11,11 @@ from  src.eigensolver.kSpaceSolverCPU import kSpaceSolverCPU
 from  src.eigensolver.kSpaceSolverGPU import kSpaceSolverGPU
 from  src.eigensolver.rSpaceSparseSolverGPU import rSpaceSparseSolverGPU
 import reikna.fft as rfft
-import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
 from src.get_ccbin import get_ccbin
 import time
 
 class wavefunction:
-
     
     def fft(self, thr, inv = 0):
         #Perform fft or ifft
