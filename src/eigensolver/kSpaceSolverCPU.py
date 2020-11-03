@@ -28,7 +28,7 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
     
     Np = params["Np"]
     dim = params["dim"]
-    PsiSize = (Kx * Ky * Kz) ** Np
+    PsiSize = int((Kx * Ky * Kz) ** Np)
 	
     
     SizesK = []
@@ -67,8 +67,8 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
     
     for k in range(0, PsiSize**2):# Go over each row
 
-        j = k % PsiSize # column index
-        i = np.floor(np.float64(k) / np.float64(PsiSize)) #i is row index
+        j = int(k % PsiSize) # column index
+        i = int(np.floor(np.float64(k) / np.float64(PsiSize))) #i is row index
 
         index1DtoND.index(j, indsCol, SizesK, params)
         index1DtoND.index(i, indsRow, SizesK, params)
@@ -78,14 +78,14 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
 		
         
 		#fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
-        H[j + PsiSize * i] = Vk[indexNDto1D.index(indsDiff, SizesKE, params)]
+        H[j + PsiSize * i] = Vk.pot[indexNDto1D.index(indsDiff, SizesKE, params)]
         
         if (i == j): #on - diagonal element
             for p in range(0,Np):
                 for d in range(0,dim):
                     H[j + PsiSize * i] +=  ((indsRow[p * dim + d] - KCOs[d]) * dKs[d]) ** 2 / (2 * params["Mass"][p])
         else:
-            H[i - 1 + PsiSize*(j - 1)] = H[j - 1 + PsiSize*(i - 1)].conj
+            H[i - 1 + PsiSize*(j - 1)] = H[j - 1 + PsiSize*(i - 1)].conjugate()
 			
 			
 		#on-site potential

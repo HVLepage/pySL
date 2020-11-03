@@ -15,8 +15,8 @@ def getparams():
         "Np": 1, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
-        "TDSESolver": "kSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
-        "Eignesolver": "CPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
+        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "Eignesolver": "CPUkSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
         # The first two elements are the real and imaginary components of the ground state. 
@@ -67,8 +67,8 @@ def getparams():
         
         "dt": 0.0002, # duration of a single time step in [ps]
         "StartTime": 0.0,
-        "TimeSteps": 2000000,
-        "PrintStep": 10000, # How often the wave function is saved to a file
+        "TimeSteps": 20000,
+        "PrintStep": 1000, # How often the wave function is saved to a file
 
         ################################################################
         # Simulation domain

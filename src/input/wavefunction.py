@@ -40,7 +40,7 @@ class wavefunction:
         elif params["Eignesolver"] == "GPUrSpace":
             rSpaceSolverGPU(params,self,V)
         elif params["Eignesolver"] == "CPUkSpace":
-            kSpaceSolverCPU(params,self,V)
+            kSpaceSolverCPU(params,self)
         elif params["Eignesolver"] == "GPUrSpaceSparse":
             rSpaceSparseSolverGPU(params,self,V)
         time_eig = time.time() - t0

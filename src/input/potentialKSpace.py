@@ -38,9 +38,9 @@ class potentialKSpace():
     # Build the potential from analytically
     def construct(self,params):
         
+        ccbin = get_ccbin()
         self.api = cluda.cuda_api()
         self.thr = self.api.Thread.create()
-        ccbin = get_ccbin
         
         Xa = params["Xa"]
         Xb = params["Xb"]
@@ -99,7 +99,10 @@ class potentialKSpace():
 
 
             #Do FFT
-            V2P=V2P.reshape((Nx,Ny,Nz,Nx,Ny,Nz))
+            #self.api = cluda.cuda_api()
+            #self.thr = self.api.Thread.create()
+        
+            V2P=V2P.reshape(self.sizesNP)
             V2P_gpu=gpuarray.to_gpu(V2P)
             
             fft_h2P = rfft.FFT(V2P_gpu)
@@ -127,12 +130,12 @@ class potentialKSpace():
 				
                     indND = indexNDto1D.index(inds, self.sizesK, params)
                     ind2D = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
-                    self.pot[indND] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2D] #NORMALIZE HERE?
+                    self.pot[indND] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2D] #/ (Nx*Ny*Nz*Nx*Ny*Nz)#NORMALIZE HERE?
 
 
 
     	#Add 1 particle static potential
-        V1P = np.zeros(Nx * Ny * Nz)
+        V1P = np.zeros(Nx * Ny * Nz, dtype = np.complex64)
         
         for p in range(0, params["Np"]):
 
@@ -155,7 +158,7 @@ class potentialKSpace():
                         V1P[ind] = VVal
 		
             #DO FFT
-            V1P=V1P.reshape((Nx,Ny,Nz))
+            V1P=V1P.reshape(self.sizes)
             V1P_gpu=gpuarray.to_gpu(V1P)
             
             fft_h1P = rfft.FFT(V1P_gpu)
@@ -178,7 +181,7 @@ class potentialKSpace():
 			
                 indND = indexNDto1D.index(inds, self.sizesK, params)
                 ind1D = indexNDto1D.index(inds1P, params["Sizes"], params, 1)
-                self.pot[i] += V1P[ind1D] #NORMALIZE?
+                self.pot[i] += V1P[int(ind1D)] #/ (Nx*Ny*Nz) #NORMALIZE?
 
 
             
@@ -209,19 +212,27 @@ class potentialKSpace():
         
         self.pot_gpu=cuda.mem_alloc(self.pot.nbytes)
         
+        self.sizes = []
         self.sizesK = []
         self.kLims = []
+        self.sizesNP=[]
         for i in range(0,params["dim"]):
             if (i == 0):
+                self.sizes.append(params["Nx"])
                 self.sizesK.append(self.Kx)
                 self.kLims.append(KxLim)
             elif (i ==1):
+                self.sizes.append(params["Ny"])
                 self.sizesK.append(self.Ky)
                 self.kLims.append(KyLim)
             elif (i ==2):
+                self.sizes.append(params["Ny"])
                 self.sizesK.append(self.Kz)
                 self.kLims.append(KzLim)
-       
-        self.construct(params, enlarged)
+                
+        for p in range(0,params["Np"]):
+            self.sizesNP += self.sizes
+            
+        self.construct(params)
 
         self.htod()
