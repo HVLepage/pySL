@@ -8,6 +8,11 @@ from src.export.exportEigenvalues import exportEigenvalues
 from src.input.potentialKSpace import potentialKSpace
 import src.fft.index1DtoND as index1DtoND
 import src.fft.indexNDto1D as indexNDto1D
+from src.get_ccbin import get_ccbin
+import reikna.fft as rfft
+import reikna.cluda as cluda
+import pycuda.gpuarray as gpuarray
+from src.fft.fftAuxPsi import ToReal
 
 def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
 	#read input parameters from params & declare stuff
@@ -57,8 +62,6 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
 	#Init Hamiltonian
     H = np.zeros(PsiSize*PsiSize, dtype = np.complex64)
     
-    H2 = params["hbar"] ** 2 #hbar squared
-    
     Vk = potentialKSpace(params, True)
 
     indsCol = np.zeros(dim*Np, dtype=np.int32)
@@ -83,26 +86,56 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
         if (i == j): #on - diagonal element
             for p in range(0,Np):
                 for d in range(0,dim):
-                    H[j + PsiSize * i] +=  ((indsRow[p * dim + d] - KCOs[d]) * dKs[d]) ** 2 / (2 * params["Mass"][p])
+                    H[j + PsiSize * i] +=  (((indsRow[p * dim + d] - KCOs[d]) * dKs[d]) ** 2) / (2 * params["Mass"][p])
         else:
-            H[i - 1 + PsiSize*(j - 1)] = H[j - 1 + PsiSize*(i - 1)].conjugate()
+            H[j + PsiSize * i] = H[j + PsiSize * i].conjugate()
 			
 			
 		#on-site potential
         
     H = H.reshape([PsiSize,PsiSize])			
-
+    
     D, eV = LA.eigh(H)
 
     for i in range(0,5):
         print(D[i])
 	
-
+    
+    ccbin = get_ccbin()
+    api = cluda.cuda_api()
+    thr = api.Thread.create()
+    PsiTemp = np.zeros(PsiOut.size, dtype = np.complex64)
+    PsiTemp_gpu = gpuarray.to_gpu(PsiTemp)
+    
+    fft_h = rfft.FFT(PsiTemp_gpu)
+    fftc=fft_h.compile(thr, compiler_options = ['-ccbin', ccbin])
+    
 
 	# Go over eigenstates to construct the init wave function as specified by Input Params
     for J in range(0,5):
         if ((params["InputStates"][2 * J] != 0.0) or (params["InputStates"][2 * J + 1] != 0.0)):
-            PsiOut.wave += params["InputStates"][2 * J] * eV[:,J] 
+            PsiTemp = PsiTemp.ravel();
+            indsR = np.zeros(dim*Np)
+            indsK = np.zeros(dim*Np)
+            
+            for i in range(0, (Kx*Ky*Kz)**Np):
+                index1DtoND.index(i, indsK, SizesK, params)
+                for j in range (0, dim*Np):
+                    indsR[j] = indsK[j] + params["Sizes"][j % dim] - KCOs[j % dim] if indsK[j] < KCOs[j % dim] else indsK[j] - KCOs[j % dim] #indsR[j] = indsK[j] < KCOs[j % params->dim] ? indsK[j] + params->Sizes[j % params->dim] - KCOs[j % params->dim] : indsK[j] - KCOs[j % params->dim];
+            
+                indNP = indexNDto1D.index(indsR, params["Sizes"], params)
+                PsiTemp[int(indNP)] = eV[i,J]
+                
+            ToReal(params, PsiTemp, False)
+            PsiTemp.reshape(PsiOut.size)
+            PsiTemp_gpu.set(PsiTemp)
+            fftc(PsiTemp_gpu, PsiTemp_gpu, 1)
+            thr.synchronize()
+            PsiTemp_gpu.get(PsiTemp)
+            
+            
+            
+            PsiOut.wave += (params["InputStates"][2 * J] + params["InputStates"][2 * J + 1]) * PsiTemp.ravel() 
 
 	
 					

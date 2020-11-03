@@ -56,7 +56,7 @@ def rSpaceSolverCPU(params, PsiOut, V): #Real space solver GPU
 	# Go over eigenstates to construct the init wave function as specified by Input Params
     for J in range(0,5):
         if ((params["InputStates"][2 * J] != 0.0) or (params["InputStates"][2 * J + 1] != 0.0)):
-            PsiOut.wave += params["InputStates"][2 * J] * eV[:,J] 
+            PsiOut.wave += (params["InputStates"][2 * J] + params["InputStates"][2 * J + 1]) * eV[:,J].reshape(PsiOut.size) 
 
 	
 					

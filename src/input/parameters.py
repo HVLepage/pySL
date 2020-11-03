@@ -84,19 +84,19 @@ def getparams():
         "Zb": 0.0,
 
         # Number of lattice sites
-        "Nx": 801,
+        "Nx": 81,
         "Ny": 1,
         "Nz": 1,
 
-        "NxOutK": 801,
+        "NxOutK": 81,
         "NyOutK": 1,
         "NzOutK": 1,
 
         # Momentum Solver Inputs
-        "KxECO": 400,
+        "KxECO": 40,
         "KyECO": 0,
         "KzECO": 0,
-        "KxKCO": 400,
+        "KxKCO": 40,
         "KyKCO": 0,
         "KzKCO": 0,
 
@@ -120,7 +120,7 @@ def getparams():
         ################################################################
 
         # Potential variables
-        "w2X": 0.0,
+        "w2X": 0.00000,
         "w2Y": 0.0,
         "ATB1": 0.0,
         "s2TB1": 0.0,

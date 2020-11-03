@@ -81,7 +81,7 @@ class potentialKSpace():
             interactionsNr = 0
 
         if (interactionsNr > 0):
-            V2P=np.zeros((Nx * Ny * Nz)**2) #store 2-particle potential
+            V2P=np.zeros((Nx * Ny * Nz)**2,  dtype = np.complex64) #store 2-particle potential
 
             for i1 in range(0,Nx):
                 for j1 in range(0,Ny):
@@ -99,8 +99,6 @@ class potentialKSpace():
 
 
             #Do FFT
-            #self.api = cluda.cuda_api()
-            #self.thr = self.api.Thread.create()
         
             V2P=V2P.reshape(self.sizesNP)
             V2P_gpu=gpuarray.to_gpu(V2P)

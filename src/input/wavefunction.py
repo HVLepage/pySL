@@ -70,8 +70,8 @@ class wavefunction:
         if self.TDSESolver=="kSpace":
             self.wave_gpu.set(self.wave)
         else:
-            cuda.memcpy_htod(self.re_gpu, self.wave.real.ravel())
-            cuda.memcpy_htod(self.im_gpu, self.wave.imag.ravel())
+            cuda.memcpy_htod(self.re_gpu, self.wave.real)
+            cuda.memcpy_htod(self.im_gpu, self.wave.imag)
         
     # Calculate norm, used at every print step to check simulation convergence
     def norm(self):
