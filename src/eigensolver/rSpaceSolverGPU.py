@@ -10,7 +10,7 @@ import os
 from skcuda import linalg
 from src.export.exportEigenvalues import exportEigenvalues
 
-def rSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
+def rSpaceSolverGPU(params, PsiOut, V, thr): #Real space solver GPU
 	#read input parameters from params & declare stuff
 
 	
@@ -71,7 +71,7 @@ def rSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
 	# Go over eigenstates to construct the init wave function as specified by Input Params
     for J in range(0,5):
         if ((params["InputStates"][2 * J] != 0.0) or (params["InputStates"][2 * J + 1] != 0.0)):
-            PsiOut.wave += (params["InputStates"][2 * J] + params["InputStates"][2 * J + 1]) *  H[:,J].reshape(PsiOut.size) 
+            PsiOut.wave += (params["InputStates"][2 * J] + 1j * params["InputStates"][2 * J + 1]) *  H[:,J].reshape(PsiOut.size) 
 
 	
 							# do a final normalisation
@@ -84,7 +84,7 @@ def rSpaceSolverGPU(params, PsiOut, V): #Real space solver GPU
         PsiOut.exportFull( params, -1, "wave")
         PsiOut.wave = np.reshape(PsiOut.wave, PsiOut.size)
         PsiOut.htod()
-        PsiOut.fft(0)
+        PsiOut.fft(thr, 0)
         PsiOut.dtoh()
         norm = PsiOut.norm()
         PsiOut.wave /= np.sqrt(norm)

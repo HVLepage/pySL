@@ -14,7 +14,7 @@ import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
 from src.fft.fftAuxPsi import ToReal
 
-def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
+def kSpaceSolverCPU(params, PsiOut, thr): #Real space solver GPU
 	#read input parameters from params & declare stuff
 
 	
@@ -62,7 +62,8 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
 	#Init Hamiltonian
     H = np.zeros(PsiSize*PsiSize, dtype = np.complex64)
     
-    Vk = potentialKSpace(params, True)
+    Vk = potentialKSpace(params, thr, True)
+    #Vk = np.zeros(((4 * KxCO + 1) * (4 * KyCO + 1) * (4 * KzCO + 1)))
 
     indsCol = np.zeros(dim*Np, dtype=np.int32)
     indsRow = np.zeros(dim*Np, dtype=np.int32)
@@ -102,8 +103,8 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
 	
     
     ccbin = get_ccbin()
-    api = cluda.cuda_api()
-    thr = api.Thread.create()
+    #api = cluda.cuda_api()
+    #thr = api.Thread.create()
     PsiTemp = np.zeros(PsiOut.size, dtype = np.complex64)
     PsiTemp_gpu = gpuarray.to_gpu(PsiTemp)
     
@@ -114,7 +115,7 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
 	# Go over eigenstates to construct the init wave function as specified by Input Params
     for J in range(0,5):
         if ((params["InputStates"][2 * J] != 0.0) or (params["InputStates"][2 * J + 1] != 0.0)):
-            PsiTemp = PsiTemp.ravel();
+            #PsiTemp = PsiTemp.ravel();
             indsR = np.zeros(dim*Np)
             indsK = np.zeros(dim*Np)
             
@@ -135,7 +136,7 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
             
             
             
-            PsiOut.wave += (params["InputStates"][2 * J] + params["InputStates"][2 * J + 1]) * PsiTemp.ravel() 
+            PsiOut.wave += (params["InputStates"][2 * J] + 1j * params["InputStates"][2 * J + 1]) * PsiTemp.ravel() 
 
 	
 					
@@ -148,7 +149,7 @@ def kSpaceSolverCPU(params, PsiOut): #Real space solver GPU
         PsiOut.exportFull( params, -1, "wave")
         PsiOut.wave = np.reshape(PsiOut.wave, PsiOut.size)
         PsiOut.htod()
-        PsiOut.fft(0)
+        PsiOut.fft(thr, 0)
         PsiOut.dtoh()
         norm = PsiOut.norm()
         PsiOut.wave /= np.sqrt(norm)

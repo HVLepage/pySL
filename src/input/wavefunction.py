@@ -19,30 +19,30 @@ import time
 class wavefunction:
 
     
-    def fft(self, inv = 0):
+    def fft(self, thr, inv = 0):
         #Perform fft or ifft
         #api = cluda.cuda_api()
         #thr = api.Thread.create()
         #fft_h = rfft.FFT(self.wave)
         #fftc=fft_h.compile(thr)
         self.fftc(self.wave_gpu, self.wave_gpu, inv)
-        self.thr.synchronize()
+        thr.synchronize()
 
     #use appropriate eigensolver to get wavefunction
-    def solve(self,params,V):
+    def solve(self,params, thr, V):
         print("\n----------------------------------------------------------------")
         print("Solving eigenvalue problem using:", str(params["Eignesolver"]))
         print("----------------------------------------------------------------\n")
         print("Eigenvalues:\n")
         t0 = time.time()
         if params["Eignesolver"] == "CPUrSpace":
-            rSpaceSolverCPU(params,self,V)
+            rSpaceSolverCPU(params,self,V, thr)
         elif params["Eignesolver"] == "GPUrSpace":
-            rSpaceSolverGPU(params,self,V)
+            rSpaceSolverGPU(params,self,V, thr)
         elif params["Eignesolver"] == "CPUkSpace":
-            kSpaceSolverCPU(params,self)
+            kSpaceSolverCPU(params,self, thr)
         elif params["Eignesolver"] == "GPUrSpaceSparse":
-            rSpaceSparseSolverGPU(params,self,V)
+            rSpaceSparseSolverGPU(params,self,V, thr)
         time_eig = time.time() - t0
         print("\nEigensolver completed in %.4f seconds"%time_eig)
         
@@ -70,8 +70,8 @@ class wavefunction:
         if self.TDSESolver=="kSpace":
             self.wave_gpu.set(self.wave)
         else:
-            cuda.memcpy_htod(self.re_gpu, self.wave.real)
-            cuda.memcpy_htod(self.im_gpu, self.wave.imag)
+            cuda.memcpy_htod(self.re_gpu, self.wave.real.ravel())
+            cuda.memcpy_htod(self.im_gpu, self.wave.imag.ravel())
         
     # Calculate norm, used at every print step to check simulation convergence
     def norm(self):
@@ -105,7 +105,7 @@ class wavefunction:
             self.wave.imag[i] = float(lines[i].split()[1])
     
     #thi sis called on creation of instance
-    def __init__(self,params,V=0):
+    def __init__(self, params, thr, V=0):
         
         if (params["TDSESolver"] == "kSpace"):
             self.TDSESolver = "kSpace"
@@ -130,18 +130,17 @@ class wavefunction:
         if (params["TDSESolver"] == "kSpace"):
             self.wave = np.reshape(self.wave, self.size)
             self.wave_gpu=gpuarray.to_gpu(self.wave)
-            self.api = cluda.cuda_api()
-            self.thr = self.api.Thread.create()
+            #self.api = cluda.cuda_api()
+            #self.thr = api.Thread.create()
             fft_h = rfft.FFT(self.wave_gpu)
-            self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', get_ccbin()])
-             
+            self.fftc=fft_h.compile(thr, compiler_options = ['-ccbin', get_ccbin()])             
         else:
             self.re_gpu=cuda.mem_alloc_like(self.wave.real)
             self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
         
         
         if (not params["ImportWavefunction"]):
-            self.solve(params,V)
+            self.solve(params, thr, V)
         else:
             #self.readFromFile(params) #read from file
             

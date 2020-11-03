@@ -9,7 +9,7 @@ import os
 from src.export.exportEigenvalues import exportEigenvalues
 import scipy.sparse as sp
 
-def rSpaceSparseSolverGPU(params, PsiOut, V): #Real space solver GPU
+def rSpaceSparseSolverGPU(params, PsiOut, V, thr): #Real space solver GPU
 	#read input parameters from params & declare stuff
 
 	
@@ -179,7 +179,7 @@ def rSpaceSparseSolverGPU(params, PsiOut, V): #Real space solver GPU
         PsiOut.exportFull( params, -1, "wave")
         PsiOut.wave = np.reshape(PsiOut.wave, PsiOut.size)
         PsiOut.htod()
-        PsiOut.fft(0)
+        PsiOut.fft(thr, 0)
         PsiOut.dtoh()
         norm = PsiOut.norm()
         PsiOut.wave /= np.sqrt(norm)

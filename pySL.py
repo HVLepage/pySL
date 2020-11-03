@@ -29,6 +29,7 @@ from src.fft.kernelInds import kernelInds
 from src.input.potential import potential
 from src.export.makepath import makepath
 
+import reikna.cluda as cluda
 
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.5")
@@ -48,6 +49,8 @@ gpuinfo.print_gpu_info()
 
 # Specify C++ compiler
 ccbin = get_ccbin()
+api = cluda.cuda_api()
+thr = api.Thread.create()
 
 # Read CUDA kernel
 with open('./src/kernel.cu', 'r') as file:
@@ -81,10 +84,10 @@ makepath(params)
 V = potential(params) # Static potential
 dom = domain(params) # Simulation domain boundary conditions
 kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avoid calculating this every time
-psi = wavefunction(params,V) #create wavefunction as per parameters
+psi = wavefunction(params, thr, V) #create wavefunction as per parameters
 
 if (params["TDSESolver"] == "kSpace"):
-    phi = convWavefunction(psi, params)
+    phi = convWavefunction(psi, thr, params)
 
 dt =  np.float32(params["dt"]) # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
@@ -162,9 +165,9 @@ for i in range(0, TimeSteps):
         rSpaceSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
     elif (params["TDSESolver"] == "kSpace"):
         psi.wave_gpu.get(phi.wave_gpu)
-        phi.fft(1)
+        phi.fft(thr, 1)
         Axpy(phi.wave_gpu, V.pot_gpu,  N,  t, kerInds.inds_gpu, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2, Mass,  dXs,  Xa,  Ya, block=(blockSize,1,1), grid=(numBlocks,1))
-        phi.fft(0)
+        phi.fft(thr, 0)
         kSpaceSL(N, psi.wave_gpu, phi.wave_gpu, t, dt, Np, N1K,  dim,  value,  Sizes,  Mass,  dKs,  np.int32(i%2),  kerInds.inds_gpu, block=(blockSize,1,1), grid=(numBlocks,1))
         
         

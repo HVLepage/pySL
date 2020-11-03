@@ -19,10 +19,10 @@ from src.get_ccbin import get_ccbin
 
 class convWavefunction:
    
-    def fft(self, inv = 0):
+    def fft(self, thr, inv = 0):
         #Perform fft or ifft
         self.fftc(self.wave_gpu, self.wave_gpu, inv)
-        self.thr.synchronize()
+        thr.synchronize()
     
     #def convFFT(self, psi, V, mod, kernelInds, t, params,  N, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2, Mass,  dXs,  Xa,  Ya):
         #psi.wave_gpu.get(self.wave_gpu)
@@ -37,11 +37,11 @@ class convWavefunction:
         
         #
     
-    def __init__(self, psi, params):
+    def __init__(self, psi, thr, params):
          self.dV = psi.dV
          self.wave_gpu=gpuarray.to_gpu(psi.wave)
-         self.api = cluda.cuda_api()
-         self.thr = self.api.Thread.create()
+         #self.api = cluda.cuda_api()
+         #thr = self.api.Thread.create()
          fft_h = rfft.FFT(self.wave_gpu)
-         self.fftc=fft_h.compile(self.thr, compiler_options = ['-ccbin', get_ccbin()])
+         self.fftc=fft_h.compile(thr, compiler_options = ['-ccbin', get_ccbin()])
        

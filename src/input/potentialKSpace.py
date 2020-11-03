@@ -36,11 +36,11 @@ class potentialKSpace():
             self.filePot[i] = float(lines[i+3].split()[0])
         
     # Build the potential from analytically
-    def construct(self,params):
+    def construct(self,params, thr):
         
         ccbin = get_ccbin()
-        self.api = cluda.cuda_api()
-        self.thr = self.api.Thread.create()
+        #self.api = cluda.cuda_api()
+        #self.thr = api.Thread.create()
         
         Xa = params["Xa"]
         Xb = params["Xb"]
@@ -104,10 +104,10 @@ class potentialKSpace():
             V2P_gpu=gpuarray.to_gpu(V2P)
             
             fft_h2P = rfft.FFT(V2P_gpu)
-            self.fftc2P=fft_h2P.compile(self.thr, compiler_options = ['-ccbin', ccbin])
+            self.fftc2P=fft_h2P.compile(thr, compiler_options = ['-ccbin', ccbin])
             
             self.fftc2P(V2P_gpu, V2P_gpu, 0)
-            self.thr.synchronize()
+            thr.synchronize()
             V2P_gpu.get(V2P)
             V2P=V2P.ravel()
     		#for each pair, fill the potential with their corresponding 2-particle interaction potential
@@ -128,7 +128,7 @@ class potentialKSpace():
 				
                     indND = indexNDto1D.index(inds, self.sizesK, params)
                     ind2D = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
-                    self.pot[indND] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2D] #/ (Nx*Ny*Nz*Nx*Ny*Nz)#NORMALIZE HERE?
+                    self.pot[indND] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2D] / (Nx*Ny*Nz*Nx*Ny*Nz)#NORMALIZE HERE?
 
 
 
@@ -160,10 +160,10 @@ class potentialKSpace():
             V1P_gpu=gpuarray.to_gpu(V1P)
             
             fft_h1P = rfft.FFT(V1P_gpu)
-            self.fftc1P=fft_h1P.compile(self.thr, compiler_options = ['-ccbin', ccbin])
+            self.fftc1P=fft_h1P.compile(thr, compiler_options = ['-ccbin', ccbin])
             
             self.fftc1P(V1P_gpu, V1P_gpu, 0)
-            self.thr.synchronize()
+            thr.synchronize()
             V1P_gpu.get(V1P)
             V1P=V1P.ravel()
             
@@ -179,12 +179,12 @@ class potentialKSpace():
 			
                 indND = indexNDto1D.index(inds, self.sizesK, params)
                 ind1D = indexNDto1D.index(inds1P, params["Sizes"], params, 1)
-                self.pot[i] += V1P[int(ind1D)] #/ (Nx*Ny*Nz) #NORMALIZE?
+                self.pot[i] += V1P[int(ind1D)] / (Nx*Ny*Nz) #NORMALIZE?
 
 
             
     
-    def __init__(self,params, enlarged = False):        
+    def __init__(self,params, thr, enlarged = False):        
         
         KxCO = params["KxECO"]
         KyCO = params["KyECO"]
@@ -231,6 +231,6 @@ class potentialKSpace():
         for p in range(0,params["Np"]):
             self.sizesNP += self.sizes
             
-        self.construct(params)
+        self.construct(params, thr)
 
         self.htod()
