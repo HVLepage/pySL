@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import src.fft.index1DtoND as index1DtoND
 import src.fft.indexNDto1D as indexNDto1D
 import reikna.fft as rfft
@@ -7,13 +8,20 @@ from src.get_ccbin import get_ccbin
 
 class WavefunctionOut:
     
-    def dtoh(self):
-        self.wave_gpu.get(self.wave)
-    
-    # Copy wave function array from host to GPU device
-    def htod(self):
-        self.wave_gpu.set(self.wave)
+   
+    def exportFull(self, params, step, Filename="wave"):
+        n_zero = math.log10((float)(params["TimeSteps"] / params["PrintStep"]) + 1) + 1
+        count = int(step / params["PrintStep"])
+        index = str(count).zfill((int(n_zero)))
         
+        if (step >= 0):
+            OutputFileName = "./out/" + params["SimName"] + "/waves/wave_iteration_" + index + ".txt"
+        else:
+            OutputFileName = "./out/" + params["SimName"] + "/" + Filename + ".txt"
+	
+        with open(OutputFileName, 'w+') as OutputFile:
+            for x in np.nditer(self.wave):
+                OutputFile.write("{:e} {:e} \n".format(x.real, x.imag))     
             
     def norm(self):
         norm = sum(self.wave.real**2 + self.wave.imag**2) *self.dV

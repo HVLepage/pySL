@@ -23,6 +23,7 @@ from src.get_ccbin import get_ccbin
 from src.input.parameters import getparams
 from src.input.wavefunction import wavefunction
 from src.input.convWavefunction import convWavefunction
+from src.export.wavefunctionOut import wavefunctionOut
 from src.fft.domain import domain
 from src.fft.kernelInds import kernelInds
 
@@ -88,6 +89,7 @@ psi = wavefunction(params, thr, V) #create wavefunction as per parameters
 
 if (params["TDSESolver"] == "kSpace"):
     phi = convWavefunction(psi, thr, params)
+    psiOut = wavefunctionOut(psi, params, thr)
 
 dt =  np.float32(params["dt"]) # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
@@ -182,7 +184,11 @@ for i in range(0, TimeSteps):
       norm = psi.norm()
       n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
       print("Iteration:", str(i).zfill(int(n_zero)), "    Time Elapsed: %.2f"%t_print, "    NORM: %.8f"%norm)
-      psi.exportFull(params,i)
+      if (params["TDSESolver"] == "kSpace"):
+          psiOut.exportWaveKtoReal(psi, thr, params)
+          psiOut.exportFull(params, i)
+      else:
+          psi.exportFull(params,i)
 
 t2 = time.time()
 t_print = t2-t0
