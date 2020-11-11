@@ -3,6 +3,10 @@
 //#include <complex>
 //#include <cmath>
 
+
+/*******************************************************************************************************************************
+Multiply by potential, calculate time dependent potential part
+*******************************************************************************************************************************/
 __global__ void Axpy(pycuda::complex<float>* Psi, float* V, 
 					int N, float t, 
 					int* kernelInds, float Nm1, int Np, int N1, int dim, 
@@ -33,6 +37,24 @@ __global__ void Axpy(pycuda::complex<float>* Psi, float* V,
 		//Psi[index].y *= (V[index] + Vt) * Nm1;
 	}
 }
+
+/*******************************************************************************************************************************
+Trace out dimensions for export
+*******************************************************************************************************************************/
+
+__global__ void AddTrace(int n, pycuda::complex<float>* trace, pycuda::complex<float>* Psi, int p1, int d1, int p2, int d2, int N1, int Np, int dim, float diff, int* Sizes, int* kernelInds) {
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if (i < n) {
+		//int offset = i * params->dim * params->ParticlesNr; // this is an offset to know where to look in kernelInds for given i
+		//Index1DtoNDkernel(i, kernelInds, Sizes, params, offset);
+		int indp1 = ((i / (int)powf(N1, Np - p1 -2)) % (N1)) * dim;
+		int indp2 = ((i / (int)powf(N1, Np - p2 -2)) % (N1)) * dim;
+		int indTrace = kernelInds[indp2 + (d2 - 1) ] + Sizes[d2 - 1] * kernelInds[indp1 + (d1 - 1)];
+		trace[indTrace] += (powf(Psi[i].real(), 2.0) + powf(Psi[i].imag(), 2.0)) * diff;
+	}
+}
+
 
 
 /*******************************************************************************************************************************

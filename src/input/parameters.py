@@ -32,6 +32,7 @@ def getparams():
         "NormalizeWaveFunction": True, # Set to false if importing a partial wave function
 
         "ExportTrace": False, # Export a reduced wave function for speed and smaller disk usage
+        "Traces": [ [1,1,2,1] ],
 
         ################################################################
         # Particle properties

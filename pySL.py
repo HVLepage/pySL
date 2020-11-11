@@ -24,6 +24,7 @@ from src.input.parameters import getparams
 from src.input.wavefunction import wavefunction
 from src.input.convWavefunction import convWavefunction
 from src.export.wavefunctionOut import wavefunctionOut
+from src.export.exportTrace import exportTrace
 from src.fft.domain import domain
 from src.fft.kernelInds import kernelInds
 
@@ -181,10 +182,16 @@ for i in range(0, TimeSteps):
       
       if (params["TDSESolver"] == "kSpace"):
           psiOut.exportWaveKtoReal(psi, thr, params)
-          psiOut.exportFull(params, i)
+          if (params["ExportTrace"]):
+              exportTrace(psiOut.wave_gpu, params, i, True, kernelInds, mod)
+          else:
+              psiOut.exportFull(params, i)
           psi2[k] = psiOut.wave.real**2 + psiOut.wave.imag**2
       else:
-          psi.exportFull(params,i)
+          if (params["ExportTrace"]):
+               exportTrace(psi.wave_gpu, params, i, False, kernelInds, mod)
+          else:
+              psi.exportFull(params,i)
           psi2[k] = psi.wave.real**2 + psi.wave.imag**2
       
       k = k + 1
