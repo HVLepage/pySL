@@ -11,7 +11,8 @@
    1. [Input parameters](#input-parameters)
    2. [Parameter sweeps](#parameter-sweeps)
 4. [Authors](#authors)
-5. [Acknowledgments](#acknowledgments)
+5. [Publications](#publications)
+6. [Acknowledgments](#acknowledgments)
 
 
 ## About
@@ -70,6 +71,11 @@ Future work includes the ability to sweep over certain parameters to optimise ou
 * **C. H. W. Barnes**
 
 See the list of [contributors](https://github.com/HVLepage/pySL/contributors) who participated in this project.
+
+## Publications
+* [Entanglement generation via power-of-swap operations between dynamic electron-spin qubits (2020)](https://journals.aps.org/pra/abstract/10.1103/PhysRevA.96.052305)
+* [Sound-driven single-electron transfer in a circuit of coupled quantum rails (2019)](https://www.nature.com/articles/s41467-019-12514-w)
+* [Protocol for fermionic positive-operator-valued measures (2017)](https://journals.aps.org/pra/abstract/10.1103/PhysRevA.96.052305)
 
 
 ## Acknowledgments
