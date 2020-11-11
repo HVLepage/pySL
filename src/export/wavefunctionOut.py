@@ -6,7 +6,7 @@ import reikna.fft as rfft
 import pycuda.gpuarray as gpuarray
 from src.get_ccbin import get_ccbin
 
-class WavefunctionOut:
+class wavefunctionOut:
     
    
     def exportFull(self, params, step, Filename="wave"):
@@ -42,7 +42,7 @@ class WavefunctionOut:
         NzLim = int((Nz - 1) / 2)
 
         for i in range(0,  params["NOut"]):
-            self.wave[i] = 0.0
+            self.wave.flat[i] = 0.0
 		
 
         NLims = np.zeros(dim)
@@ -69,30 +69,36 @@ class WavefunctionOut:
 		
             indNP = indexNDto1D.index(indsR, self.SizesOutK, params)
 		#Divide by elements here?
-            self.wave[indNP] += PsiK.wave.flat[i]
+            self.wave.flat[int(indNP)] += PsiK.wave.flat[i]
 		
 
     	#Do the FFT
         #FFTAuxPsi(params, PsiReal, planConvND, false, false, true)
+        #self.wave = np.reshape(self.wave, self.size)
         self.wave_gpu.set(self.wave)
         
         self.fftc(self.wave_gpu, self.wave_gpu, 1)
         thr.synchronize()
         self.wave_gpu.get(self.wave)
+        #self.wave=self.wave.ravel()
         
-        def __init__(self, PsiK, params, thr):
-            self.NxOut = params["NxOutK"]	#Padded real wave function size
-            self.NyOut = params["NyOutK"]
-            self.NzOut = params["NzOutK"]
-            self.SizesOutK = params["SizesOutK"]
-            self.size=[]
-            for i in range(0,params["Np"]):
-                self.size += self.SizesOutK
+    def __init__(self, params, thr):
+        self.NxOut = params["NxOutK"]	#Padded real wave function size
+        self.NyOut = params["NyOutK"]
+        self.NzOut = params["NzOutK"]
+        #self.SizesOutK = params["SizesOutK"]
+        self.SizesOutK=[]
+        self.size=[]
+        for i in range(0,params["dim"]):
+            self.SizesOutK.append(int( params["SizesOutK"][i]))
+        for i in range(0,params["Np"]):
+            self.size += self.SizesOutK
             
-            self.wave = np.zeros(self.size, dtype = np.complex64)
-            self.wave_gpu=gpuarray.to_gpu(self.wave)
+        self.wave = np.zeros(self.size, dtype = np.complex64)
+        self.wave_gpu=gpuarray.to_gpu(self.wave)
+        #self.wave = self.wave.ravel()
             
-            fft_h = rfft.FFT(self.wave_gpu)
-            self.fftc=fft_h.compile(thr, compiler_options = ['-ccbin', get_ccbin()])
+        fft_h = rfft.FFT(self.wave_gpu)
+        self.fftc=fft_h.compile(thr, compiler_options = ['-ccbin', get_ccbin()])
             
-            self.exportWaveKtoReal(PsiK, thr, params)
+        #self.exportWaveKtoReal(PsiK, thr, params)

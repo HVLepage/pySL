@@ -87,15 +87,17 @@ dom = domain(params) # Simulation domain boundary conditions
 kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avoid calculating this every time
 psi = wavefunction(params, thr, V) #create wavefunction as per parameters
 
-if (params["TDSESolver"] == "kSpace"):
-    phi = convWavefunction(psi, thr, params)
-    psiOut = wavefunctionOut(psi, params, thr)
 
 dt =  np.float32(params["dt"]) # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
 PrintStep = params["PrintStep"]  # Used for saving the wave function
 
-psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N)) #output plot data
+if (params["TDSESolver"] == "kSpace"):
+    phi = convWavefunction(psi, thr, params)
+    psiOut = wavefunctionOut(params, thr)
+    psi2 = np.zeros((int(TimeSteps/PrintStep), params["NOut"]))
+else:
+    psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N)) #output plot data
 
 
 k = 0 # Keeps track of print step, will be made obsolete in future release
@@ -176,7 +178,15 @@ for i in range(0, TimeSteps):
     if (i % PrintStep) == 0:
       #Print to file / record to plot every printStep
       psi.dtoh()
-      psi2[k] = psi.wave.real**2 + psi.wave.imag**2
+      
+      if (params["TDSESolver"] == "kSpace"):
+          psiOut.exportWaveKtoReal(psi, thr, params)
+          psiOut.exportFull(params, i)
+          psi2[k] = psiOut.wave.real**2 + psiOut.wave.imag**2
+      else:
+          psi.exportFull(params,i)
+          psi2[k] = psi.wave.real**2 + psi.wave.imag**2
+      
       k = k + 1
       t2 = time.time()
       t_print = t2-t1
@@ -184,11 +194,6 @@ for i in range(0, TimeSteps):
       norm = psi.norm()
       n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
       print("Iteration:", str(i).zfill(int(n_zero)), "    Time Elapsed: %.2f"%t_print, "    NORM: %.8f"%norm)
-      if (params["TDSESolver"] == "kSpace"):
-          psiOut.exportWaveKtoReal(psi, thr, params)
-          psiOut.exportFull(params, i)
-      else:
-          psi.exportFull(params,i)
 
 t2 = time.time()
 t_print = t2-t0
