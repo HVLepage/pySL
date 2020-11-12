@@ -74,22 +74,24 @@ def kSpaceSolverGPU(params, PsiOut, thr): #Real space solver GPU
         j = int(k % PsiSize) # column index
         i = int(np.floor(np.float64(k) / np.float64(PsiSize))) #i is row index
 
-        index1DtoND.index(j, indsCol, SizesK, params)
-        index1DtoND.index(i, indsRow, SizesK, params)
-		# Calculate offset from diagonal
-        for l in range(0, dim * Np):
-            indsDiff[l] = indsCol[l] - indsRow[l] if  (indsCol[l] - indsRow[l]) >= 0 else (4 * KCOs[l % dim] + 1) + (indsCol[l] - indsRow[l]) #((indsCol[l] - indsRow[l]) >= 0 ? (indsCol[l] - indsRow[l]) : (4 * KCOs[l % dim] + 1) + (indsCol[l] - indsRow[l]))
+        if (j >= i):
+            index1DtoND.index(j, indsCol, SizesK, params)
+            index1DtoND.index(i, indsRow, SizesK, params)
+            #calulate offset from diagonal
+            for l in range(0, dim * Np):
+                indsDiff[l] = indsCol[l] - indsRow[l] if  (indsCol[l] - indsRow[l]) >= 0 else (4 * KCOs[l % dim] + 1) + (indsCol[l] - indsRow[l]) #((indsCol[l] - indsRow[l]) >= 0 ? (indsCol[l] - indsRow[l]) : (4 * KCOs[l % dim] + 1) + (indsCol[l] - indsRow[l]))
 		
         
-		#fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
-        H[j + PsiSize * i] = Vk.pot[indexNDto1D.index(indsDiff, SizesKE, params)]
+    		#fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
+            H[j + PsiSize * i] = Vk.pot[indexNDto1D.index(indsDiff, SizesKE, params)]
         
-        if (i == j): #on - diagonal element
-            for p in range(0,Np):
-                for d in range(0,dim):
-                    H[j + PsiSize * i] +=  (((indsRow[p * dim + d] - KCOs[d]) * dKs[d]) ** 2) / (2 * params["Mass"][p])
-        else:
-            H[j + PsiSize * i] = H[j + PsiSize * i].conjugate()
+        
+            if (i == j): #on - diagonal element
+                for p in range(0,Np):
+                    for d in range(0,dim):
+                        H[j + PsiSize * i] +=  (((indsRow[p * dim + d] - KCOs[d]) * dKs[d]) ** 2) / (2 * params["Mass"][p])
+            else:
+                H[i + PsiSize * j] = H[j + PsiSize * i].conjugate()
 			
 			
 		#on-site potential
