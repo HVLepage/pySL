@@ -16,7 +16,7 @@
 
 
 ## About
-The pySL package solves the Time Dependent Schrödinger Equation (TDSE) using CUDA for GPU-accerelation.
+The python Staggered Leapfrog (pySL) package solves the Time Dependent Schrödinger Equation (TDSE) using CUDA for GPU-accerelation.
 
 ## Installation
 TDSE3DCUDA works on modern NVIDIA GPU systems running Windows or Linux. This code was written using the CUDA 10.2 SDK. The current version has been tested on CUDA 10.0 and later. Earlier versions of CUDA are not supported.
