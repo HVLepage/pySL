@@ -127,13 +127,13 @@ def kSpaceSolverCPU(params, PsiOut, thr): #Real space solver GPU
                 indNP = indexNDto1D.index(indsR, params["Sizes"], params)
                 PsiTemp[int(indNP)] = eV[i,J]
                 
-            ToReal(params, PsiTemp, False)
+            #ToReal(params, PsiTemp, False)
             PsiTemp.reshape(PsiOut.size)
             PsiTemp_gpu.set(PsiTemp)
             fftc(PsiTemp_gpu, PsiTemp_gpu, 1)
             thr.synchronize()
             PsiTemp_gpu.get(PsiTemp)
-            
+            ToReal(params, PsiTemp, False)
             
             
             PsiOut.wave += (params["InputStates"][2 * J] + 1j * params["InputStates"][2 * J + 1]) * PsiTemp.ravel() 

@@ -5,6 +5,7 @@ import src.fft.indexNDto1D as indexNDto1D
 import reikna.fft as rfft
 import pycuda.gpuarray as gpuarray
 from src.get_ccbin import get_ccbin
+from src.fft.fftAuxPsi import ToReal
 
 class wavefunctionOut:
     
@@ -80,6 +81,7 @@ class wavefunctionOut:
         self.fftc(self.wave_gpu, self.wave_gpu, 1)
         thr.synchronize()
         self.wave_gpu.get(self.wave)
+        ToReal(params, self.wave, True)
         #self.wave=self.wave.ravel()
         
     def __init__(self, params, thr):

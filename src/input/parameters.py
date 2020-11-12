@@ -15,13 +15,13 @@ def getparams():
         "Np": 1, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
-        "TDSESolver": "kSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
         "Eignesolver": "GPUkSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
         # The first two elements are the real and imaginary components of the ground state. 
         # The second two elements are the real and imaginary components of the first excited state. 
-        "InputStates": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "InputStates": [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 
         # Import external files (if set to sal)
         "ImportPotential": False, # If set to false, the potential will be created functionally in fftauxV.py
@@ -69,7 +69,7 @@ def getparams():
         "dt": 0.0002, # duration of a single time step in [ps]
         "StartTime": 0.0,
         "TimeSteps": 20000,
-        "PrintStep": 1000, # How often the wave function is saved to a file
+        "PrintStep": 10000, # How often the wave function is saved to a file
 
         ################################################################
         # Simulation domain
@@ -121,7 +121,7 @@ def getparams():
         ################################################################
 
         # Potential variables
-        "w2X": 0.000005,
+        "w2X": 0.000001,
         "w2Y": 0.0,
         "ATB1": 0.0,
         "s2TB1": 0.0,
