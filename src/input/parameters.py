@@ -6,7 +6,7 @@ def getparams():
     
     params = {
         
-        "SimName": "CUDA_1D_Double_Slit_Experiment",
+        "SimName": "CUDA_2DTest",
 
         ################################################################
         # FLAGS 
@@ -15,8 +15,8 @@ def getparams():
         "Np": 1, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
-        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
-        "Eignesolver": "CPUkSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
+        "TDSESolver": "kSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
         # The first two elements are the real and imaginary components of the ground state. 
@@ -78,27 +78,27 @@ def getparams():
         # Lattice boundaries [nm]
         "Xa": -200.0,
         "Xb": 200.0,
-        "Ya": 0.0,
-        "Yb": 0.0,
+        "Ya": -100.0,
+        "Yb": 100.0,
 
         "Za": 0.0,
         "Zb": 0.0,
 
         # Number of lattice sites
-        "Nx": 81,
-        "Ny": 1,
+        "Nx": 61,
+        "Ny": 61,
         "Nz": 1,
 
-        "NxOutK": 81,
-        "NyOutK": 1,
+        "NxOutK": 61,
+        "NyOutK": 61,
         "NzOutK": 1,
 
         # Momentum Solver Inputs
-        "KxECO": 40,
-        "KyECO": 0,
+        "KxECO": 20,
+        "KyECO": 20,
         "KzECO": 0,
-        "KxKCO": 40,
-        "KyKCO": 0,
+        "KxKCO": 20,
+        "KyKCO": 20,
         "KzKCO": 0,
 
 
@@ -122,7 +122,7 @@ def getparams():
 
         # Potential variables
         "w2X": 0.000001,
-        "w2Y": 0.0,
+        "w2Y": 0.000005,
         "ATB1": 0.0,
         "s2TB1": 0.0,
         "ATB2": 0.0,

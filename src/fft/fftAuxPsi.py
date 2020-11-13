@@ -5,11 +5,11 @@ def ThetaOfMax(psi, L):
     maxindex = 0
     current = 0.0
     for i in range(0,L):
-        current = (psi[i].real ** 2) + (psi[i].imag ** 2)
+        current = (psi.flat[i].real ** 2) + (psi.flat[i].imag ** 2)
         if (current > maxi):
             maxi = current
             maxindex = i
-    return math.atan2(psi[maxindex].imag, psi[maxindex].real)
+    return math.atan2(psi.flat[maxindex].imag, psi.flat[maxindex].real)
 
 
 def ToReal(params, psi, OutK):
@@ -39,7 +39,7 @@ def ToReal(params, psi, OutK):
 
 		theta = ThetaOfMax(psi, Nx*Ny*Nz ** params["Np"])
 		for i in range(0, (Nx*Ny*Nz ** params["Np"] )):
-			psiR = psi[i].real
-			psiI = psi[i].imag
-			psi[i] = psiR * math.cos(theta) + psiI * math.sin(theta) + 1j*(psiI * math.cos(theta) - psiR * math.sin(theta))
+			psiR = psi.flat[i].real
+			psiI = psi.flat[i].imag
+			psi.flat[i] = psiR * math.cos(theta) + psiI * math.sin(theta) + 1j*(psiI * math.cos(theta) - psiR * math.sin(theta))
 

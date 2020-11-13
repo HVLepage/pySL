@@ -119,6 +119,7 @@ def kSpaceSolverGPU(params, PsiOut, thr): #Real space solver GPU
     #thr = api.Thread.create()
     PsiTemp = np.zeros(PsiOut.size, dtype = np.complex64)
     PsiTemp_gpu = gpuarray.to_gpu(PsiTemp)
+    #PsiTemp=PsiTemp.ravel()
     
     fft_h = rfft.FFT(PsiTemp_gpu)
     fftc=fft_h.compile(thr, compiler_options = ['-ccbin', ccbin])
@@ -137,10 +138,10 @@ def kSpaceSolverGPU(params, PsiOut, thr): #Real space solver GPU
                     indsR[j] = indsK[j] + params["Sizes"][j % dim] - KCOs[j % dim] if indsK[j] < KCOs[j % dim] else indsK[j] - KCOs[j % dim] #indsR[j] = indsK[j] < KCOs[j % params->dim] ? indsK[j] + params->Sizes[j % params->dim] - KCOs[j % params->dim] : indsK[j] - KCOs[j % params->dim];
             
                 indNP = indexNDto1D.index(indsR, params["Sizes"], params)
-                PsiTemp[int(indNP)] = H[i,J]
+                PsiTemp.flat[int(indNP)] = H[i,J]
                 
             #ToReal(params, PsiTemp, False)
-            PsiTemp.reshape(PsiOut.size)
+            #PsiTemp.reshape(PsiOut.size)
             PsiTemp_gpu.set(PsiTemp)
             fftc(PsiTemp_gpu, PsiTemp_gpu, 1)
             thr.synchronize()
@@ -148,8 +149,10 @@ def kSpaceSolverGPU(params, PsiOut, thr): #Real space solver GPU
             ToReal(params, PsiTemp, False)
             
             
-            
-            PsiOut.wave += (params["InputStates"][2 * J] + 1j * params["InputStates"][2 * J + 1]) * PsiTemp.ravel() 
+            if (params["TDSESolver"] == "kSpace"):
+                PsiOut.wave += (params["InputStates"][2 * J] + 1j * params["InputStates"][2 * J + 1]) * PsiTemp
+            else:
+                PsiOut.wave += (params["InputStates"][2 * J] + 1j * params["InputStates"][2 * J + 1]) * PsiTemp.ravel() 
 
 	
 					

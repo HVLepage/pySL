@@ -186,13 +186,13 @@ for i in range(0, TimeSteps):
               exportTrace(psiOut.wave_gpu, params, i, True, kernelInds, mod)
           else:
               psiOut.exportFull(params, i)
-          psi2[k] = psiOut.wave.real**2 + psiOut.wave.imag**2
+          #psi2[k] = psiOut.wave.real**2 + psiOut.wave.imag**2
       else:
           if (params["ExportTrace"]):
                exportTrace(psi.wave_gpu, params, i, False, kernelInds, mod)
           else:
               psi.exportFull(params,i)
-          psi2[k] = psi.wave.real**2 + psi.wave.imag**2
+          #psi2[k] = psi.wave.real**2 + psi.wave.imag**2
       
       k = k + 1
       t2 = time.time()
@@ -221,12 +221,12 @@ psi.dtoh()
 
 plt.rcParams.update({'font.size': 10})
 # plt.rc('font',**{'family':'serif','serif':['Times']})
-plt.imshow(np.transpose(psi2), extent=[0,100,-200,200], aspect=0.1, cmap='inferno', vmin=0, vmax=0.01)
+#plt.imshow(np.transpose(psi2), extent=[0,100,-200,200], aspect=0.1, cmap='inferno', vmin=0, vmax=0.01)
 plt.xlabel('x (nm)')
 plt.ylabel('y (nm)')
 # plt.savefig('DoubleSlit.png', dpi=600)
 # plt.savefig("graph.pdf")
-plt.show()
+#plt.show()
 
 ################################################################################################################################
 # Trace Memory Management

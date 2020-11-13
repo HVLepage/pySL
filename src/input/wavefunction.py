@@ -75,7 +75,7 @@ class wavefunction:
         
     # Calculate norm, used at every print step to check simulation convergence
     def norm(self):
-        norm = sum(self.wave.real**2 + self.wave.imag**2) *self.dV
+        norm = sum(self.wave.ravel().real**2 + self.wave.ravel().imag**2) *self.dV
         return norm
 
     #write full wavefunction to file
@@ -130,6 +130,7 @@ class wavefunction:
         if (params["TDSESolver"] == "kSpace"):
             self.wave = np.reshape(self.wave, self.size)
             self.wave_gpu=gpuarray.to_gpu(self.wave)
+            #self.wave = self.wave.ravel()
             #self.api = cluda.cuda_api()
             #self.thr = api.Thread.create()
             fft_h = rfft.FFT(self.wave_gpu)
@@ -142,14 +143,7 @@ class wavefunction:
         if (not params["ImportWavefunction"]):
             self.solve(params, thr, V)
         else:
-            #self.readFromFile(params) #read from file
-            
-            # Define initial wave function
-            w = 0.1                           # Initial wave packet spread
-            xoffset = 40                      # Wave packet distance from center
-            x = np.linspace(params["Xa"], params["Xb"], params["Nx"])  # Define the simulation domain
-            
-            self.wave = (2**(0.5))*((w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2))/2  # Initial wave function
+            self.readFromFile(params) #read from file
         
         
         self.htod()
