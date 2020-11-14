@@ -6,7 +6,7 @@ def getparams():
     
     params = {
         
-        "SimName": "CUDA_2DTest",
+        "SimName": "Double_slit_experiment_1D",
 
         ################################################################
         # FLAGS 
@@ -15,7 +15,7 @@ def getparams():
         "Np": 1, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
-        "TDSESolver": "kSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
         "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
@@ -27,8 +27,8 @@ def getparams():
         "ImportPotential": False, # If set to false, the potential will be created functionally in fftauxV.py
         "PotentialFileName": "potential.txt",
 
-        "ImportWavefunction": False, # If set to false, the wave function will be solved using the specified eigensolver
-        "WaveFileName": "wave.txt",
+        "ImportWavefunction": True, # If set to false, the wave function will be solved using the specified eigensolver
+        "WaveFileName": "wave_DSE1D.txt",
         "NormalizeWaveFunction": True, # Set to false if importing a partial wave function
 
         "ExportTrace": False, # Export a reduced wave function for speed and smaller disk usage
@@ -66,10 +66,10 @@ def getparams():
         ################################################################
 
         
-        "dt": 0.0002, # duration of a single time step in [ps]
+        "dt": 0.0005, # duration of a single time step in [ps]
         "StartTime": 0.0,
-        "TimeSteps": 20000,
-        "PrintStep": 10000, # How often the wave function is saved to a file
+        "TimeSteps": 10000,
+        "PrintStep": 10, # How often the wave function is saved to a file
 
         ################################################################
         # Simulation domain
@@ -78,15 +78,15 @@ def getparams():
         # Lattice boundaries [nm]
         "Xa": -200.0,
         "Xb": 200.0,
-        "Ya": -100.0,
-        "Yb": 100.0,
+        "Ya": 0.0,
+        "Yb": 0.0,
 
         "Za": 0.0,
         "Zb": 0.0,
 
         # Number of lattice sites
-        "Nx": 61,
-        "Ny": 61,
+        "Nx": 801,
+        "Ny": 1,
         "Nz": 1,
 
         "NxOutK": 61,
@@ -121,8 +121,8 @@ def getparams():
         ################################################################
 
         # Potential variables
-        "w2X": 0.000001,
-        "w2Y": 0.000005,
+        "w2X": 0.0,
+        "w2Y": 0.0,
         "ATB1": 0.0,
         "s2TB1": 0.0,
         "ATB2": 0.0,
