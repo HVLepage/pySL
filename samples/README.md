@@ -24,7 +24,7 @@ This directory also contains a copy of `InputParameters.txt` and the initial wav
 The function `animate1D.py` can be called to create a simple animation of the real and imaginary components of the ground state wave function as they evolve in time.
 
 <p align="center">
-  <img src="https://www.dropbox.com/s/b15fv2c4f9d7x28/animation.gif?dl=0">
+  <img src="https://www.dropbox.com/s/b15fv2c4f9d7x28/animation.gif?raw=1">
 </p>
 
 To observe a different initial wave function, the contribution of the first few eigenstates can be adjusted in `parameters.py`. Modifying the `InputStates` variable to the following
@@ -34,7 +34,7 @@ InputStates = 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 creates an equal superposition of the ground state and the first excited state. The resulting oscillations can be seen in the animation below.
 
 <p align="center">
-  <img src="https://www.dropbox.com/s/dpt3xrcdn39ooxz/animation1.gif?dl=0">
+  <img src="https://www.dropbox.com/s/dpt3xrcdn39ooxz/animation1.gif?raw=1">
 </p>
 
 As defined in the input parameters, this simulation spans 400 picoseconds. Given the two first eigenvalues, we can calculate the period of oscillation of the wave function as <img src="https://render.githubusercontent.com/render/math?math=T = 2 \pi / (\lambda_1-\lambda_0)">. In natural units, the first five eigenvalues of this problem are calculated to be:
