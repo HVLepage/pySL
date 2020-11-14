@@ -5,6 +5,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 import tracemalloc
+import humanize
 
 # Set target CUDA device. Must be an integer. Currently no error checking.
 if (len(sys.argv) > 1):
@@ -236,12 +237,13 @@ plt.ylabel('y (nm)')
 # Trace Memory Management
 ################################################################################################################################
 
-print("\n----------------------------------------------------------------")
-print("Total Memory Usage")
-print("----------------------------------------------------------------")
-
 snapshot = tracemalloc.take_snapshot()
 top_stats = snapshot.statistics('lineno')
+total = sum(stat.size for stat in top_stats)
+
+print("\n----------------------------------------------------------------")
+print("Total Memory Usage: %s"% humanize.naturalsize(total))
+print("----------------------------------------------------------------")
 
 print("[ Top 10 ]")
 for stat in top_stats[:10]:

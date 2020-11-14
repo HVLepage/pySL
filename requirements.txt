@@ -7,7 +7,7 @@ pycuda
 
 matplotlib
 scikit-cuda
-
+humanize
 
 reikna
 
