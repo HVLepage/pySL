@@ -64,3 +64,18 @@ This gives a period of oscillation of approximately T = 149ps.
 
 **Memory usage (with plots):** 14.9 MB
 
+
+In this example, an external wave function is imported. The file `wave_DSE1D.txt` must be located in the `/input/` directory.
+
+This sample will create an infinite potential well in the x dimension of length 400nm. The potential is set to zero inside the well and infinity outside the well.
+
+A free electron is placed in two Gaussian wave packets located at +/- 40nm and the time evolution is calculated. This calculation simulates a single electron that goes through two slits of an interferometer.
+
+### Analysis
+Once the calculation is finished, a directory called `Double_slit_experiment_1D` will be created and contain snapshots of the wave function at different time steps.
+
+This directory also contains a copy of `InputParameters.txt` and the initial wave function for future reference.
+
+The function `plot1Dtrace.py` can be called to create a trace plot of the wave function.
+
+![1D - Double Slit Experiment](https://www.dropbox.com/s/91orqvwukzmbvqw/trace1D.png?raw=1)
