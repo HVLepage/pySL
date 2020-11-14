@@ -132,3 +132,4 @@ dmypy.json
 # Don't upload simulation inputs or outputs to GitHub
 *.txt
 !requirements.txt
+*.mp4
