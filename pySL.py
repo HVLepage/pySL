@@ -37,6 +37,7 @@ import reikna.cluda as cluda
 
 # Built-in plotting
 from src.plot.animate1D import animate1D
+from src.plot.plot1Dtrace import plot1Dtrace
 
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.5")
@@ -225,6 +226,8 @@ psi.dtoh()
 # Animate the 1D wave function as save as an mp4 file. Used in the Particle_in_a_box_1D example
 # animate1D(params)
 
+# Trace a 1D particle with the x axis as time and the y axis as the spatial dimension.
+plot1Dtrace(params)
 
 ################################################################################################################################
 # Trace Memory Management
