@@ -1,12 +1,8 @@
 # Samples
 
 ## Table of Contents
-- [Samples](#samples)
-  - [Table of Contents](#table-of-contents)
-  - [About](#about)
-  - [Particle in a box](#particle-in-a-box)
-    - [Output](#output)
-  - [Double slit experiment](#double-slit-experiment)
+1. [Particle in a box](#particle-in-a-box)
+2. [Double slit experiment](#double-slit-experiment)
 
 ## About
 To use these samples, rename the input file to `parameters.py` and place in `src/input/parameters.py`.
