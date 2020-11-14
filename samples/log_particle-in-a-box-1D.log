@@ -1,0 +1,280 @@
+[gpu-s6@gpu-s6 pySL]$ python3 pySL.py 
+/home/gpu-s6/.local/lib/python3.7/site-packages/skcuda/cublas.py:284: UserWarning: creating CUBLAS context to get version number
+  warnings.warn('creating CUBLAS context to get version number')
+
+----------------------------------------------------------------
+pySL version 0.0.5
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+Python version: 3.7.6 (default, Jan 30 2020, 10:29:04) 
+[GCC 9.2.1 20190827 (Red Hat 9.2.1-1)]
+pyCUDA version: 2020.1
+CUDA runtime version: 10.2.0
+----------------------------------------------------------------
+CUDA capable device count: 7
+Target CUDA device: 0
+
+===Attributes for device 0 : GeForce RTX 2080 Ti
+   Compute capability: 7.5
+   Total global memory: 10.8GB
+
+===Attributes for device 1 : GeForce RTX 2080 Ti
+   Compute capability: 7.5
+   Total global memory: 10.8GB
+
+===Attributes for device 2 : GeForce RTX 2080 Ti
+   Compute capability: 7.5
+   Total global memory: 10.8GB
+
+===Attributes for device 3 : GeForce RTX 2080 Ti
+   Compute capability: 7.5
+   Total global memory: 10.8GB
+
+===Attributes for device 4 : GeForce RTX 2080 Ti
+   Compute capability: 7.5
+   Total global memory: 10.8GB
+
+===Attributes for device 5 : GeForce RTX 2080 Ti
+   Compute capability: 7.5
+   Total global memory: 10.8GB
+
+===Attributes for device 6 : GeForce RTX 2080 Ti
+   Compute capability: 7.5
+   Total global memory: 10.8GB
+
+----------------------------------------------------------------
+Solving eigenvalue problem using: GPUrSpace
+----------------------------------------------------------------
+
+Eigenvalues:
+
+0.000120901495
+0.0004836854
+0.0010882268
+0.0019343778
+0.0030219324
+
+Eigensolver completed in 0.3817 seconds
+
+----------------------------------------------------------------
+GPU-accelerated simulation using: rSpace
+Simulation Name: Particle_in_a_box_1D
+----------------------------------------------------------------
+Iteration: 000000     Time Elapsed: 0.00     NORM: 0.99999995
+Iteration: 001000     Time Elapsed: 0.04     NORM: 0.99986861
+Iteration: 002000     Time Elapsed: 0.04     NORM: 0.99946585
+Iteration: 003000     Time Elapsed: 0.04     NORM: 0.99880096
+Iteration: 004000     Time Elapsed: 0.04     NORM: 0.99788399
+Iteration: 005000     Time Elapsed: 0.04     NORM: 0.99672532
+Iteration: 006000     Time Elapsed: 0.04     NORM: 0.99534250
+Iteration: 007000     Time Elapsed: 0.04     NORM: 0.99374740
+Iteration: 008000     Time Elapsed: 0.04     NORM: 0.99195805
+Iteration: 009000     Time Elapsed: 0.04     NORM: 0.99000745
+Iteration: 010000     Time Elapsed: 0.04     NORM: 0.98791767
+Iteration: 011000     Time Elapsed: 0.04     NORM: 0.98571046
+Iteration: 012000     Time Elapsed: 0.04     NORM: 0.98340154
+Iteration: 013000     Time Elapsed: 0.04     NORM: 0.98102398
+Iteration: 014000     Time Elapsed: 0.04     NORM: 0.97859884
+Iteration: 015000     Time Elapsed: 0.04     NORM: 0.97615926
+Iteration: 016000     Time Elapsed: 0.04     NORM: 0.97374339
+Iteration: 017000     Time Elapsed: 0.04     NORM: 0.97138286
+Iteration: 018000     Time Elapsed: 0.04     NORM: 0.96909616
+Iteration: 019000     Time Elapsed: 0.04     NORM: 0.96691044
+Iteration: 020000     Time Elapsed: 0.04     NORM: 0.96486291
+Iteration: 021000     Time Elapsed: 0.04     NORM: 0.96297234
+Iteration: 022000     Time Elapsed: 0.04     NORM: 0.96126826
+Iteration: 023000     Time Elapsed: 0.04     NORM: 0.95976769
+Iteration: 024000     Time Elapsed: 0.04     NORM: 0.95848233
+Iteration: 025000     Time Elapsed: 0.04     NORM: 0.95740827
+Iteration: 026000     Time Elapsed: 0.04     NORM: 0.95656025
+Iteration: 027000     Time Elapsed: 0.04     NORM: 0.95594595
+Iteration: 028000     Time Elapsed: 0.04     NORM: 0.95556789
+Iteration: 029000     Time Elapsed: 0.04     NORM: 0.95542562
+Iteration: 030000     Time Elapsed: 0.04     NORM: 0.95551709
+Iteration: 031000     Time Elapsed: 0.04     NORM: 0.95583435
+Iteration: 032000     Time Elapsed: 0.04     NORM: 0.95636120
+Iteration: 033000     Time Elapsed: 0.04     NORM: 0.95710061
+Iteration: 034000     Time Elapsed: 0.04     NORM: 0.95804304
+Iteration: 035000     Time Elapsed: 0.04     NORM: 0.95916958
+Iteration: 036000     Time Elapsed: 0.04     NORM: 0.96045183
+Iteration: 037000     Time Elapsed: 0.04     NORM: 0.96187237
+Iteration: 038000     Time Elapsed: 0.04     NORM: 0.96339665
+Iteration: 039000     Time Elapsed: 0.04     NORM: 0.96499779
+Iteration: 040000     Time Elapsed: 0.04     NORM: 0.96665868
+Iteration: 041000     Time Elapsed: 0.04     NORM: 0.96834870
+Iteration: 042000     Time Elapsed: 0.04     NORM: 0.97003312
+Iteration: 043000     Time Elapsed: 0.04     NORM: 0.97167849
+Iteration: 044000     Time Elapsed: 0.04     NORM: 0.97326607
+Iteration: 045000     Time Elapsed: 0.04     NORM: 0.97476472
+Iteration: 046000     Time Elapsed: 0.04     NORM: 0.97615911
+Iteration: 047000     Time Elapsed: 0.04     NORM: 0.97742973
+Iteration: 048000     Time Elapsed: 0.04     NORM: 0.97855765
+Iteration: 049000     Time Elapsed: 0.04     NORM: 0.97950962
+Iteration: 050000     Time Elapsed: 0.04     NORM: 0.98026543
+Iteration: 051000     Time Elapsed: 0.04     NORM: 0.98081746
+Iteration: 052000     Time Elapsed: 0.04     NORM: 0.98114463
+Iteration: 053000     Time Elapsed: 0.04     NORM: 0.98123659
+Iteration: 054000     Time Elapsed: 0.04     NORM: 0.98108395
+Iteration: 055000     Time Elapsed: 0.04     NORM: 0.98067622
+Iteration: 056000     Time Elapsed: 0.04     NORM: 0.97999808
+Iteration: 057000     Time Elapsed: 0.04     NORM: 0.97906544
+Iteration: 058000     Time Elapsed: 0.04     NORM: 0.97788754
+Iteration: 059000     Time Elapsed: 0.04     NORM: 0.97647437
+Iteration: 060000     Time Elapsed: 0.04     NORM: 0.97483846
+Iteration: 061000     Time Elapsed: 0.04     NORM: 0.97299527
+Iteration: 062000     Time Elapsed: 0.04     NORM: 0.97096041
+Iteration: 063000     Time Elapsed: 0.04     NORM: 0.96874856
+Iteration: 064000     Time Elapsed: 0.04     NORM: 0.96639374
+Iteration: 065000     Time Elapsed: 0.04     NORM: 0.96392020
+Iteration: 066000     Time Elapsed: 0.04     NORM: 0.96134975
+Iteration: 067000     Time Elapsed: 0.04     NORM: 0.95869721
+Iteration: 068000     Time Elapsed: 0.04     NORM: 0.95599592
+Iteration: 069000     Time Elapsed: 0.04     NORM: 0.95326815
+Iteration: 070000     Time Elapsed: 0.04     NORM: 0.95054445
+Iteration: 071000     Time Elapsed: 0.04     NORM: 0.94786563
+Iteration: 072000     Time Elapsed: 0.04     NORM: 0.94526143
+Iteration: 073000     Time Elapsed: 0.04     NORM: 0.94275304
+Iteration: 074000     Time Elapsed: 0.04     NORM: 0.94036732
+Iteration: 075000     Time Elapsed: 0.04     NORM: 0.93814271
+Iteration: 076000     Time Elapsed: 0.04     NORM: 0.93609648
+Iteration: 077000     Time Elapsed: 0.04     NORM: 0.93425782
+Iteration: 078000     Time Elapsed: 0.04     NORM: 0.93264465
+Iteration: 079000     Time Elapsed: 0.04     NORM: 0.93126916
+Iteration: 080000     Time Elapsed: 0.04     NORM: 0.93012886
+Iteration: 081000     Time Elapsed: 0.04     NORM: 0.92923513
+Iteration: 082000     Time Elapsed: 0.04     NORM: 0.92859948
+Iteration: 083000     Time Elapsed: 0.04     NORM: 0.92822250
+Iteration: 084000     Time Elapsed: 0.04     NORM: 0.92810495
+Iteration: 085000     Time Elapsed: 0.04     NORM: 0.92824326
+Iteration: 086000     Time Elapsed: 0.04     NORM: 0.92863166
+Iteration: 087000     Time Elapsed: 0.04     NORM: 0.92925052
+Iteration: 088000     Time Elapsed: 0.04     NORM: 0.93010415
+Iteration: 089000     Time Elapsed: 0.04     NORM: 0.93118286
+Iteration: 090000     Time Elapsed: 0.04     NORM: 0.93246620
+Iteration: 091000     Time Elapsed: 0.04     NORM: 0.93392829
+Iteration: 092000     Time Elapsed: 0.04     NORM: 0.93554945
+Iteration: 093000     Time Elapsed: 0.04     NORM: 0.93729741
+Iteration: 094000     Time Elapsed: 0.04     NORM: 0.93914186
+Iteration: 095000     Time Elapsed: 0.04     NORM: 0.94106720
+Iteration: 096000     Time Elapsed: 0.04     NORM: 0.94304021
+Iteration: 097000     Time Elapsed: 0.04     NORM: 0.94502956
+Iteration: 098000     Time Elapsed: 0.04     NORM: 0.94699864
+Iteration: 099000     Time Elapsed: 0.04     NORM: 0.94892882
+Iteration: 100000     Time Elapsed: 0.04     NORM: 0.95079130
+Iteration: 101000     Time Elapsed: 0.04     NORM: 0.95256787
+Iteration: 102000     Time Elapsed: 0.04     NORM: 0.95424136
+Iteration: 103000     Time Elapsed: 0.04     NORM: 0.95579069
+Iteration: 104000     Time Elapsed: 0.04     NORM: 0.95718288
+Iteration: 105000     Time Elapsed: 0.04     NORM: 0.95839646
+Iteration: 106000     Time Elapsed: 0.04     NORM: 0.95942521
+Iteration: 107000     Time Elapsed: 0.04     NORM: 0.96024611
+Iteration: 108000     Time Elapsed: 0.04     NORM: 0.96085002
+Iteration: 109000     Time Elapsed: 0.04     NORM: 0.96122556
+Iteration: 110000     Time Elapsed: 0.04     NORM: 0.96136345
+Iteration: 111000     Time Elapsed: 0.04     NORM: 0.96124880
+Iteration: 112000     Time Elapsed: 0.04     NORM: 0.96089373
+Iteration: 113000     Time Elapsed: 0.04     NORM: 0.96030859
+Iteration: 114000     Time Elapsed: 0.04     NORM: 0.95950204
+Iteration: 115000     Time Elapsed: 0.04     NORM: 0.95848568
+Iteration: 116000     Time Elapsed: 0.04     NORM: 0.95727478
+Iteration: 117000     Time Elapsed: 0.04     NORM: 0.95588550
+Iteration: 118000     Time Elapsed: 0.04     NORM: 0.95433095
+Iteration: 119000     Time Elapsed: 0.04     NORM: 0.95264564
+Iteration: 120000     Time Elapsed: 0.04     NORM: 0.95085349
+Iteration: 121000     Time Elapsed: 0.04     NORM: 0.94897426
+Iteration: 122000     Time Elapsed: 0.04     NORM: 0.94702242
+Iteration: 123000     Time Elapsed: 0.04     NORM: 0.94503034
+Iteration: 124000     Time Elapsed: 0.04     NORM: 0.94302055
+Iteration: 125000     Time Elapsed: 0.04     NORM: 0.94102246
+Iteration: 126000     Time Elapsed: 0.04     NORM: 0.93907756
+Iteration: 127000     Time Elapsed: 0.04     NORM: 0.93721424
+Iteration: 128000     Time Elapsed: 0.04     NORM: 0.93545515
+Iteration: 129000     Time Elapsed: 0.04     NORM: 0.93382509
+Iteration: 130000     Time Elapsed: 0.04     NORM: 0.93236068
+Iteration: 131000     Time Elapsed: 0.04     NORM: 0.93108013
+Iteration: 132000     Time Elapsed: 0.04     NORM: 0.93001184
+Iteration: 133000     Time Elapsed: 0.04     NORM: 0.92917257
+Iteration: 134000     Time Elapsed: 0.04     NORM: 0.92857363
+Iteration: 135000     Time Elapsed: 0.04     NORM: 0.92821317
+Iteration: 136000     Time Elapsed: 0.04     NORM: 0.92810033
+Iteration: 137000     Time Elapsed: 0.04     NORM: 0.92824726
+Iteration: 138000     Time Elapsed: 0.04     NORM: 0.92865467
+Iteration: 139000     Time Elapsed: 0.04     NORM: 0.92932062
+Iteration: 140000     Time Elapsed: 0.04     NORM: 0.93024045
+Iteration: 141000     Time Elapsed: 0.04     NORM: 0.93140818
+Iteration: 142000     Time Elapsed: 0.04     NORM: 0.93280317
+Iteration: 143000     Time Elapsed: 0.04     NORM: 0.93442894
+Iteration: 144000     Time Elapsed: 0.04     NORM: 0.93627617
+Iteration: 145000     Time Elapsed: 0.04     NORM: 0.93832331
+Iteration: 146000     Time Elapsed: 0.04     NORM: 0.94054561
+Iteration: 147000     Time Elapsed: 0.04     NORM: 0.94292056
+Iteration: 148000     Time Elapsed: 0.04     NORM: 0.94541562
+Iteration: 149000     Time Elapsed: 0.04     NORM: 0.94800002
+Iteration: 150000     Time Elapsed: 0.04     NORM: 0.95065595
+Iteration: 151000     Time Elapsed: 0.04     NORM: 0.95335246
+Iteration: 152000     Time Elapsed: 0.04     NORM: 0.95605767
+Iteration: 153000     Time Elapsed: 0.04     NORM: 0.95873298
+Iteration: 154000     Time Elapsed: 0.04     NORM: 0.96135920
+Iteration: 155000     Time Elapsed: 0.04     NORM: 0.96391056
+Iteration: 156000     Time Elapsed: 0.04     NORM: 0.96636461
+Iteration: 157000     Time Elapsed: 0.04     NORM: 0.96870506
+Iteration: 158000     Time Elapsed: 0.04     NORM: 0.97090925
+Iteration: 159000     Time Elapsed: 0.04     NORM: 0.97294390
+Iteration: 160000     Time Elapsed: 0.04     NORM: 0.97478724
+Iteration: 161000     Time Elapsed: 0.04     NORM: 0.97643231
+Iteration: 162000     Time Elapsed: 0.04     NORM: 0.97785583
+Iteration: 163000     Time Elapsed: 0.04     NORM: 0.97904846
+Iteration: 164000     Time Elapsed: 0.04     NORM: 0.97999838
+Iteration: 165000     Time Elapsed: 0.04     NORM: 0.98069472
+Iteration: 166000     Time Elapsed: 0.04     NORM: 0.98112378
+Iteration: 167000     Time Elapsed: 0.04     NORM: 0.98129264
+Iteration: 168000     Time Elapsed: 0.04     NORM: 0.98121495
+Iteration: 169000     Time Elapsed: 0.04     NORM: 0.98089848
+Iteration: 170000     Time Elapsed: 0.04     NORM: 0.98035540
+Iteration: 171000     Time Elapsed: 0.04     NORM: 0.97959858
+Iteration: 172000     Time Elapsed: 0.04     NORM: 0.97864653
+Iteration: 173000     Time Elapsed: 0.04     NORM: 0.97751022
+Iteration: 174000     Time Elapsed: 0.04     NORM: 0.97622386
+Iteration: 175000     Time Elapsed: 0.04     NORM: 0.97481115
+Iteration: 176000     Time Elapsed: 0.04     NORM: 0.97329177
+Iteration: 177000     Time Elapsed: 0.04     NORM: 0.97168104
+Iteration: 178000     Time Elapsed: 0.04     NORM: 0.97000911
+Iteration: 179000     Time Elapsed: 0.04     NORM: 0.96830101
+Iteration: 180000     Time Elapsed: 0.04     NORM: 0.96658334
+Iteration: 181000     Time Elapsed: 0.04     NORM: 0.96489968
+Iteration: 182000     Time Elapsed: 0.04     NORM: 0.96327719
+Iteration: 183000     Time Elapsed: 0.04     NORM: 0.96173966
+Iteration: 184000     Time Elapsed: 0.04     NORM: 0.96030927
+Iteration: 185000     Time Elapsed: 0.04     NORM: 0.95902180
+Iteration: 186000     Time Elapsed: 0.04     NORM: 0.95789729
+Iteration: 187000     Time Elapsed: 0.04     NORM: 0.95696288
+Iteration: 188000     Time Elapsed: 0.04     NORM: 0.95623542
+Iteration: 189000     Time Elapsed: 0.04     NORM: 0.95572721
+Iteration: 190000     Time Elapsed: 0.04     NORM: 0.95543673
+Iteration: 191000     Time Elapsed: 0.04     NORM: 0.95536941
+Iteration: 192000     Time Elapsed: 0.04     NORM: 0.95554138
+Iteration: 193000     Time Elapsed: 0.04     NORM: 0.95594965
+Iteration: 194000     Time Elapsed: 0.04     NORM: 0.95659271
+Iteration: 195000     Time Elapsed: 0.04     NORM: 0.95746683
+Iteration: 196000     Time Elapsed: 0.04     NORM: 0.95856680
+Iteration: 197000     Time Elapsed: 0.04     NORM: 0.95987292
+Iteration: 198000     Time Elapsed: 0.04     NORM: 0.96138653
+Iteration: 199000     Time Elapsed: 0.04     NORM: 0.96309976
+
+Total Time Elapsed =  7.780060529708862
+
+----------------------------------------------------------------
+Total Memory Usage: 3.0 MB
+----------------------------------------------------------------
+[ Top 10 ]
+pySL.py:109: size=314 KiB, count=2, average=157 KiB
+/home/gpu-s6/.local/lib/python3.7/site-packages/matplotlib/lines.py:366: size=223 KiB, count=104, average=2193 B
+/home/gpu-s6/.local/lib/python3.7/site-packages/matplotlib/font_manager.py:1308: size=189 KiB, count=2008, average=96 B
+<frozen importlib._bootstrap_external>:525: size=157 KiB, count=1530, average=105 B
+/home/gpu-s6/.local/lib/python3.7/site-packages/matplotlib/transforms.py:200: size=133 KiB, count=1592, average=86 B
+/home/gpu-s6/.local/lib/python3.7/site-packages/matplotlib/cbook/__init__.py:2234: size=125 KiB, count=1989, average=64 B
+/home/gpu-s6/.local/lib/python3.7/site-packages/matplotlib/transforms.py:116: size=103 KiB, count=1211, average=87 B
+/home/gpu-s6/.local/lib/python3.7/site-packages/matplotlib/artist.py:70: size=86.0 KiB, count=158, average=557 B
+/usr/lib64/python3.7/contextlib.py:82: size=53.0 KiB, count=342, average=159 B
+/usr/lib64/python3.7/site-packages/numpy/core/numeric.py:538: size=50.2 KiB, count=622, average=83 B
