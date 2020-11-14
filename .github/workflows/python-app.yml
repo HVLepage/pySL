@@ -22,7 +22,6 @@ jobs:
         python-version: 3.8
     - name: CUDA Pre-installation Actions
       run: |
-        lspci | grep -i nvidia
         uname -m && cat /etc/*release
         gcc --version
     - name: Install CUDA
