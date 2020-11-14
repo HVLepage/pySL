@@ -16,7 +16,7 @@ def getparams():
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
         "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
-        "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
+        "Eignesolver": "CPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
         # The first two elements are the real and imaginary components of the ground state. 
@@ -27,7 +27,7 @@ def getparams():
         "ImportPotential": False, # If set to false, the potential will be created functionally in fftauxV.py
         "PotentialFileName": "potential.txt",
 
-        "ImportWavefunction": True, # If set to false, the wave function will be solved using the specified eigensolver
+        "ImportWavefunction": False, # If set to false, the wave function will be solved using the specified eigensolver
         "WaveFileName": "wave_DSE1D.txt",
         "NormalizeWaveFunction": True, # Set to false if importing a partial wave function
 
@@ -69,24 +69,24 @@ def getparams():
         "dt": 0.0005, # duration of a single time step in [ps]
         "StartTime": 0.0,
         "TimeSteps": 10000,
-        "PrintStep": 10, # How often the wave function is saved to a file
+        "PrintStep": 1000, # How often the wave function is saved to a file
 
         ################################################################
         # Simulation domain
         ################################################################
 
         # Lattice boundaries [nm]
-        "Xa": -200.0,
-        "Xb": 200.0,
-        "Ya": 0.0,
-        "Yb": 0.0,
+        "Xa": -100.0,
+        "Xb": 100.0,
+        "Ya": -100.0,
+        "Yb": 100.0,
 
         "Za": 0.0,
         "Zb": 0.0,
 
         # Number of lattice sites
-        "Nx": 801,
-        "Ny": 1,
+        "Nx": 61,
+        "Ny": 61,
         "Nz": 1,
 
         "NxOutK": 61,
@@ -94,8 +94,8 @@ def getparams():
         "NzOutK": 1,
 
         # Momentum Solver Inputs
-        "KxECO": 20,
-        "KyECO": 20,
+        "KxECO": 10,
+        "KyECO": 10,
         "KzECO": 0,
         "KxKCO": 20,
         "KyKCO": 20,
@@ -121,8 +121,8 @@ def getparams():
         ################################################################
 
         # Potential variables
-        "w2X": 0.0,
-        "w2Y": 0.0,
+        "w2X": 0.00002,
+        "w2Y": 0.0002,
         "ATB1": 0.0,
         "s2TB1": 0.0,
         "ATB2": 0.0,

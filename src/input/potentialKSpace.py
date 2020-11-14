@@ -2,10 +2,8 @@
 # Create the potential class for storing the time-independent FFT transformed potential of the problem for k-space, including 2-particle interactions like Coulomb
 ################################################################################################################################
 
-import os
 import numpy as np
 import pycuda.driver as cuda
-import math
 import src.fft.index6Dto1D as index6Dto1D
 import src.fft.index3Dto1D as index3Dto1D
 import src.fft.index1DtoND as index1DtoND
@@ -13,7 +11,6 @@ import src.fft.indexNDto1D as indexNDto1D
 from src.input.electrostaticPotential import electrostaticPotential
 from src.input.coulombPotential import CoulombPotential
 import reikna.fft as rfft
-import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
 from src.get_ccbin import get_ccbin
 
