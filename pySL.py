@@ -35,6 +35,9 @@ from src.export.exportParameters import exportParameters
 
 import reikna.cluda as cluda
 
+# Built-in plotting
+from src.plot.animate1D import animate1D
+
 print("\n----------------------------------------------------------------")
 print("pySL version 0.0.5")
 print("----------------------------------------------------------------")
@@ -219,19 +222,9 @@ psi.dtoh()
 # Show Plots
 ################################################################################################################################
 
-# plt. plot(x, re**2 + im**2, label = "line 1")
-# plt. plot(x, re_new**2 + im_new**2, label = "line 2")
-# # plt. plot(x, re_new + im_new, label = "line 2")
-# plt.show()
+# Animate the 1D wave function as save as an mp4 file. Used in the Particle_in_a_box_1D example
+# animate1D(params)
 
-plt.rcParams.update({'font.size': 10})
-# plt.rc('font',**{'family':'serif','serif':['Times']})
-#plt.imshow(np.transpose(psi2), extent=[0,100,-200,200], aspect=0.1, cmap='inferno', vmin=0, vmax=0.01)
-plt.xlabel('x (nm)')
-plt.ylabel('y (nm)')
-# plt.savefig('DoubleSlit.png', dpi=600)
-# plt.savefig("graph.pdf")
-#plt.show()
 
 ################################################################################################################################
 # Trace Memory Management
