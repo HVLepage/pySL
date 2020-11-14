@@ -5,6 +5,7 @@
   - [Table of Contents](#table-of-contents)
   - [About](#about)
   - [Particle in a box](#particle-in-a-box)
+    - [Output](#output)
   - [Double slit experiment](#double-slit-experiment)
 
 ## About
@@ -12,10 +13,43 @@ To use these samples, rename the input file to `parameters.py` and place in `src
 
 
 ## Particle in a box
-**File name:** `parameters_particle-in-a-box.py`
+**File name:** `parameters_particle-in-a-box-1D.py`
 
 **Memory usage:** 3.0 MB
 
+This sample will create an infinite potential well in the x dimension of length 200nm. The potential is set to zero inside the well and infinity outside the well.
+A free electron is placed in the ground state and the time evolution is calculated.
+
+### Output
+Once the calculation is finished, a directory called `CUDA_1D_Particle_in_a_Box` will be created and contain snapshots of the wave function at different time steps.
+
+This directory also contains a copy of `InputParameters.dat` and the initial wave function for future reference.
+
+As an example, the Python script `animate.py` can be run to create a simple animation of the real and imaginary components of the ground state wave function as they evolve in time.
+
+<p align="center">
+  <img src="https://github.com/HVLepage/TDSE3DCUDA/raw/Refactor/samples/1D_particle_in_a_box/animation.gif">
+</p>
+
+To observe a different initial wave function, the contribution of the first few eigenstates can be adjusted in `InputParameters.dat`. Modifying the `InputStates` variable to the following
+```
+InputStates = 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+```
+creates an equal superposition of the ground state and the first excited state. The resulting oscillations can be seen in the animation below.
+
+<p align="center">
+  <img src="https://github.com/HVLepage/TDSE3DCUDA/raw/Refactor/samples/1D_particle_in_a_box/animation1.gif">
+</p>
+
+As defined in the input parameters, this simulation spans 400 picoseconds. Given the two first eigenvalues, we can calculate the period of oscillation of the wave function as <img src="https://render.githubusercontent.com/render/math?math=T = 2 \pi / (\lambda_1-\lambda_0)">. In natural units, the first five eigenvalues of this problem are calculated to be:
+```
+0.000120901495393
+0.000483685405925
+0.00108822679613
+0.00193437782582
+0.00302193243988
+```
+This gives a period of oscillation of approximately T = 149ps.
 
 
 
