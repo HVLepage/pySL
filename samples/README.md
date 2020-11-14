@@ -1,8 +1,12 @@
 # Samples
 
 ## Table of Contents
-1. [Particle in a box](#particle-in-a-box)
-2. [Double slit experiment](#double-slit-experiment)
+- [Samples](#samples)
+  - [Table of Contents](#table-of-contents)
+  - [About](#about)
+  - [Particle in a box](#particle-in-a-box)
+    - [Output](#output)
+  - [Double slit experiment](#double-slit-experiment)
 
 ## About
 To use these samples, rename the input file to `parameters.py` and place in `src/input/parameters.py`.
@@ -11,7 +15,9 @@ To use these samples, rename the input file to `parameters.py` and place in `src
 ## Particle in a box
 **File name:** `parameters_particle-in-a-box-1D.py`
 
-**Memory usage:** 3.0 MB
+**Memory usage:** 1.2 MB
+
+**Memory usage (with plots):** 3.0 MB
 
 This sample will create an infinite potential well in the x dimension of length 200nm. The potential is set to zero inside the well and infinity outside the well.
 A free electron is placed in the ground state and the time evolution is calculated.
@@ -54,5 +60,7 @@ This gives a period of oscillation of approximately T = 149ps.
 ## Double slit experiment
 **File name:** `parameters_double-slit-experiment.py`
 
-**Memory usage:** 
+**Memory usage:** 6.9 MB
+
+**Memory usage (with plots):** 14.9 MB
 
