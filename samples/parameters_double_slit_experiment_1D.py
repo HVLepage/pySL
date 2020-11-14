@@ -1,165 +1,254 @@
-################################################################################################################################
-# Create the potential class for storing the time-independent potential of the problem, including 2-particle interactions like Coulomb
-################################################################################################################################
-
-
-import numpy as np
-import pycuda.driver as cuda
 import math
-import src.fft.index6Dto1D as index6Dto1D
-import src.fft.index3Dto1D as index3Dto1D
-import src.fft.index1DtoND as index1DtoND
-import src.fft.indexNDto1D as indexNDto1D
-from src.input.electrostaticPotential import electrostaticPotential
-from src.input.coulombPotential import CoulombPotential
+import numpy as np
+import sys
 
-class potential():
+def getparams():
     
-    #copy data from device to host
-    def dtoh(self):
-        cuda.memcpy_dtoh(self.pot, self.pot_gpu)
-    
-    #copy data from host to device
-    def htod(self):
-        cuda.memcpy_htod(self.pot_gpu, self.pot)
+    params = {
         
-    #read potential from file specified in params
-    def readFromFile(self,params):
-        file = open(".\src\\" + params["PotentialFileName"])
-        self.filePot = np.zeros(params["N1"])
-        lines = file.readlines()
-        for i in range(0,params["N1"]):
-            self.filePot[i] = float(lines[i+3].split()[0])
+        "SimName": "Double_slit_experiment_1D",
+
+        ################################################################
+        # FLAGS 
+        ################################################################
         
-    # Build the potential from analytically
-    def construct(self,params):
-        Xa = params["Xa"]
-        Xb = params["Xb"]
-        Ya = params["Ya"]
-        Yb = params["Yb"]
-        Za = params["Za"]
-        Zb = params["Zb"]
-        Nx = params["Nx"]
-        Ny = params["Ny"]
-        Nz = params["Nz"]
+        "Np": 1, # Number of particles
+        # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
+        
+        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
+
+        # Define the initial superposition state of the wave function. 
+        # The first two elements are the real and imaginary components of the ground state. 
+        # The second two elements are the real and imaginary components of the first excited state. 
+        "InputStates": [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+
+        # Import external files (if set to sal)
+        "ImportPotential": False, # If set to false, the potential will be created functionally in fftauxV.py
+        "PotentialFileName": "potential.txt",
+
+        "ImportWavefunction": True, # If set to false, the wave function will be solved using the specified eigensolver
+        "WaveFileName": "wave_DSE1D.txt",
+        "NormalizeWaveFunction": True, # Set to false if importing a partial wave function
+
+        "ExportTrace": False, # Export a reduced wave function for speed and smaller disk usage
+        "Traces": [ [1,1,2,1] ],
+
+        ################################################################
+        # Particle properties
+        ################################################################
+
+        # Mass is quoted in [electron masses] (so 1 for a free electron in a vacuum)
+        "Mass": np.array([1.0], dtype=np.float32),
+        
+        # Charge in [electron charges]
+        "Charge": np.array([1.0], dtype=np.float32),
+
+        # Relative permittivity of quantum well material
+        "RelPerm": 13.1,
+
+        # Conversion between SI units and natural units (hbar = 1, m_e = 1)
+        "v_si2nu": 1.312342066e-2,
+        "t_si2nu": 1.157676458e2,
+
+        ################################################################
+        # Surface acoustic wave
+        ################################################################
+
+        # SAW amplitude [meV] , speed of sound [nm]/[ps], wave length [nm], and offset [nm]
+        "ASAW": 0.0,
+        "cSAW": 3.0,
+        "lambdaSAW": 1000.0,
+        "SAWoffset": 0.0,
+
+        ################################################################
+        # Simulation time
+        ################################################################
+
+        
+        "dt": 0.0005, # duration of a single time step in [ps]
+        "StartTime": 0.0,
+        "TimeSteps": 10000,
+        "PrintStep": 10, # How often the wave function is saved to a file
+
+        ################################################################
+        # Simulation domain
+        ################################################################
+
+        # Lattice boundaries [nm]
+        "Xa": -200.0,
+        "Xb": 200.0,
+        "Ya": 0.0,
+        "Yb": 0.0,
+
+        "Za": 0.0,
+        "Zb": 0.0,
+
+        # Number of lattice sites
+        "Nx": 801,
+        "Ny": 1,
+        "Nz": 1,
+
+        "NxOutK": 61,
+        "NyOutK": 61,
+        "NzOutK": 1,
+
+        # Momentum Solver Inputs
+        "KxECO": 20,
+        "KyECO": 20,
+        "KzECO": 0,
+        "KxKCO": 20,
+        "KyKCO": 20,
+        "KzKCO": 0,
 
 
-        Np = params["Np"]
-        dim = params["dim"]
+        # Lattice padding (for expanding TDSE solution window)
+        # "padLeft": 0,
+        # "padRight": 0,
+        # "padTop": 0,
+        # "padBottom": 0,
 
+        # Absorbing Boudary Conditions (Leave as zero for Dirichlet boundary)
+        # "ABC_L": 0,
+        # "ABC_R": 0,
+        # "ABC_T": 0,
+        # "ABC_B": 0,
+        # "ABC_U": 0,
+        # "ABC_D": 0,
 
-        x = np.linspace(Xa, Xb, Nx)
-        y = np.linspace(Ya, Yb, Ny)
-        z = np.linspace(Za, Zb, Nz)
+        ################################################################
+        # Potential 
+        ################################################################
+
+        # Potential variables
+        "w2X": 0.0,
+        "w2Y": 0.0,
+        "ATB1": 0.0,
+        "s2TB1": 0.0,
+        "ATB2": 0.0,
+        "s2TB2": 0.0,
+        "detuneX": 0.0,
+
+        "RS": 0.0,
+        "DRt0": 1.0,
+        "URt0": 12.4,
+
+        # "sigmaFit": [1.74707037e-17, -2.73761743e-14, 1.78462882e-11, -6.26868417e-09, 1.28479963e-06, -1.55625754e-04, 1.07952353e-02, 6.02006265e-01, 6.93382649e+00],
+        # "Traces": 0,
+        
+    }
+
+    t_si2nu = params["t_si2nu"]
+    v_si2nu = params["v_si2nu"]
+
+    # Convert variables to Natural Units
+    params["dt"] *= t_si2nu
+    params["StartTime"] *= t_si2nu
+    params["ASAW"] *= v_si2nu
+    params["cSAW"] /= t_si2nu
+    params["wSAW"] = 2 * math.pi * params["cSAW"] / params["lambdaSAW"]
+    params["kSAW"] = 2 * math.pi  / params["lambdaSAW"]
+    params["DRt0"] *= t_si2nu
+    params["URt0"] *= t_si2nu
+
+    # Construct Hamiltonian
+    params["dx"] = 1.0
+    params["dy"] = 1.0
+    params["dz"] = 1.0
+    if (params["Nx"] > 1):
+        params["dx"] = (params["Xb"] - params["Xa"]) / (params["Nx"] - 1)
+    if (params["Ny"] > 1):
+        params["dy"] = (params["Yb"] - params["Ya"]) / (params["Ny"] - 1)
+    if (params["Nz"] > 1):
+        params["dz"] = (params["Zb"] - params["Za"]) / (params["Nz"] - 1)
+        
+        
+
+    if (params["TDSESolver"] != "kSpace"):
+        params["NxOutK"] = 1
+        params["NyOutK"] = 1
+        params["NzOutK"] = 1
+        params["KxKCO"] = 0
+        params["KyKCO"] = 0
+        params["KzKCO"] = 0
 	
-        if (params["ImportPotential"]):
-            self.readFromFile(params)
-
-
-        inds = np.zeros(dim*Np)
-
-        if (Np > 1):
-            interactionsNr = (Np**2 - Np) / 2 #Nr of onteractions between particle pairs
-            interactionsMap = np.zeros(interactionsNr,2) #map of which particle interacts with which
-		
-
-
-            for i in range(0,Np):
-                for j in range(i+1,Np):
-                    interactionsMap[i,0] = i
-                    interactionsMap[i,1] = j
-        else:
-            interactionsNr = 0
-
-        if (interactionsNr > 0):
-            V2P=np.zeros((Nx * Ny * Nz)**2) #store 2-particle potential
-
-            for i1 in range(0,Nx):
-                for j1 in range(0,Ny):
-                    for k1 in range(0,Nz):
-                        for i2 in range(0,Nx):
-                            for j2 in range(0,Ny):
-                                for k2 in range(0,Nz):
-                                    #calculate 2-particle potential using Coulomb ionteraction
-                                    VVal = CoulombPotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
-                                    if (VVal > 100):
-                                        VVal = 100.0
-                                            
-                                    V2P[index6Dto1D.index(i1, j1, k1, i2, j2, k2, Nx, Ny, Nz, Nx, Ny, Nz)] = VVal
-
-    		#for each pair, fill the potential with their corresponding 2-particle interaction potential
-            for p in range(0,interactionsNr):
-
-                p1 = interactionsMap[p]
-                p2 = interactionsMap[p + 1]
-                inds2P = np.zeros(dim*2)
-
-                for i in range(0,params["N"]):
-                    index1DtoND.index(i, inds, params["Sizes"], params)
-
-                    for j in range(0,dim):
-                        inds2P[j] = inds[p1 * dim + j]
-                        inds2P[j + dim] = inds[p2 * dim + j]
-				
-                    ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
-                    self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
-
-
-
-	#Add 1 particle static potential
-        V1P = np.zeros(Nx * Ny * Nz)
         
-        for p in range(0, params["Np"]):
-
-            for i in range(0,Nx):
-                for j in range(0,Ny):
-                    for k in range(0,Nz):
-                        VVal = 0.0;
-                        ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
-                        
-                        #either import from file, or calculate from electrostatic equations
-                        if (params["ImportPotential"]):
-                            VVal= self.filePot[ind]
-                        else:
-                            VVal = electrostaticPotential(params,p,x[i],y[j],z[k])
-
-                        if (VVal > 100):
-                            VVal = 100.0
-					
-
-                        V1P[ind] = VVal
-		
-        inds1P = np.zeros(dim)
-		
-
-		#Only go into if right indexes are 0, i.e. do this other way around ...
-        for i in range(0,params["N"]):
-            index1DtoND.index(i, inds, params["Sizes"], params)
-
-            for j in range(0, dim):
-                inds1P[j] = inds[p * dim + j]
-			
-            ind1P = indexNDto1D.index(inds1P, params["Sizes"], params, 1)
-            self.pot[i] += V1P[int(ind1P)]
-
-
-            
+    params["Kx"] = 2 * params["KxKCO"]  + 1
+    params["Ky"]  = 2 * params["KyKCO"]  + 1
+    params["Kz"] = 2 * params["KzKCO"]  + 1
     
-    def __init__(self,params):        
-        
-        self.pot=np.zeros(params["N"], dtype=np.float32)
-        
-        self.pot_gpu=cuda.mem_alloc(self.pot.nbytes)
+    params["N"] =(params["Nx"] * params["Ny"] * params["Nz"]) ** params["Np"]
+    params["N1"] = params["Nx"] * params["Ny"] * params["Nz"]
+    params["N1K"] = params["Kx"] * params["Ky"] * params["Kz"]
+    params["NOut"] = (params["NxOutK"] * params["NyOutK"] * params["NzOutK"])**params["Np"]
+    params["NK"] = ((2 * params["KxKCO"] + 1) * (2 * params["KyKCO"] + 1) * (2 * params["KzKCO"] + 1))**params["Np"]
     
-        self.construct(params)
-        
-        self.size1P = []
-        self.size = []
-        for i in range(0,params["dim"]):
-            self.size1P.append(int(params["Sizes"][i]))
-        for i in range(0,params["Np"]):
-            self.size += self.size1P
-        
-        #self.pot = np.reshape(self.pot, self.size)
+    params["dim"] = 0
+    if (params["Nx"] > 1):
+        params["dim"]=params["dim"]+1
+    if (params["Ny"] > 1):
+        params["dim"]=params["dim"]+1
+    if (params["Nz"] > 1):
+        params["dim"]=params["dim"]+1
+    if (params["dim"] == 0):
+        print( "No dimension size is greater than 1")
+        exit(1)
+	
 
-        self.htod()
+	# Check if padded output is greater than Psi
+    if ((params["TDSESolver"] == "kSpace") and (params["NxOutK"] < params["Nx"] or params["NyOutK"] < params["Ny"] or params["NzOutK"] < params["Nz"])) :
+        print("NOut parameters cannot be smaller than N for KSpaceLeapfrog")
+        sys.exit(1)
+	
+    if ((params["TDSESolver"] == "kSpace") and ((2 * params["KxKCO"] + 1) >params["Nx"] or (2 * params["KyKCO"] + 1) > params["Ny"] or (2 * params["KzKCO"] + 1) > params["Nz"])):
+        print("(2 * Kx/y/zKCO + 1)  cannot be greater than Nx/y/z for KSpaceLeapfrog")
+        sys.exit(1)
+
+	
+    params["dKx"] =  2 * math.pi / (params["Xb"] - params["Xa"]) if (params["Xb"] - params["Xa"])>0 else 1.0 #delta momentum
+    params["dKy"] =  2 * math.pi / (params["Yb"] - params["Ya"]) if (params["Yb"] - params["Ya"])>0 else 1.0
+    params["dKz"] =  2 * math.pi / (params["Zb"] - params["Za"]) if (params["Zb"] - params["Za"])>0 else 1.0
+    
+    params["Sizes"] = np.zeros( params["dim"], dtype = np.int32)
+    params["SizesK"] = np.zeros( params["dim"], dtype = np.int32)
+    params["SizesOutK"] = np.zeros( params["dim"], dtype = np.int32)
+    params["KCOs"] = np.zeros( params["dim"], dtype = np.int32)
+    params["dKs"] = np.zeros( params["dim"], dtype = np.float32)
+    params["dXs"] = np.zeros( params["dim"], dtype = np.float32)
+    params["faa"] = np.zeros( params["dim"], dtype = np.float32)
+
+    params["hbar"] = 1
+    
+    i = 0
+    if (params["Nx"] > 1):
+        params["Sizes"][i] = params["Nx"] #Psi size
+        params["SizesK"][i] = params["Kx"] #K space size
+        params["SizesOutK"][i] = params["NxOutK"]
+        params["KCOs"][i] = params["KxKCO"] #K cutoff
+        params["dKs"][i] = params["dKx"] #delta K
+        params["dXs"][i] = params["dx"]
+        params["faa"][i] = params["hbar"] * params["dt"] / (params["dx"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        i=i+1
+    if (params["Ny"] > 1):
+        params["Sizes"][i] = params["Ny"] #Psi size
+        params["SizesK"][i] = params["Ky"] #K space size
+        params["SizesOutK"][i] = params["NyOutK"]
+        params["KCOs"][i] = params["KyKCO"] #K cutoff
+        params["dKs"][i] = params["dKy"] #delta K
+        params["dXs"][i] = params["dy"]
+        params["faa"][i] = params["hbar"] * params["dt"] / (params["dy"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        i=i+1
+    if (params["Nz"] > 1):
+        params["Sizes"][i] = params["Nz"] #Psi size
+        params["SizesK"][i] = params["Kz"] #K space size
+        params["SizesOutK"][i] = params["NzOutK"]
+        params["KCOs"][i] = params["KzKCO"] #K cutoff
+        params["dKs"][i] = params["dKz"] #delta K
+        params["dXs"][i] = params["dz"]
+        params["faa"][i] = params["hbar"] * params["dt"] / (params["dz"] **2) #kinetic parameter faa for Hamiltonians/kernels
+        i=i+1
+	
+
+    params["fbb"] = 2.0 * params["dt"] / params["hbar"] #time parameter fbb for Hamiltonians/kernels
+
+    return params
