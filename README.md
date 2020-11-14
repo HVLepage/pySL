@@ -1,18 +1,21 @@
 # pySL
  
 ## Table of Contents
-1. [About](#about)
-2. [Installation](#installation)
-   1. [Prerequisites](#prerequisites)
-      1. [CUDA SDK](#cuda-sdk)
-      2. [Python 3](#python3)
-      3. [Python modules](#python-modules)
-3. [Usage](#usage)
-   1. [Input parameters](#input-parameters)
-   2. [Parameter sweeps](#parameter-sweeps)
-4. [Authors](#authors)
-5. [Publications](#publications)
-6. [Acknowledgments](#acknowledgments)
+- [pySL](#pysl)
+  - [Table of Contents](#table-of-contents)
+  - [About](#about)
+  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+      - [CUDA SDK](#cuda-sdk)
+      - [Python3](#python3)
+      - [Python modules](#python-modules)
+      - [(Optional) ffmpeg](#optional-ffmpeg)
+  - [Usage](#usage)
+    - [Input parameters](#input-parameters)
+    - [Parameter sweeps](#parameter-sweeps)
+  - [Authors](#authors)
+  - [Publications](#publications)
+  - [Acknowledgments](#acknowledgments)
 
 
 ## About
@@ -42,6 +45,10 @@ Make sure `nvcc` is working correctly on your system. You might have to specify 
 #### Python3
 
 #### Python modules
+
+#### (Optional) ffmpeg
+
+`ffmpeg` is used to generate plot animations. This is not a required feature since plotting is not necessary and other software can be used for analysis purposes. Installation will vary depending on the host operating system.
 
 
 ## Usage
