@@ -17,17 +17,17 @@ This sample will create an infinite potential well in the x dimension of length 
 A free electron is placed in the ground state and the time evolution is calculated.
 
 ### Output
-Once the calculation is finished, a directory called `CUDA_1D_Particle_in_a_Box` will be created and contain snapshots of the wave function at different time steps.
+Once the calculation is finished, a directory called `Particle_in_a_Box_1D` will be created and contain snapshots of the wave function at different time steps.
 
-This directory also contains a copy of `InputParameters.dat` and the initial wave function for future reference.
+This directory also contains a copy of `InputParameters.txt` and the initial wave function for future reference.
 
-As an example, the Python script `animate.py` can be run to create a simple animation of the real and imaginary components of the ground state wave function as they evolve in time.
+The function `animate1D.py` can be called to create a simple animation of the real and imaginary components of the ground state wave function as they evolve in time.
 
 <p align="center">
   <img src="https://github.com/HVLepage/TDSE3DCUDA/raw/Refactor/samples/1D_particle_in_a_box/animation.gif">
 </p>
 
-To observe a different initial wave function, the contribution of the first few eigenstates can be adjusted in `InputParameters.dat`. Modifying the `InputStates` variable to the following
+To observe a different initial wave function, the contribution of the first few eigenstates can be adjusted in `parameters.py`. Modifying the `InputStates` variable to the following
 ```
 InputStates = 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 ```
