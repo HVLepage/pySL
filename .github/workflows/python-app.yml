@@ -20,6 +20,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+    - name: CUDA Pre-installation Actions
+      run: |
+        lspci | grep -i nvidia
+        uname -m && cat /etc/*release
+        gcc --version
     - name: Install CUDA
       run: |
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
@@ -35,14 +40,9 @@ jobs:
             exit 1
         fi
         
-        CUDA_PATH=/usr/local/cuda-11.1.1
-        echo "CUDA_PATH=${CUDA_PATH}"
-        export CUDA_PATH=${CUDA_PATH}
+        export PATH=/usr/local/cuda-11.1/bin${PATH:+:${PATH}}
+        export LD_LIBRARY_PATH=/usr/local/cuda-11.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
-
-        # Quick test. @temp
-        export PATH="$CUDA_PATH/bin:$PATH"
-        export LD_LIBRARY_PATH="$CUDA_PATH/lib:$LD_LIBRARY_PATH"
         nvcc -V
         
     - name: Install dependencies
