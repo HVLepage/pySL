@@ -98,7 +98,7 @@ class wavefunction:
     
     #if importing, read wavefunction from file
     def readFromFile(self,params):
-        file = open("./input/" + params["WavefunctionName"])
+        file = open("./input/" + params["WaveFileName"])
         lines = file.readlines()
         for i in range(0,params["N"]):
             self.wave.real[i] = float(lines[i].split()[0])
