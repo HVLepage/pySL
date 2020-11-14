@@ -30,6 +30,7 @@ from src.fft.kernelInds import kernelInds
 
 from src.input.potential import potential
 from src.export.makepath import makepath
+from src.export.exportParameters import exportParameters
 
 import reikna.cluda as cluda
 
@@ -81,6 +82,9 @@ params = getparams()
 
 # Create output directory
 makepath(params)
+
+# Save input parameters to a text file
+exportParameters(params)
 
 
 V = potential(params) # Static potential
