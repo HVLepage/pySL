@@ -20,6 +20,44 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+    - name: Install CUDA
+      run: |
+        CUDA_MAJOR="11"
+        CUDA_MINOR="1"
+        PIN_FILENAME="cuda-ubuntu${UBUNTU_VERSION}.pin"
+        PIN_URL="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${UBUNTU_VERSION}/x86_64/${PIN_FILENAME}"
+        APT_KEY_URL="http://developer.download.nvidia.com/compute/cuda/repos/ubuntu${UBUNTU_VERSION}/x86_64/7fa2af80.pub"
+        REPO_URL="http://developer.download.nvidia.com/compute/cuda/repos/ubuntu${UBUNTU_VERSION}/x86_64/"
+
+        echo "PIN_FILENAME ${PIN_FILENAME}"
+        echo "PIN_URL ${PIN_URL}"
+        echo "APT_KEY_URL ${APT_KEY_URL}"
+        
+        echo "Adding CUDA Repository"
+        wget ${PIN_URL}
+        sudo mv ${PIN_FILENAME} /etc/apt/preferences.d/cuda-repository-pin-600
+        sudo apt-key adv --fetch-keys ${APT_KEY_URL}
+        sudo add-apt-repository "deb ${REPO_URL} /"
+        sudo apt-get update
+
+        echo "Installing CUDA package"
+        sudo apt-get -y install cuda
+
+        if [[ $? -ne 0 ]]; then
+            echo "CUDA Installation Error."
+            exit 1
+        fi
+        
+        CUDA_PATH=/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}
+        echo "CUDA_PATH=${CUDA_PATH}"
+        export CUDA_PATH=${CUDA_PATH}
+
+
+        # Quick test. @temp
+        export PATH="$CUDA_PATH/bin:$PATH"
+        export LD_LIBRARY_PATH="$CUDA_PATH/lib:$LD_LIBRARY_PATH"
+        nvcc -V
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
