@@ -13,7 +13,8 @@ To use these samples, rename the input file to `parameters.py` and place in `src
 
 ## Particle in a box
 **File name:** `parameters_particle-in-a-box.py`
-**Memory usage:** 
+
+**Memory usage:** 3.0 MB
 
 
 
@@ -22,5 +23,6 @@ To use these samples, rename the input file to `parameters.py` and place in `src
 
 ## Double slit experiment
 **File name:** `parameters_double-slit-experiment.py`
+
 **Memory usage:** 
 
