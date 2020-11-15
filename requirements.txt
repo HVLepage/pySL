@@ -1,15 +1,14 @@
 # Essential modules #
 
+numpy
 pycuda
+scikit-cuda
 
+reikna
 
 # Extra additions #
 
 matplotlib
-scikit-cuda
 humanize
-
-reikna
-
 
 # guppy3
