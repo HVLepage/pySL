@@ -8,6 +8,8 @@ import pycuda.gpuarray as gpuarray
 import os
 from src.export.exportEigenvalues import exportEigenvalues
 import scipy.sparse as sp
+import src.fft.index1DtoND as index1DtoND
+import src.fft.indexNDto1D as indexNDto1D
 
 def rSpaceSparseSolverGPU(params, PsiOut, V, thr): #Real space solver GPU
 	#read input parameters from params & declare stuff
@@ -25,27 +27,38 @@ def rSpaceSparseSolverGPU(params, PsiOut, V, thr): #Real space solver GPU
 	#generate Hamiltonian matrix for eigenfunction solving
 	
 	#Init Hamiltonian
-    H = np.zeros([PsiSize, PsiSize], dtype=np.float32)
+    H = np.zeros([PsiSize**2], dtype=np.float32)
     
     H2 = params["hbar"] ** 2 #hbar squared
-
+    inds = np.zeros(dim*Np)
+    
     for k in range(0, PsiSize):# Go over each row
-
-
+        ind = k + k*PsiSize
+        indPMone=0
+        index1DtoND.index(k,inds,params["Sizes"],params)
 
 		#fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
 
 		#on-site potential
-        H[k,k] += V.pot[k] #!!!!!!!!!!!!!!!!!!!!!!!
+        H[ind] += V.pot[k] #!!!!!!!!!!!!!!!!!!!!!!!
         for d in range(0,dim):
             for p in range(0,Np):
-                H[k,k] += H2 / (params["Mass"][p] * params["dXs"][d] ** 2) # on-site kinetic part
-
-                if ((k-1)>=0):
-                    H[k,k-1] -= H2 / (2 * params["Mass"][p] * params["dXs"][d] ** 2)
+                H[ind] += H2 / (params["Mass"][p] * params["dXs"][d] ** 2) # on-site kinetic part
+                
+                inds[p*dim+d]-=1
+                indPMone = indexNDto1D.index(inds,params["Sizes"],params)
+                if (inds[p*dim+d]>=0 and inds[p*dim+d]< params["Sizes"][d]):
+                    H[int(k*PsiSize + indPMone)] -= H2 / (2 * params["Mass"][p] * params["dXs"][d] ** 2)
+                    
+                inds[p*dim+d]+=2
+                indPMone = indexNDto1D.index(inds,params["Sizes"],params)
+                
+                if (inds[p*dim+d]>=0 and inds[p*dim+d]< params["Sizes"][d] and (k+1)<PsiSize):
+                    H[int(k*PsiSize + indPMone)] -=  H2 / (2 * params["Mass"][p] * params["dXs"][d] ** 2)
+                    
+                inds[p*dim+d]-=1
 				
-                if ((k+1)<PsiSize):
-                    H[k,k+1] -=  H2 / (2 * params["Mass"][p] * params["dXs"][d] ** 2)
+    H=np.reshape(H, [PsiSize,PsiSize])
 				
 
    #Do eig things here
