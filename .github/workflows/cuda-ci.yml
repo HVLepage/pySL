@@ -25,9 +25,11 @@ jobs:
         uname -m && cat /etc/*release
         gcc --version
         nvcc --version
-    - name: Python Install Check
+    - name: Install pip
       run: |
         python --version
+        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        python get-pip.py
         pip --version
     - name: Install dependencies
       run: |
