@@ -227,7 +227,7 @@ psi.dtoh()
 # animate1D(params)
 
 # Trace a 1D particle with the x axis as time and the y axis as the spatial dimension.
-plot1Dtrace(params)
+# plot1Dtrace(params)
 
 ################################################################################################################################
 # Trace Memory Management
