@@ -28,6 +28,7 @@ jobs:
     - name: Install pip
       run: |
         python --version
+        apt update
         apt install -y python3-pip
         pip --version
     - name: Install dependencies
