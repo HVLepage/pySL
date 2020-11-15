@@ -30,8 +30,7 @@ jobs:
         python --version
         apt update
         apt install -y python3-pip
-        echo "alias pip='python -m /usr/bin/pip3'" >> ~/.bashrc
-        source ~/.bashrc
+        ln -s /usr/bin/pip3 /usr/bin/pip
         pip --version
       shell: bash
     - name: Install dependencies
