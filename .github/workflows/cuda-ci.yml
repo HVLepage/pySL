@@ -25,20 +25,12 @@ jobs:
         uname -m && cat /etc/*release
         gcc --version
         nvcc --version
-    - name: Install pip
-      run: |
-        python --version
-        apt update
-        apt install -y python3-pip
-        ln -s /usr/bin/pip3 /usr/bin/pip
-        pip --version
-      shell: bash
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install wheel
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python -m pip install wheel
+        python -m pip install flake8 pytest
+        if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
       shell: bash
     - name: Lint with flake8
       run: |
