@@ -6,7 +6,7 @@ def getparams():
     
     params = {
         
-        "SimName": "Double_slit_experiment_1D",
+        "SimName": "Root_of_swap",
 
         ################################################################
         # FLAGS 
@@ -15,7 +15,7 @@ def getparams():
         "Np": 2, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
-        "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
+        "TDSESolver": "kSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
         "Eignesolver": "GPUkSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 

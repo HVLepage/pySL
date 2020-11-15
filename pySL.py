@@ -27,7 +27,7 @@ from src.fft.convWavefunction import convWavefunction
 from src.export.wavefunctionOut import wavefunctionOut
 from src.export.exportTrace import exportTrace
 from src.input.domain import domain
-from src.input.kernelInds import kernelInds
+from src.index.kernelInds import kernelInds
 
 from src.input.potential import potential
 from src.export.makepath import makepath
