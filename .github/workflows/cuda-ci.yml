@@ -31,7 +31,6 @@ jobs:
         python -m pip install wheel
         python -m pip install flake8 pytest
         if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
-      shell: bash
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -43,4 +42,3 @@ jobs:
         rm ./src/input/parameters.py
         cp ./samples/parameters_particle-in-a-box-1D.py ./src/input/parameters.py
         python pySL.py
-      shell: bash
