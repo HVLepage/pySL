@@ -13,7 +13,7 @@ jobs:
   build:
 
     runs-on: ubuntu-18.04
-    container: nvidia/cuda:11.1.0-devel-ubuntu18.04
+    container: nvidia/cuda
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
