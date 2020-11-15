@@ -12,11 +12,11 @@ def getparams():
         # FLAGS 
         ################################################################
         
-        "Np": 1, # Number of particles
+        "Np": 2, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
         "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
-        "Eignesolver": "GPUrSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
+        "Eignesolver": "GPUkSpace", # Type of eigensolver [CPUrSpace, GPUrSpace] future [GPUkSpace, GPUrSparse]
 
         # Define the initial superposition state of the wave function. 
         # The first two elements are the real and imaginary components of the ground state. 
@@ -39,10 +39,11 @@ def getparams():
         ################################################################
 
         # Mass is quoted in [electron masses] (so 1 for a free electron in a vacuum)
-        "Mass": np.array([1.0], dtype=np.float32),
+        "Mass": np.array([1.0, 1.0], dtype=np.float32),
         
         # Charge in [electron charges]
-        "Charge": np.array([1.0], dtype=np.float32),
+        "Charge": np.array([1.0, 1.0], dtype=np.float32),
+        "sigmaFit":  [1.74707037e-17, -2.73761743e-14, 1.78462882e-11, -6.26868417e-09, 1.28479963e-06, -1.55625754e-04, 1.07952353e-02, 6.02006265e-01, 6.93382649e+00],
 
         # Relative permittivity of quantum well material
         "RelPerm": 13.1,
@@ -66,7 +67,7 @@ def getparams():
         ################################################################
 
         
-        "dt": 0.0005, # duration of a single time step in [ps]
+        "dt": 0.00001, # duration of a single time step in [ps]
         "StartTime": 0.0,
         "TimeSteps": 10000,
         "PrintStep": 1000, # How often the wave function is saved to a file
@@ -85,20 +86,20 @@ def getparams():
         "Zb": 0.0,
 
         # Number of lattice sites
-        "Nx": 61,
-        "Ny": 61,
+        "Nx": 21,
+        "Ny": 21,
         "Nz": 1,
 
-        "NxOutK": 61,
-        "NyOutK": 61,
+        "NxOutK": 21,
+        "NyOutK": 21,
         "NzOutK": 1,
 
         # Momentum Solver Inputs
-        "KxECO": 10,
-        "KyECO": 10,
+        "KxECO": 3,
+        "KyECO": 2,
         "KzECO": 0,
-        "KxKCO": 20,
-        "KyKCO": 20,
+        "KxKCO": 4,
+        "KyKCO": 3,
         "KzKCO": 0,
 
 
@@ -121,10 +122,10 @@ def getparams():
         ################################################################
 
         # Potential variables
-        "w2X": 0.00002,
+        "w2X": 0.002,
         "w2Y": 0.0002,
-        "ATB1": 0.0,
-        "s2TB1": 0.0,
+        "ATB1": 3.0,
+        "s2TB1": 0.0015,
         "ATB2": 0.0,
         "s2TB2": 0.0,
         "detuneX": 0.0,
@@ -192,7 +193,7 @@ def getparams():
         params["dim"]=params["dim"]+1
     if (params["dim"] == 0):
         print( "No dimension size is greater than 1")
-        exit(1)
+        sys.exit(1)
 	
 
 	# Check if padded output is greater than Psi

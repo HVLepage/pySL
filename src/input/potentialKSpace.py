@@ -50,8 +50,8 @@ class potentialKSpace():
         Nz = params["Nz"]
 
 
-        Np = params["Np"]
-        dim = params["dim"]
+        Np = int(params["Np"])
+        dim = int(params["dim"])
 
 
         x = np.linspace(Xa, Xb, Nx)
@@ -65,8 +65,8 @@ class potentialKSpace():
         inds = np.zeros(dim*Np)
 
         if (Np > 1):
-            interactionsNr = (Np**2 - Np) / 2 #Nr of onteractions between particle pairs
-            interactionsMap = np.zeros(interactionsNr,2) #map of which particle interacts with which
+            interactionsNr = int((Np**2 - Np) / 2) #Nr of onteractions between particle pairs
+            interactionsMap = np.zeros([interactionsNr,2]) #map of which particle interacts with which
 		
 
 
@@ -110,22 +110,22 @@ class potentialKSpace():
     		#for each pair, fill the potential with their corresponding 2-particle interaction potential
             for p in range(0,interactionsNr):
 
-                p1 = interactionsMap[p]
-                p2 = interactionsMap[p + 1]
+                p1 = interactionsMap[p,0]
+                p2 = interactionsMap[p,1]
                 inds2P = np.zeros(dim*2)
                 
                 for i in range(0, (self.Kx*self.Ky*self.Kz)**2):
                     index1DtoND.index(i, inds2P, self.sizesK, params, 2)
-                    inds = np.zeros([dim,Np])
+                    inds = np.zeros(dim*Np)
                     for j in range(0,params["dim"]):
-                        inds[j + dim*p1] = inds2P[j]
-                        inds[j + dim*p2] = inds2P[j + dim]
+                        inds[j + int(dim*p1)] = inds2P[j]
+                        inds[j + int(dim*p2)] = inds2P[j + dim]
                         inds2P[j] = inds2P[j] if (inds2P[j] <= self.kLims[j]) else inds2P[j] + params["Sizes"][j] - self.sizesK[j] #inds2P[j] <= KLims[j] ? inds2P[j] : inds2P[j] + params->Sizes[j] - SizesK[j];
                         inds2P[j + dim] = inds2P[j + dim] if (inds2P[j + dim] <= self.kLims[j]) else inds2P[j + dim] + params["Sizes"][j] - self.sizesK[j]#inds2P[j + params->dim] <= KLims[j] ? inds2P[j + params->dim] : inds2P[j + params->dim] + params->Sizes[j] - SizesK[j];
 				
-                    indND = indexNDto1D.index(inds, self.sizesK, params)
-                    ind2D = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
-                    self.pot[indND] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2D] / (Nx*Ny*Nz*Nx*Ny*Nz)#NORMALIZE HERE?
+                    indND = int(indexNDto1D.index(inds, self.sizesK, params))
+                    ind2D = int(indexNDto1D.index(inds2P, params["Sizes"], params, 2))
+                    self.pot[indND] += params["Charge"][int(p1)] * params["Charge"][int(p2)] * V2P[ind2D] / (Nx*Ny*Nz*Nx*Ny*Nz)#NORMALIZE HERE?
 
 
 
@@ -176,7 +176,7 @@ class potentialKSpace():
 			
                 indND = indexNDto1D.index(inds, self.sizesK, params)
                 ind1D = indexNDto1D.index(inds1P, params["Sizes"], params, 1)
-                self.pot[i] += V1P[int(ind1D)] / (Nx*Ny*Nz) #NORMALIZE?
+                self.pot[int(indND)] += V1P[int(ind1D)] / (Nx*Ny*Nz) #NORMALIZE?
 
 
             
@@ -203,7 +203,7 @@ class potentialKSpace():
         self.Ky = 2 * KyLim + 1
         self.Kz = 2 * KzLim + 1
     
-        self.pot=np.zeros(self.Kx*self.Ky*self.Kz, dtype=np.complex64)
+        self.pot=np.zeros((self.Kx*self.Ky*self.Kz)**int(params["Np"]), dtype=np.complex64)
         
         self.pot_gpu=cuda.mem_alloc(self.pot.nbytes)
         

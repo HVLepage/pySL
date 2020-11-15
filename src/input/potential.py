@@ -44,8 +44,8 @@ class potential():
         Nz = params["Nz"]
 
 
-        Np = params["Np"]
-        dim = params["dim"]
+        Np = int(params["Np"])
+        dim = int(params["dim"])
 
 
         x = np.linspace(Xa, Xb, Nx)
@@ -59,8 +59,8 @@ class potential():
         inds = np.zeros(dim*Np)
 
         if (Np > 1):
-            interactionsNr = (Np**2 - Np) / 2 #Nr of onteractions between particle pairs
-            interactionsMap = np.zeros(interactionsNr,2) #map of which particle interacts with which
+            interactionsNr = int((Np**2 - Np) / 2) #Nr of onteractions between particle pairs
+            interactionsMap = np.zeros([interactionsNr,2]) #map of which particle interacts with which
 		
 
 
@@ -90,19 +90,19 @@ class potential():
     		#for each pair, fill the potential with their corresponding 2-particle interaction potential
             for p in range(0,interactionsNr):
 
-                p1 = interactionsMap[p]
-                p2 = interactionsMap[p + 1]
+                p1 = interactionsMap[p,0]
+                p2 = interactionsMap[p,1]
                 inds2P = np.zeros(dim*2)
 
                 for i in range(0,params["N"]):
                     index1DtoND.index(i, inds, params["Sizes"], params)
 
                     for j in range(0,dim):
-                        inds2P[j] = inds[p1 * dim + j]
-                        inds2P[j + dim] = inds[p2 * dim + j]
+                        inds2P[j] = inds[int(p1 * dim + j)]
+                        inds2P[j + dim] = inds[int(p2 * dim + j)]
 				
-                    ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
-                    self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
+                    ind2P = int(indexNDto1D.index(inds2P, params["Sizes"], params, 2))
+                    self.pot[i] += params["Charge"][int(p1)] * params["Charge"][int(p2)] * V2P[ind2P]
 
 
 
