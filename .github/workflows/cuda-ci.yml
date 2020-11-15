@@ -27,6 +27,8 @@ jobs:
         nvcc --version
     - name: Install dependencies
       run: |
+        chown -R $USER:$USER /github/home/
+        chown -R $USER:$USER /github/home/.cache/
         python -m pip install --upgrade pip
         python -m pip install wheel
         python -m pip install flake8 pytest
