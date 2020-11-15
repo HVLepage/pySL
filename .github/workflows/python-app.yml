@@ -43,6 +43,13 @@ jobs:
         export LD_LIBRARY_PATH=/usr/local/cuda-11.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
         export CUDA_ROOT=/usr/local/cuda/bin
         
+        export CUDA_PATH=/usr/local/cuda-11.1/bin
+        echo "Adding CUDA to CUDA_PATH, PATH and LD_LIBRARY_PATH"
+        echo "CUDA_PATH=${CUDA_PATH}" >> $GITHUB_ENV
+        echo "${CUDA_PATH}/bin" >> $GITHUB_PATH
+        echo "LD_LIBRARY_PATH=${CUDA_PATH}/lib:${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=/usr/local/cuda-11.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" >> $GITHUB_ENV
+        
         nvcc -V
         
     - name: Install dependencies
