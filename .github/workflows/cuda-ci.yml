@@ -28,8 +28,7 @@ jobs:
     - name: Install pip
       run: |
         python --version
-        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        python get-pip.py
+        sudo apt install python3-pip
         pip --version
     - name: Install dependencies
       run: |
