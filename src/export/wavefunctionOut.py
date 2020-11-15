@@ -1,7 +1,7 @@
 import numpy as np
 import math
-import src.fft.index1DtoND as index1DtoND
-import src.fft.indexNDto1D as indexNDto1D
+import src.index.index1DtoND as index1DtoND
+import src.index.indexNDto1D as indexNDto1D
 import reikna.fft as rfft
 import pycuda.gpuarray as gpuarray
 from src.get_ccbin import get_ccbin

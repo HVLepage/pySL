@@ -6,7 +6,7 @@
 # Values on the boundary of the simulation domain are set to false, everything inside is set to true.
 # Although this method uses more GPU memory, it reduces the number of operations required per iteration.
 import numpy as np
-import src.fft.index1DtoND as index1DtoND
+import src.index.index1DtoND as index1DtoND
 import pycuda.driver as cuda
 
 class domain:

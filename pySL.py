@@ -23,11 +23,11 @@ import src.get_gpu_info as gpuinfo
 from src.get_ccbin import get_ccbin
 from src.input.parameters import getparams
 from src.input.wavefunction import wavefunction
-from src.input.convWavefunction import convWavefunction
+from src.fft.convWavefunction import convWavefunction
 from src.export.wavefunctionOut import wavefunctionOut
 from src.export.exportTrace import exportTrace
-from src.fft.domain import domain
-from src.fft.kernelInds import kernelInds
+from src.input.domain import domain
+from src.input.kernelInds import kernelInds
 
 from src.input.potential import potential
 from src.export.makepath import makepath

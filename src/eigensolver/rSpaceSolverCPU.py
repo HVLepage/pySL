@@ -5,8 +5,8 @@
 import numpy as np
 from numpy import linalg as LA
 from src.export.exportEigenvalues import exportEigenvalues
-import src.fft.index1DtoND as index1DtoND
-import src.fft.indexNDto1D as indexNDto1D
+import src.index.index1DtoND as index1DtoND
+import src.index.indexNDto1D as indexNDto1D
 
 def rSpaceSolverCPU(params, PsiOut, V, thr): #Real space solver GPU
 	#read input parameters from params & declare stuff

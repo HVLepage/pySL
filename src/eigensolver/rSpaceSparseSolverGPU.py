@@ -8,8 +8,8 @@ import pycuda.gpuarray as gpuarray
 import os
 from src.export.exportEigenvalues import exportEigenvalues
 import scipy.sparse as sp
-import src.fft.index1DtoND as index1DtoND
-import src.fft.indexNDto1D as indexNDto1D
+import src.index.index1DtoND as index1DtoND
+import src.index.indexNDto1D as indexNDto1D
 
 def rSpaceSparseSolverGPU(params, PsiOut, V, thr): #Real space solver GPU
 	#read input parameters from params & declare stuff

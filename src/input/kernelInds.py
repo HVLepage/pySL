@@ -6,7 +6,7 @@
 # It is done for 1 particle only here, since for many particles it's relatively cheap to calculate the indices from that
 
 import numpy as np
-import src.fft.index1DtoND as index1DtoND
+import src.index.index1DtoND as index1DtoND
 import pycuda.driver as cuda
 
 class kernelInds:

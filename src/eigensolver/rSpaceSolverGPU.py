@@ -9,8 +9,8 @@ import pycuda.gpuarray as gpuarray
 import os
 from skcuda import linalg
 from src.export.exportEigenvalues import exportEigenvalues
-import src.fft.index1DtoND as index1DtoND
-import src.fft.indexNDto1D as indexNDto1D
+import src.index.index1DtoND as index1DtoND
+import src.index.indexNDto1D as indexNDto1D
 
 def rSpaceSolverGPU(params, PsiOut, V, thr): #Real space solver GPU
 	#read input parameters from params & declare stuff

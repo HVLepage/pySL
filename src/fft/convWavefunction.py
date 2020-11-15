@@ -5,12 +5,7 @@
 
 
 #from src.input.wavefunction import wavefunction
-import os
-import math
-import numpy as np
-import pycuda.driver as cuda
 import reikna.fft as rfft
-import reikna.cluda as cluda
 import pycuda.gpuarray as gpuarray
 from src.get_ccbin import get_ccbin
 
