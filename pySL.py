@@ -97,10 +97,16 @@ print("Allocating potential")
 print("----------------------------------------------------------------")
 t0V = time.time()
 V = potential(params) # Static potential
+time_V = time.time() - t0V
+t0V = time.time()
+print("\nPotential allocated in %.4f seconds"%time_V)
 dom = domain(params) # Simulation domain boundary conditions
+time_V = time.time() - t0V
+t0V = time.time()
+print("Simulation domain defined in %.4f seconds"%time_V)
 kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avoid calculating this every time
 time_V = time.time() - t0V
-print("\nPotential allocated in %.4f seconds"%time_V)
+print("KernelInds calculated in %.4f seconds"%time_V)
 
 psi = wavefunction(params, thr, V) #create wavefunction as per parameters
 
