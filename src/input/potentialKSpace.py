@@ -3,6 +3,7 @@
 ################################################################################################################################
 
 import numpy as np
+import math
 import pycuda.driver as cuda
 import src.index.index6Dto1D as index6Dto1D
 import src.index.index3Dto1D as index3Dto1D
@@ -33,8 +34,8 @@ class potentialKSpace():
             self.filePot[i] = float(lines[i+3].split()[0])
         
     # Build the potential from analytically
-    def construct(self,params, thr):
-        
+    def construct(self,params, mod, thr):
+        CoulombPotential = mod.get_function("CoulombPotential")
         ccbin = get_ccbin()
         #self.api = cluda.cuda_api()
         #self.thr = api.Thread.create()
@@ -78,22 +79,22 @@ class potentialKSpace():
             interactionsNr = 0
 
         if (interactionsNr > 0):
-            V2P=np.zeros((Nx * Ny * Nz)**2,  dtype = np.complex64) #store 2-particle potential
+            V2P=np.zeros((Nx * Ny * Nz)**2,  dtype = np.float32) #store 2-particle potential
 
-            for i1 in range(0,Nx):
-                for j1 in range(0,Ny):
-                    for k1 in range(0,Nz):
-                        for i2 in range(0,Nx):
-                            for j2 in range(0,Ny):
-                                for k2 in range(0,Nz):
-                                    #calculate 2-particle potential using Coulomb ionteraction
-                                    VVal = CoulombPotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
-                                    if (VVal > 100):
-                                        VVal = 100.0
-                                            
-                                    V2P[index6Dto1D.index(i1, j1, k1, i2, j2, k2, Nx, Ny, Nz, Nx, Ny, Nz)] = VVal
+            V2P_gpu = cuda.mem_alloc_like(V2P)
+            
+            blockSize = 256 
+            numBlocks = math.ceil(params["N"] / blockSize) 
+            #calculate 2-particle potential using Coulomb ionteraction
+            CoulombPotential(np.int32(params["N"]), V2P_gpu,  np.int32(Nx),  np.int32(Ny),  np.int32(Nz),  np.float32(Xa),   np.float32(params["dx"]),
+                                  np.float32(Ya),   np.float32(params["dy"]),   np.float32(Za),   np.float32(params["dy"]),   np.float32(params["RelPerm"]),
+                                   np.float32(params["sigmaFit"][0]),    np.float32(params["sigmaFit"][1]),    np.float32(params["sigmaFit"][2]),
+                                    np.float32(params["sigmaFit"][3]),    np.float32(params["sigmaFit"][4]),
+                                   np.float32(params["sigmaFit"][5]),    np.float32(params["sigmaFit"][6]),   np.float32(params["sigmaFit"][7]),    np.float32(params["sigmaFit"][8]),
+                                  block=(blockSize,1,1), grid=(numBlocks,1))
 
-
+            cuda.memcpy_dtoh(V2P, V2P_gpu)
+            V2P = V2P.astype(np.complex64)
 
             #Do FFT
         
@@ -181,7 +182,7 @@ class potentialKSpace():
 
             
     
-    def __init__(self,params, thr, enlarged = False):        
+    def __init__(self,params, mod, thr, enlarged = False):        
         
         KxCO = params["KxECO"]
         KyCO = params["KyECO"]
@@ -228,6 +229,6 @@ class potentialKSpace():
         for p in range(0,params["Np"]):
             self.sizesNP += self.sizes
             
-        self.construct(params, thr)
+        self.construct(params, mod, thr)
 
         self.htod()

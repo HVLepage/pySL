@@ -14,7 +14,7 @@ from src.fft.fftAuxPsi import ToReal
 from skcuda import linalg
 
 
-def kSpaceSolverGPU(params, PsiOut, thr): #Real space solver GPU
+def kSpaceSolverGPU(params, PsiOut, mod, thr): #Real space solver GPU
 	#read input parameters from params & declare stuff
 
 	
@@ -62,7 +62,7 @@ def kSpaceSolverGPU(params, PsiOut, thr): #Real space solver GPU
 	#Init Hamiltonian
     H = np.zeros(PsiSize*PsiSize, dtype = np.complex64)
     
-    Vk = potentialKSpace(params, thr, True)
+    Vk = potentialKSpace(params, mod, thr, True)
     #Vk = np.zeros(((4 * KxCO + 1) * (4 * KyCO + 1) * (4 * KzCO + 1)))
 
     indsCol = np.zeros(dim*Np, dtype=np.int32)

@@ -3,6 +3,72 @@
 //#include <complex>
 //#include <cmath>
 
+/*******************************************************************************************************************************
+Calculate Coulomb potential
+*******************************************************************************************************************************/
+__global__ void CoulombPotential(int N, float* V2P, int Nx, int Ny, int Nz, float Xa, float dx, float Ya, float dy, float Za, float dz, float RelPerm,
+                                 float sigmaFit0, float sigmaFit1, float sigmaFit2, float sigmaFit3, float sigmaFit4, float sigmaFit5, float sigmaFit6, 
+                                 float sigmaFit7, float sigmaFit8){       
+    int ind = blockIdx.x * blockDim.x + threadIdx.x;
+    int indOut = ind;
+    if (ind<N){
+    
+	long stride = N;
+	long temp = 0;
+	
+	temp = stride;
+	stride = (long)((double)temp / (double)Nx);
+	int i1 = ind / stride;
+	ind = ind - i1 * stride;
+	
+	temp = stride;
+	stride = (long)((double)temp / (double)Ny);
+	int j1 = ind / stride;
+	ind = ind - j1 * stride;
+	
+	temp = stride;
+	stride = (long)((double)temp / (double)Nz);
+	int k1 = ind / stride;
+	ind = ind - k1 * stride;
+	
+	temp = stride;
+	stride = (long)((double)temp / (double)Nx);
+	int i2 = ind / stride;
+	ind = ind - i2 * stride;
+	
+	temp = stride;
+	stride = (long)((double)temp / (double)Ny);
+	int j2 = ind / stride;
+	ind = ind - j2 * stride;
+	
+	temp = stride;
+	stride = (long)((double)temp / (double)Nz);
+	int k2 = ind / stride;
+	//ind = ind - k2 * stride;
+	
+    
+    float x1 = Xa + i1*dx;
+    float y1 = Ya + j1*dy;
+    float z1 = Za + k1*dz;
+    float x2 = Xa + i2*dx;
+    float y2 = Ya + j2*dx;
+    float z2 = Za + k2*dx;
+        
+     float d = sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2) + pow((z1 - z2), 2));
+     float dsoft = powf(d, 8) * sigmaFit0 + powf(d, 7) * sigmaFit1 + powf(d, 6) * sigmaFit2 +
+									powf(d, 5) * sigmaFit3 + powf(d, 4) * sigmaFit4 + powf(d, 3) * sigmaFit5 +
+									powf(d, 2) * sigmaFit6 + d * sigmaFit7 + sigmaFit8;
+	 double VVal = (18.8950673 / RelPerm) * powf(dsoft, -1.0); //use Coulomb softening with cap at 100, 18.89... is conversion factor to natural units and nm
+     VVal = (18.8950673 / RelPerm) * powf(dsoft, -1.0); //use Coulomb softening with cap at 100, 18.89... is conversion factor to natural units and nm
+     if (VVal>100.0){
+         VVal=100.0;
+    }
+     V2P[indOut]=VVal;
+     
+   }
+
+}
+
 
 /*******************************************************************************************************************************
 Multiply by potential, calculate time dependent potential part

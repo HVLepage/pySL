@@ -27,7 +27,7 @@ class wavefunction:
         thr.synchronize()
 
     #use appropriate eigensolver to get wavefunction
-    def solve(self,params, thr, V):
+    def solve(self,params, mod, thr, V):
         print("\n----------------------------------------------------------------")
         print("Solving eigenvalue problem using:", str(params["Eignesolver"]))
         print("----------------------------------------------------------------\n")
@@ -38,9 +38,9 @@ class wavefunction:
         elif params["Eignesolver"] == "GPUrSpace":
             rSpaceSolverGPU(params,self,V, thr)
         elif params["Eignesolver"] == "CPUkSpace":
-            kSpaceSolverCPU(params,self, thr)
+            kSpaceSolverCPU(params,self, mod, thr)
         elif params["Eignesolver"] == "GPUkSpace":
-            kSpaceSolverGPU(params,self, thr)
+            kSpaceSolverGPU(params,self, mod, thr)
         elif params["Eignesolver"] == "GPUrSpaceSparse":
             rSpaceSparseSolverGPU(params,self,V, thr)
         time_eig = time.time() - t0
@@ -107,7 +107,7 @@ class wavefunction:
             self.wave = self.wave / math.sqrt(self.norm())
     
     #thi sis called on creation of instance
-    def __init__(self, params, thr, V=0):
+    def __init__(self, params, mod, thr, V=0):
         
         if (params["TDSESolver"] == "kSpace"):
             self.TDSESolver = "kSpace"
@@ -143,7 +143,7 @@ class wavefunction:
         
         
         if (not params["ImportWavefunction"]):
-            self.solve(params, thr, V)
+            self.solve(params,mod, thr, V)
         else:
             self.readFromFile(params) #read from file
         

@@ -96,7 +96,7 @@ print("\n----------------------------------------------------------------")
 print("Allocating potential")
 print("----------------------------------------------------------------")
 t0V = time.time()
-V = potential(params) # Static potential
+V = potential(params, mod) # Static potential
 time_V = time.time() - t0V
 t0V = time.time()
 print("\nPotential allocated in %.4f seconds"%time_V)
@@ -108,7 +108,7 @@ kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avo
 time_V = time.time() - t0V
 print("KernelInds calculated in %.4f seconds"%time_V)
 
-psi = wavefunction(params, thr, V) #create wavefunction as per parameters
+psi = wavefunction(params,mod, thr, V) #create wavefunction as per parameters
 
 dt =  np.float32(params["dt"]) # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
@@ -194,7 +194,7 @@ for i in range(0, TimeSteps):
         phi.fft(thr, 1)
         Axpy(phi.wave_gpu, V.pot_gpu,  N,  t, kerInds.inds_gpu, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2, Mass,  dXs,  Xa,  Ya, block=(blockSize,1,1), grid=(numBlocks,1))
         phi.fft(thr, 0)
-        kSpaceSL(N, psi.wave_gpu, phi.wave_gpu, t, dt, Np, N1K,  dim,  value,  Sizes,  Mass,  dKs,  np.int32(i%2),  kerInds.inds_gpu, block=(blockSize,1,1), grid=(numBlocks,1))
+        kSpaceSL(np.int32(params["NK"]) , psi.wave_gpu, phi.wave_gpu, t, dt, Np, N1K,  dim,  value,  Sizes,  Mass,  dKs,  np.int32(i%2),  kerInds.inds_gpu, block=(blockSize,1,1), grid=(numBlocks,1))
         
         
     if (i % PrintStep) == 0:

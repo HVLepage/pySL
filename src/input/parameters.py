@@ -69,7 +69,7 @@ def getparams():
         
         "dt": 0.00001, # duration of a single time step in [ps]
         "StartTime": 0.0,
-        "TimeSteps": 10000,
+        "TimeSteps": 1000,
         "PrintStep": 1000, # How often the wave function is saved to a file
 
         ################################################################
