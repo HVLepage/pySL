@@ -40,8 +40,9 @@ from src.plot.animate1D import animate1D
 from src.plot.plot1Dtrace import plot1Dtrace
 
 print("\n----------------------------------------------------------------")
-print("pySL version 0.1.0")
+print("pySL version 0.1.1")
 print("----------------------------------------------------------------")
+t0_full = time.time() # Keep track of total simulation time
 
 ################################################################################################################################
 # Application profiling & GPU hardware configuration
@@ -225,7 +226,7 @@ for i in range(0, TimeSteps):
 
 t2 = time.time()
 t_print = t2-t0
-print("\nTotal Time Elapsed = ",t_print)
+print("\nTDSE time elapsed = ",t_print)
 
 
 psi.dtoh()
@@ -244,6 +245,9 @@ psi.dtoh()
 ################################################################################################################################
 # Trace Memory Management
 ################################################################################################################################
+t_print = time.time()-t0_full
+print("\nTotal time elapsed = ",t_print)
+
 
 snapshot = tracemalloc.take_snapshot()
 top_stats = snapshot.statistics('lineno')
