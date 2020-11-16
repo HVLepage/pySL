@@ -28,7 +28,7 @@ jobs:
         nvidia-smi
     - name: Install dependencies
       run: |
-        ln -s /usr/bin/pip3 /usr/bin/pip
+        ln -s /__t/Python/3.8.6/x64/bin/pip /usr/bin/pip
         python -m pip install --upgrade pip
         python -m pip install wheel
         python -m pip install flake8 pytest
