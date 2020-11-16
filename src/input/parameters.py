@@ -103,13 +103,8 @@ def getparams():
         "KzKCO": 0,
 
 
-        # Lattice padding (for expanding TDSE solution window)
-        # "padLeft": 0,
-        # "padRight": 0,
-        # "padTop": 0,
-        # "padBottom": 0,
-
         # Absorbing Boudary Conditions (Leave as zero for Dirichlet boundary)
+        # These do not to anything yet. Possible implementation in a future version of pySL
         # "ABC_L": 0,
         # "ABC_R": 0,
         # "ABC_T": 0,
@@ -133,12 +128,12 @@ def getparams():
         "RS": 0.0,
         "DRt0": 1.0,
         "URt0": 12.4,
-
-        # "sigmaFit": [1.74707037e-17, -2.73761743e-14, 1.78462882e-11, -6.26868417e-09, 1.28479963e-06, -1.55625754e-04, 1.07952353e-02, 6.02006265e-01, 6.93382649e+00],
-        # "Traces": 0,
         
     }
 
+    ################################################################
+    # Post processing and conversion to Natural Units
+    ################################################################
     t_si2nu = params["t_si2nu"]
     v_si2nu = params["v_si2nu"]
 
