@@ -1,10 +1,10 @@
 # Essential modules #
 
-numpy
 pycuda
 scikit-cuda
 
 reikna
+numpy
 
 # Extra additions #
 
