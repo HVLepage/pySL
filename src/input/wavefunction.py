@@ -103,6 +103,8 @@ class wavefunction:
         for i in range(0,params["N"]):
             self.wave.real[i] = float(lines[i].split()[0])
             self.wave.imag[i] = float(lines[i].split()[1])
+        if (params["NormalizeWaveFunction"]):
+            self.wave = self.wave / self.norm()
     
     #thi sis called on creation of instance
     def __init__(self, params, thr, V=0):
