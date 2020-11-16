@@ -48,10 +48,6 @@ def getparams():
         # Relative permittivity of quantum well material
         "RelPerm": 13.1,
 
-        # Conversion between SI units and natural units (hbar = 1, m_e = 1)
-        "v_si2nu": 1.312342066e-2,
-        "t_si2nu": 1.157676458e2,
-
         ################################################################
         # Surface acoustic wave
         ################################################################
@@ -134,8 +130,10 @@ def getparams():
     ################################################################
     # Post processing and conversion to Natural Units
     ################################################################
-    t_si2nu = params["t_si2nu"]
-    v_si2nu = params["v_si2nu"]
+
+    # Conversion between SI units and natural units (hbar = 1, m_e = 1)
+    t_si2nu = 1.157676458e2
+    v_si2nu = 1.312342066e-2
 
     # Convert variables to Natural Units
     params["dt"] *= t_si2nu
