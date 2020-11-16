@@ -24,7 +24,7 @@ class potential():
         
     #read potential from file specified in params
     def readFromFile(self,params):
-        file = open(".\src\\" + params["PotentialFileName"])
+        file = open("./src/" + params["PotentialFileName"])
         self.filePot = np.zeros(params["N1"])
         lines = file.readlines()
         for i in range(0,params["N1"]):
@@ -105,7 +105,7 @@ class potential():
 
 
 
-	#Add 1 particle static potential
+	    #Add 1 particle static potential
         V1P = np.zeros(Nx * Ny * Nz)
         
         for p in range(0, params["Np"]):
@@ -113,7 +113,7 @@ class potential():
             for i in range(0,Nx):
                 for j in range(0,Ny):
                     for k in range(0,Nz):
-                        VVal = 0.0;
+                        VVal = 0.0
                         ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
                         
                         #either import from file, or calculate from electrostatic equations

@@ -92,11 +92,17 @@ makepath(params)
 exportParameters(params)
 
 
+print("\n----------------------------------------------------------------")
+print("Allocating potential")
+print("----------------------------------------------------------------")
+t0V = time.time()
 V = potential(params) # Static potential
 dom = domain(params) # Simulation domain boundary conditions
 kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avoid calculating this every time
-psi = wavefunction(params, thr, V) #create wavefunction as per parameters
+time_V = time.time() - t0V
+print("\nPotential allocated in %.4f seconds"%time_V)
 
+psi = wavefunction(params, thr, V) #create wavefunction as per parameters
 
 dt =  np.float32(params["dt"]) # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
