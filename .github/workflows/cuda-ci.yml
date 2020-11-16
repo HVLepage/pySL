@@ -25,7 +25,6 @@ jobs:
         uname -m && cat /etc/*release
         gcc --version
         nvcc --version
-        nvidia-smi
     - name: Install dependencies
       run: |
         ln -s /__t/Python/3.8.6/x64/bin/pip /usr/bin/pip
