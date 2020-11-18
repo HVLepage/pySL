@@ -146,4 +146,6 @@ export CUDA_PATH=${CUDA_PATH}
 # Quick test. @temp
 export PATH="$CUDA_PATH/bin:$PATH"
 export LD_LIBRARY_PATH="$CUDA_PATH/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$CUDA_PATH/lib64:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/usr/lib64:$LD_LIBRARY_PATH"
 nvcc -V
