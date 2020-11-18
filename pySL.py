@@ -66,10 +66,7 @@ with open('./src/kernel.cu', 'r') as file:
     source = file.read()
 
 # Compile kernel using nvcc
-if os.name == 'nt': # Compatibility with Windows
-    mod = SourceModule(source, options=['-ccbin', ccbin])
-else:
-    mod = SourceModule(source, options=['-ccbin', ccbin])
+mod = SourceModule(source, options=['-ccbin', ccbin])
 
 # Load CUDA function into python
 rSpaceSL = mod.get_function("rSpaceSL")
