@@ -130,6 +130,9 @@ sudo apt-get update
 echo "Installing CUDA packages ${CUDA_PACKAGES}"
 sudo apt-get -y install ${CUDA_PACKAGES}
 
+echo "Full CUDA Install"
+sudo apt-get -y install cuda
+
 if [[ $? -ne 0 ]]; then
     echo "CUDA Installation Error."
     exit 1
