@@ -14,9 +14,11 @@ def plot1Dtrace(params):
     waves.sort()
 
     wave = np.loadtxt(fname = FilePath + waves[0])
+    
+    Xa = float(params["Xa"])
+    Xb = float(params["Xb"])
 
-
-    x = np.linspace(float(params["Xa"]), float(params["Xb"]), int(params["Nx"]))
+    x = np.linspace(Xa, Xb, int(params["Nx"]))
     psi2 = np.zeros((len(waves),len(x)))
 
     for i in range(0, len(waves)-1):
@@ -25,7 +27,7 @@ def plot1Dtrace(params):
 
     # First set up the figure, the axis, and the plot element we want to animate
     fig = plt.figure()
-    plt.imshow(np.transpose(psi2), extent=[0,100,-200,200], aspect=0.1, cmap='inferno', vmin=0, vmax=0.01)
+    plt.imshow(np.transpose(psi2), extent=[0,100, int(Xa), int(Xb)], aspect=0.1, cmap='inferno', vmin=0, vmax=0.01)
     plt.xlabel('t (ps)')
     plt.ylabel('y (nm)')
     fig.suptitle('1D Double Slit Experiment')
