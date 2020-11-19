@@ -30,7 +30,7 @@ def plot1Dtrace(params):
     plt.imshow(np.transpose(psi2), extent=[0,100, int(Xa), int(Xb)], aspect=0.1, cmap='inferno', vmin=0, vmax=0.01)
     plt.xlabel('t (ps)')
     plt.ylabel('y (nm)')
-    fig.suptitle('1D Double Slit Experiment')
+    fig.suptitle(SimName)
 
     SavePath = './out/' + SimName + '/trace1D.png'
     plt.savefig('trace1D.png', dpi=600)
