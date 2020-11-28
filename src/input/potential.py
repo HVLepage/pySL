@@ -59,8 +59,8 @@ class potential():
         inds = np.zeros(dim*Np)
 
         if (Np > 1):
-            interactionsNr = (Np**2 - Np) / 2 #Nr of onteractions between particle pairs
-            interactionsMap = np.zeros(interactionsNr,2) #map of which particle interacts with which
+            interactionsNr = np.int32( (Np**2 - Np) / 2 ) #Nr of onteractions between particle pairs
+            interactionsMap = np.zeros( (interactionsNr, 2) ) #map of which particle interacts with which
 		
 
 
