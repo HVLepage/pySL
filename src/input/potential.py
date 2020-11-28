@@ -2,16 +2,15 @@
 # Create the potential class for storing the time-independent potential of the problem, including 2-particle interactions like Coulomb
 ################################################################################################################################
 
-
+import math
 import numpy as np
 import pycuda.driver as cuda
-import math
-import src.fft.index6Dto1D as index6Dto1D
-import src.fft.index3Dto1D as index3Dto1D
-import src.fft.index1DtoND as index1DtoND
-import src.fft.indexNDto1D as indexNDto1D
+import src.index.index6Dto1D as index6Dto1D
+import src.index.index3Dto1D as index3Dto1D
+import src.index.index1DtoND as index1DtoND
+import src.index.indexNDto1D as indexNDto1D
 from src.input.electrostaticPotential import electrostaticPotential
-from src.input.coulombPotential import CoulombPotential
+#from src.input.coulombPotential import CoulombPotential
 
 class potential():
     
@@ -29,10 +28,12 @@ class potential():
         self.filePot = np.zeros(params["N1"])
         lines = file.readlines()
         for i in range(0,params["N1"]):
-            self.filePot[i] = float(lines[i].split()[0])
+            self.filePot[i] = float(lines[i+3].split()[0])
         
     # Build the potential from analytically
-    def construct(self,params):
+    def construct(self,params, mod):
+        CoulombPotential = mod.get_function("CoulombPotential")
+        
         Xa = params["Xa"]
         Xb = params["Xb"]
         Ya = params["Ya"]
@@ -44,8 +45,8 @@ class potential():
         Nz = params["Nz"]
 
 
-        Np = params["Np"]
-        dim = params["dim"]
+        Np = int(params["Np"])
+        dim = int(params["dim"])
 
 
         x = np.linspace(Xa, Xb, Nx)
@@ -59,8 +60,8 @@ class potential():
         inds = np.zeros(dim*Np)
 
         if (Np > 1):
-            interactionsNr = np.int32( (Np**2 - Np) / 2 ) #Nr of onteractions between particle pairs
-            interactionsMap = np.zeros( [interactionsNr, 2] ) #map of which particle interacts with which
+            interactionsNr = int((Np**2 - Np) / 2) #Nr of onteractions between particle pairs
+            interactionsMap = np.zeros([interactionsNr,2]) #map of which particle interacts with which
 		
 
 
@@ -72,41 +73,42 @@ class potential():
             interactionsNr = 0
 
         if (interactionsNr > 0):
-            V2P=np.zeros((Nx * Ny * Nz)**2) #store 2-particle potential
+            V2P=np.zeros((Nx * Ny * Nz)**2, dtype = np.float32) #store 2-particle potential
+            V2P_gpu = cuda.mem_alloc_like(V2P)
+            
+            blockSize = 256 
+            numBlocks = math.ceil(params["N"] / blockSize) 
+            #calculate 2-particle potential using Coulomb ionteraction
+            CoulombPotential(np.int32(params["N"]), V2P_gpu,  np.int32(Nx),  np.int32(Ny),  np.int32(Nz),  np.float32(Xa),   np.float32(params["dx"]),
+                                  np.float32(Ya),   np.float32(params["dy"]),   np.float32(Za),   np.float32(params["dy"]),   np.float32(params["RelPerm"]),
+                                   np.float32(params["sigmaFit"][0]),    np.float32(params["sigmaFit"][1]),    np.float32(params["sigmaFit"][2]),
+                                    np.float32(params["sigmaFit"][3]),    np.float32(params["sigmaFit"][4]),
+                                   np.float32(params["sigmaFit"][5]),    np.float32(params["sigmaFit"][6]),   np.float32(params["sigmaFit"][7]),    np.float32(params["sigmaFit"][8]),
+                                  block=(blockSize,1,1), grid=(numBlocks,1))
 
-            for i1 in range(0,Nx):
-                for j1 in range(0,Ny):
-                    for k1 in range(0,Nz):
-                        for i2 in range(0,Nx):
-                            for j2 in range(0,Ny):
-                                for k2 in range(0,Nz):
-                                    #calculate 2-particle potential using Coulomb ionteraction
-                                    VVal = CoulombPotential(params,x[i1],y[j1],z[k1],x[i2],y[j2],z[k2])
-                                    if (VVal > 100):
-                                        VVal = 100.0
-                                            
-                                    V2P[index6Dto1D.index(i1, j1, k1, i2, j2, k2, Nx, Ny, Nz, Nx, Ny, Nz)] = VVal
+            cuda.memcpy_dtoh(V2P, V2P_gpu)
+            
 
     		#for each pair, fill the potential with their corresponding 2-particle interaction potential
             for p in range(0,interactionsNr):
 
-                p1 = interactionsMap[p, 0]
-                p2 = interactionsMap[p, 1]
+                p1 = interactionsMap[p,0]
+                p2 = interactionsMap[p,1]
                 inds2P = np.zeros(dim*2)
 
                 for i in range(0,params["N"]):
                     index1DtoND.index(i, inds, params["Sizes"], params)
 
                     for j in range(0,dim):
-                        inds2P[j] = inds[p1 * dim + j]
-                        inds2P[j + dim] = inds[p2 * dim + j]
+                        inds2P[j] = inds[int(p1 * dim + j)]
+                        inds2P[j + dim] = inds[int(p2 * dim + j)]
 				
-                    ind2P = indexNDto1D.index(inds2P, params["Sizes"], params, 2)
-                    self.pot[i] += params["Charge"][p1] * params["Charge"][p2] * V2P[ind2P]
+                    ind2P = int(indexNDto1D.index(inds2P, params["Sizes"], params, 2))
+                    self.pot[i] += params["Charge"][int(p1)] * params["Charge"][int(p2)] * V2P[ind2P]
 
 
 
-	#Add 1 particle static potential
+	    #Add 1 particle static potential
         V1P = np.zeros(Nx * Ny * Nz)
         
         for p in range(0, params["Np"]):
@@ -114,7 +116,7 @@ class potential():
             for i in range(0,Nx):
                 for j in range(0,Ny):
                     for k in range(0,Nz):
-                        VVal = 0.0;
+                        VVal = 0.0
                         ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
                         
                         #either import from file, or calculate from electrostatic equations
@@ -145,13 +147,13 @@ class potential():
 
             
     
-    def __init__(self,params):        
+    def __init__(self,params, mod):        
         
         self.pot=np.zeros(params["N"], dtype=np.float32)
         
         self.pot_gpu=cuda.mem_alloc(self.pot.nbytes)
     
-        self.construct(params)
+        self.construct(params, mod)
         
         self.size1P = []
         self.size = []
