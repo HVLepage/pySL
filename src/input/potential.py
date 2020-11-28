@@ -60,7 +60,7 @@ class potential():
 
         if (Np > 1):
             interactionsNr = np.int32( (Np**2 - Np) / 2 ) #Nr of onteractions between particle pairs
-            interactionsMap = np.zeros( (interactionsNr, 2) ) #map of which particle interacts with which
+            interactionsMap = np.zeros( [interactionsNr, 2] ) #map of which particle interacts with which
 		
 
 
@@ -90,8 +90,8 @@ class potential():
     		#for each pair, fill the potential with their corresponding 2-particle interaction potential
             for p in range(0,interactionsNr):
 
-                p1 = interactionsMap[p]
-                p2 = interactionsMap[p + 1]
+                p1 = interactionsMap[p, 0]
+                p2 = interactionsMap[p, 1]
                 inds2P = np.zeros(dim*2)
 
                 for i in range(0,params["N"]):
