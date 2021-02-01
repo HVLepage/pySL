@@ -29,19 +29,19 @@ class wavefunction:
     #use appropriate eigensolver to get wavefunction
     def solve(self,params, mod, thr, V):
         print("\n----------------------------------------------------------------")
-        print("Solving eigenvalue problem using:", str(params["Eignesolver"]))
+        print("Solving eigenvalue problem using:", str(params["Eigensolver"]))
         print("----------------------------------------------------------------\n")
         print("Eigenvalues:\n")
         t0 = time.time()
-        if params["Eignesolver"] == "CPUrSpace":
+        if params["Eigensolver"] == "CPUrSpace":
             rSpaceSolverCPU(params,self,V, thr)
-        elif params["Eignesolver"] == "GPUrSpace":
+        elif params["Eigensolver"] == "GPUrSpace":
             rSpaceSolverGPU(params,self,V, thr)
-        elif params["Eignesolver"] == "CPUkSpace":
+        elif params["Eigensolver"] == "CPUkSpace":
             kSpaceSolverCPU(params,self, mod, thr)
-        elif params["Eignesolver"] == "GPUkSpace":
+        elif params["Eigensolver"] == "GPUkSpace":
             kSpaceSolverGPU(params,self, mod, thr)
-        elif params["Eignesolver"] == "GPUrSpaceSparse":
+        elif params["Eigensolver"] == "GPUrSpaceSparse":
             rSpaceSparseSolverGPU(params,self,V, thr)
         time_eig = time.time() - t0
         print("\nEigensolver completed in %.4f seconds"%time_eig)
