@@ -24,7 +24,7 @@ class potential():
         
     #read potential from file specified in params
     def readFromFile(self,params):
-        file = open("./src/" + params["PotentialFileName"])
+        file = open("./input/" + params["PotentialFileName"])
         self.filePot = np.zeros(params["N1"])
         lines = file.readlines()
         for i in range(0,params["N1"]):
