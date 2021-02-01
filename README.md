@@ -67,6 +67,8 @@ An output directory will be created for each different simulation name. Within t
 ### Input parameters
 Simulation parameters should be written to the input file `parameters.py`.
 
+Other input files such as an initial wave function or static potentials should be written as text files and placed in the `/input/` directory.
+
 ### Parameter sweeps
 Future work includes the ability to sweep over certain parameters to optimise output results.
 
