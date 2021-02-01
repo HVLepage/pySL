@@ -6,6 +6,9 @@ scikit-cuda
 reikna
 numpy
 
+multiprocessing
+functools
+
 # Extra additions #
 
 matplotlib
