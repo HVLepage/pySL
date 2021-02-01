@@ -40,7 +40,7 @@ from src.plot.animate1D import animate1D
 from src.plot.plot1Dtrace import plot1Dtrace
 
 print("\n----------------------------------------------------------------")
-print("pySL version 0.1.1")
+print("pySL version 0.1.2")
 print("----------------------------------------------------------------")
 t0_full = time.time() # Keep track of total simulation time
 
