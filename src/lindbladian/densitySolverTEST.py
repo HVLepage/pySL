@@ -10,7 +10,7 @@ def commutator (A,B):
     return A@B -B@A
 
 
-Nx = 51
+Nx = 101
 PsiSize = (Nx)
 m = 1
 
@@ -25,35 +25,37 @@ x=np.linspace(Xa,Xb,Nx)
 	
 	#Init Hamiltonian
 H = np.zeros([PsiSize**2], dtype=np.complex64)
-    
+
+# Define total hamiltonian
 H=np.reshape(H, [PsiSize,PsiSize])
+# Kinetic part of the Hamiltonian
+HK=np.reshape(H, [PsiSize,PsiSize])
 
 H2 = hbar ** 2 #hbar squared
 V=0.00005*x**2
    
     
 for k in range(0, PsiSize):# Go over each row
-    
+    #fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
 
-		#fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
-
-		#on-site potential
-    H[k][k] += V[k] 
+    #on-site potential
+    # H[k][k] += V[k] 
  
-    H[k][k] += H2 / (m * dx ** 2) # on-site kinetic part
+    HK[k][k] += H2 / (m * dx ** 2) # on-site kinetic part
                 
     pmone= k -1
     if (pmone>=0 and pmone<Nx):
-        H[k][k-1] -= H2 / (2 * m * dx ** 2)
+        HK[k][k-1] -= H2 / (2 * m * dx ** 2)
                     
     pmone= k+1
                
                 
     if (pmone>=0 and pmone< Nx ):
-        H[k][k+1] -= H2 / (2 * m * dx ** 2)
+        HK[k][k+1] -= H2 / (2 * m * dx ** 2)
                     
+# Add potential term to the Hamiltonian (can be time dependent)
+H = HK + np.diag(V)
 
-				
 
 D, eV = LA.eigh(H)
 
@@ -61,13 +63,14 @@ psi0=eV[:,0]
 psi1=eV[:,1]
 
 psi = (1/np.sqrt(2)) *(psi1+psi0)
+psi = psi0
 
 rho=np.outer(psi,psi)
 
 rhodot= commutator(H,rho)/(hbar*1j)
 
-T=1000
-dt=0.05
+T=200
+dt=0.01
 
 Nt=T/dt
 
@@ -79,7 +82,19 @@ psi01 = np.zeros(int(Nt), dtype=np.complex64)
 psi10 = np.zeros(int(Nt), dtype=np.complex64)
 psi11 = np.zeros(int(Nt), dtype=np.complex64)
 
+
+# print(HK.shape)
+# print(H.shape)
+# print(V.shape)
+
+
 for i in range(0,int(Nt)):
+    # Adjust time-dependent potential
+    if (i>2000):
+        V = (0.0007) * x**2
+    
+    H = HK + np.diag(V)
+
     rho+=rhodot*dt
     rhodot= -1j*commutator(H,rho)/(hbar)
     
@@ -88,14 +103,12 @@ for i in range(0,int(Nt)):
     psi10[i] = np.conjugate(psi1)@rho@psi0
     psi11[i] = np.conjugate(psi1)@rho@psi1
 
-    # print(np.conjugate(psi0)@rho@psi0)
+# rhofinal=rho
 
-rhofinal=rho
-
-psifinal00 = np.conjugate(psi0)@rhofinal@psi0
-psifinal10 = np.conjugate(psi1)@rhofinal@psi0
-psifinal01 = np.conjugate(psi0)@rhofinal@psi1
-psifinal11 = np.conjugate(psi1)@rhofinal@psi1
+# psifinal00 = np.conjugate(psi0)@rhofinal@psi0
+# psifinal10 = np.conjugate(psi1)@rhofinal@psi0
+# psifinal01 = np.conjugate(psi0)@rhofinal@psi1
+# psifinal11 = np.conjugate(psi1)@rhofinal@psi1
 
 
 
@@ -113,6 +126,3 @@ plt.grid()
 
 # fig.savefig("test.png")
 plt.show()
-
-
-# print(psi11.real)
