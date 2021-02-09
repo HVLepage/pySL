@@ -63,7 +63,7 @@ psi0=eV[:,0]
 psi1=eV[:,1]
 
 psi = (1/np.sqrt(2)) *(psi1+psi0)
-psi = psi0
+# psi = psi0
 
 rho=np.outer(psi,psi)
 
@@ -103,26 +103,38 @@ for i in range(0,int(Nt)):
     psi10[i] = np.conjugate(psi1)@rho@psi0
     psi11[i] = np.conjugate(psi1)@rho@psi1
 
-# rhofinal=rho
 
-# psifinal00 = np.conjugate(psi0)@rhofinal@psi0
-# psifinal10 = np.conjugate(psi1)@rhofinal@psi0
-# psifinal01 = np.conjugate(psi0)@rhofinal@psi1
-# psifinal11 = np.conjugate(psi1)@rhofinal@psi1
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+fig.suptitle('Potential step at T=2000')
+
+ax1.plot(range(int(Nt)), psi00.real, label = "psi00")
+ax1.plot(range(int(Nt)), psi01.real, label = "psi01")
+ax1.plot(range(int(Nt)), psi10.real, label = "psi10")
+ax1.plot(range(int(Nt)), psi11.real, label = "psi11")
+
+ax1.set_xlabel('Time')
+ax1.set_ylabel('Psi')
+ax1.set_ylim(-1, 1)
+ax1.set_title("Pure State Evolution")
+ax1.legend()
+ax1.grid()
 
 
+DMGraph = np.zeros((PsiSize,PsiSize), dtype=np.complex64)
+for i in range(PsiSize):
+    for j in range(PsiSize):
+        DMGraph[i][j] = np.conjugate(eV[:,i])@rho@eV[:,j]
 
-plt.plot(range(int(Nt)), psi00.real, label = "psi00")
-plt.plot(range(int(Nt)), psi01.real, label = "psi01")
-plt.plot(range(int(Nt)), psi10.real, label = "psi10")
-plt.plot(range(int(Nt)), psi11.real, label = "psi11")
+ax2.bar(np.arange(0, PsiSize)-.5, np.diag(DMGraph.real))
+ax2.set_title("Pure State ocupation")
 
-plt.xlabel('Time')
-plt.ylabel('Psi')
-plt.ylim(-1, 1)
-plt.title('Title')
-plt.legend()
-plt.grid()
+ax3.pcolormesh(x, x, DMGraph.real)
+ax3.set_title("Full State ocupation")
 
 # fig.savefig("test.png")
 plt.show()
+
+# psifinal00 = np.conjugate(psi0)@rho@psi0
+# psifinal10 = np.conjugate(psi1)@rho@psi0
+# psifinal01 = np.conjugate(psi0)@rho@psi1
+# psifinal11 = np.conjugate(psi1)@rho@psi1
