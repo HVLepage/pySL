@@ -66,17 +66,30 @@ rho=np.outer(psi,psi)
 
 rhodot= commutator(H,rho)/(hbar*1j)
 
-T=100
+T=1000
 dt=0.05
 
 Nt=T/dt
 
 #rhofinal=expm(-1j *H *T/hbar)@rho@expm(1j *H *T/hbar)
 
+
+psi00 = np.zeros(int(Nt), dtype=np.complex64)
+psi01 = np.zeros(int(Nt), dtype=np.complex64)
+psi10 = np.zeros(int(Nt), dtype=np.complex64)
+psi11 = np.zeros(int(Nt), dtype=np.complex64)
+
 for i in range(0,int(Nt)):
     rho+=rhodot*dt
     rhodot= -1j*commutator(H,rho)/(hbar)
     
+    psi00[i] = np.conjugate(psi0)@rho@psi0
+    psi01[i] = np.conjugate(psi0)@rho@psi1
+    psi10[i] = np.conjugate(psi1)@rho@psi0
+    psi11[i] = np.conjugate(psi1)@rho@psi1
+
+    # print(np.conjugate(psi0)@rho@psi0)
+
 rhofinal=rho
 
 psifinal00 = np.conjugate(psi0)@rhofinal@psi0
@@ -85,3 +98,21 @@ psifinal01 = np.conjugate(psi0)@rhofinal@psi1
 psifinal11 = np.conjugate(psi1)@rhofinal@psi1
 
 
+
+plt.plot(range(int(Nt)), psi00.real, label = "psi00")
+plt.plot(range(int(Nt)), psi01.real, label = "psi01")
+plt.plot(range(int(Nt)), psi10.real, label = "psi10")
+plt.plot(range(int(Nt)), psi11.real, label = "psi11")
+
+plt.xlabel('Time')
+plt.ylabel('Psi')
+plt.ylim(-1, 1)
+plt.title('Title')
+plt.legend()
+plt.grid()
+
+# fig.savefig("test.png")
+plt.show()
+
+
+# print(psi11.real)
