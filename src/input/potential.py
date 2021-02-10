@@ -24,11 +24,12 @@ class potential():
         
     #read potential from file specified in params
     def readFromFile(self,params):
-        file = open("./src/" + params["PotentialFileName"])
+        file = open("./src/input/" + params["PotentialFileName"])
         self.filePot = np.zeros(params["N1"])
         lines = file.readlines()
         for i in range(0,params["N1"]):
-            self.filePot[i] = float(lines[i+3].split()[0])
+            #print(i, lines[i], lines[i].split()[0])
+            self.filePot[i] = float(lines[i].split()[0])
         
     # Build the potential from analytically
     def construct(self,params, mod):
