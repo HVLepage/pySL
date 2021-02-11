@@ -88,6 +88,15 @@ class wavefunctionOut:
         #self.wave=self.wave.ravel()
         
     def __init__(self, params, thr):
+    
+        if (params["TDSESolver"] == "kSpace"):
+            self.TDSESolver = "kSpace"
+            self.dV = (params["dKx"] * params["dKy"] *params["dKz"]) ** params["Np"]
+        else:
+            self.TDSESolver = "rSpace"
+            self.dV = (params["dx"] * params["dy"] *params["dz"]) ** params["Np"]
+        
+        
         self.NxOut = params["NxOutK"]	#Padded real wave function size
         self.NyOut = params["NyOutK"]
         self.NzOut = params["NzOutK"]
