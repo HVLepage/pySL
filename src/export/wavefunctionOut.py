@@ -6,6 +6,7 @@ import reikna.fft as rfft
 import pycuda.gpuarray as gpuarray
 from src.get_ccbin import get_ccbin
 from src.fft.fftAuxPsi import ToReal
+from  src.export.exportNorms import exportNorms
 
 class wavefunctionOut:
     
@@ -22,7 +23,9 @@ class wavefunctionOut:
 	
         with open(OutputFileName, 'w+') as OutputFile:
             for x in np.nditer(self.wave):
-                OutputFile.write("{:e} {:e} \n".format(x.real, x.imag))     
+                OutputFile.write("{:e} {:e} \n".format(x.real, x.imag))  
+
+        exportNorms(params, self, step)
             
     def norm(self):
         norm = sum(self.wave.real**2 + self.wave.imag**2) *self.dV
