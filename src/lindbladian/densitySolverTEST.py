@@ -26,7 +26,6 @@ tracemalloc.start() # Memory allocation profile
 def commutator (A,B):
     return A@B -B@A
 
-
 Nx = 101
 PsiSize = (Nx)
 m = 1
@@ -38,9 +37,9 @@ dx = (Xb-Xa)/(Nx-1)
 hbar = 1
 
 x=np.linspace(Xa,Xb,Nx)
-	#generate Hamiltonian matrix for eigenfunction solving
+#generate Hamiltonian matrix for eigenfunction solving
 	
-	#Init Hamiltonian
+#Init Hamiltonian
 H = np.zeros([PsiSize**2], dtype=np.complex64)
 
 # Define total hamiltonian
@@ -110,8 +109,7 @@ for i in range(0,int(Nt)):
     # Adjust time-dependent potential
     if (i*dt > 500):
         V = (0.00005) * x**2
-    
-    H = HK + np.diag(V)
+        H = HK + np.diag(V)
 
     rho += rhodot*dt
     rhodot = -1j*commutator(H,rho)/(hbar)
