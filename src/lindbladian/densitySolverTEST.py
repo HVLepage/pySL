@@ -4,13 +4,30 @@ import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
+import time
+import tracemalloc
+import humanize
 
+
+t0_full = time.time() # Keep track of total simulation time
+
+################################################################################################################################
+# Application profiling & GPU hardware configuration
+################################################################################################################################
+
+tracemalloc.start() # Memory allocation profile
+
+# gpuinfo.print_gpu_info()
+
+################################################################################################################################
+# 
+################################################################################################################################
 
 def commutator (A,B):
     return A@B -B@A
 
 
-Nx = 41
+Nx = 101
 PsiSize = (Nx)
 m = 1
 
@@ -138,9 +155,30 @@ ax3.set_xlabel('x (nm)')
 ax3.set_ylabel('Time (ps)')
 
 # fig.savefig("test.png")
-plt.show()
+# plt.show()
 
 # psifinal00 = np.conjugate(psi0)@rho@psi0
 # psifinal10 = np.conjugate(psi1)@rho@psi0
 # psifinal01 = np.conjugate(psi0)@rho@psi1
 # psifinal11 = np.conjugate(psi1)@rho@psi1
+
+
+
+################################################################################################################################
+# Trace Memory Management
+################################################################################################################################
+t_print = time.time()-t0_full
+print("\nTotal time elapsed = ",t_print)
+
+
+snapshot = tracemalloc.take_snapshot()
+top_stats = snapshot.statistics('lineno')
+total = sum(stat.size for stat in top_stats)
+
+print("\n----------------------------------------------------------------")
+print("Total Memory Usage: %s"% humanize.naturalsize(total))
+print("----------------------------------------------------------------")
+
+print("[ Top 10 ]")
+for stat in top_stats[:10]:
+    print(stat)
