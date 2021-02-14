@@ -26,7 +26,7 @@ tracemalloc.start() # Memory allocation profile
 def commutator (A,B):
     return A@B -B@A
 
-Nx = 101
+Nx = 41
 PsiSize = (Nx)
 m = 1
 
@@ -37,6 +37,7 @@ dx = (Xb-Xa)/(Nx-1)
 hbar = 1
 
 x=np.linspace(Xa,Xb,Nx)
+
 #generate Hamiltonian matrix for eigenfunction solving
 	
 #Init Hamiltonian
@@ -47,36 +48,32 @@ H=np.reshape(H, [PsiSize,PsiSize])
 # Kinetic part of the Hamiltonian
 HK=np.reshape(H, [PsiSize,PsiSize])
 
-H2 = hbar ** 2 #hbar squared
-V=0.0002*x**2
-   
-    
+hbar2 = hbar ** 2 #hbar squared
+w = 0.015
+V = w**2 * x**2   
+
+hk = hbar2 / (2 * m * dx ** 2)
+
 for k in range(0, PsiSize):# Go over each row
     #fill Hamiltonian, making use of hermiticity to only fill half and do conjugate
-
-    #on-site potential
-    # H[k][k] += V[k] 
  
-    HK[k][k] += H2 / (m * dx ** 2) # on-site kinetic part
-                
+    HK[k][k] += 2 * hk # on-site kinetic part
+
     pmone= k -1
     if (pmone>=0 and pmone<Nx):
-        HK[k][k-1] -= H2 / (2 * m * dx ** 2)
-                    
+        HK[k][k-1] -= hk
+
     pmone= k+1
-               
-                
     if (pmone>=0 and pmone< Nx ):
-        HK[k][k+1] -= H2 / (2 * m * dx ** 2)
-                    
+        HK[k][k+1] -= hk
+
 # Add potential term to the Hamiltonian (can be time dependent)
 H = HK + np.diag(V)
 
+D, psi_eig = LA.eigh(H)
 
-D, eV = LA.eigh(H)
-
-psi0=eV[:,0]
-psi1=eV[:,1]
+psi0=psi_eig[:,0]
+psi1=psi_eig[:,1]
 
 psi = (1/np.sqrt(2)) *(psi1+psi0)
 # psi = psi0
@@ -141,7 +138,7 @@ ax1.grid()
 DMGraph = np.zeros((PsiSize,PsiSize), dtype=np.complex64)
 for i in range(PsiSize):
     for j in range(PsiSize):
-        DMGraph[i][j] = np.conjugate(eV[:,i])@rho@eV[:,j]
+        DMGraph[i][j] = np.conjugate(psi_eig[:,i])@rho@psi_eig[:,j]
 
 ax2.bar(np.arange(0, PsiSize)-.5, np.diag(DMGraph.real))
 ax2.set_title("Pure State ocupation")
@@ -153,7 +150,7 @@ ax3.set_xlabel('x (nm)')
 ax3.set_ylabel('Time (ps)')
 
 # fig.savefig("test.png")
-# plt.show()
+plt.show()
 
 # psifinal00 = np.conjugate(psi0)@rho@psi0
 # psifinal10 = np.conjugate(psi1)@rho@psi0
