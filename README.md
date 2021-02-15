@@ -32,7 +32,44 @@ TDSE3DCUDA works on modern NVIDIA GPU systems running Windows or Linux. This cod
 #### CUDA SDK
 For installation on Linux, follow the instructions in https://docs.nvidia.com/cuda/cuda-installation-guide-linux/
 
-To add binaries and libraries permanently add the following lines to `~/.bash_profile`
+:warning: **Linux driver issues**
+
+Linux drivers installed from the system package manager will sometimes cause issues with CUDA installations. It is recommended to install both the driver and the CUDA SDK using the downloadable run file.
+
+To uninstall all versions of CUDA as well as the drivers on Ubuntu, use the command:
+```bash
+sudo apt autoremove --purge cuda
+sudo apt autoremove --purge *nvidia*
+```
+
+A system restart is required.
+
+Next, install the Latest Production Branch Version driver from https://www.nvidia.com/en-gb/drivers/unix/ for example:
+```bash
+wget https://uk.download.nvidia.com/XFree86/Linux-x86_64/460.39/NVIDIA-Linux-x86_64-460.39.run
+sudo sh NVIDIA-Linux-x86_64-460.39.run
+```
+Note that the exact version will depend on the host computer as well as NVIDIA updates.
+
+A system restart is required.
+
+To check that the drivers have been installed properly, run the command:
+```bash
+nvidia-smi
+```
+![nvidia-smi](https://www.dropbox.com/s/8x2pgdg3rt1q8gg/nvidia-smi.png?raw=1)
+
+
+Next, download the latest version of the CUDA SDK from https://developer.nvidia.com/cuda-downloads make sure you choose the `runfile (local)`. For example:
+```bash
+wget https://developer.download.nvidia.com/compute/cuda/11.2.1/local_installers/cuda_11.2.1_460.32.03_linux.run
+sudo sh cuda_11.2.1_460.32.03_linux.run
+```
+Follow the onscreen instructions and untick the NVIDIA driver as it should already be installed.
+
+![cuda-install](https://www.dropbox.com/s/nu58d9wa4dl41z2/cuda-install.png?raw=1)
+
+Finally, add binaries and libraries to PATH
 ```bash
 # Export NVIDIA CUDA bin and libraries to PATH
 export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}
@@ -40,7 +77,13 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64\
 ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 ```
 
-Make sure `nvcc` is working correctly on your system. You might have to specify a custum path to your local C++ compiler in the file `get_ccbin.py`.
+Make sure `nvcc` is working correctly on your system by running the command
+```bash
+nvcc --version
+```
+![nvcc --version](https://www.dropbox.com/s/727x405eo47ffi6/nvcc-version.png?raw=1)
+
+You might have to specify a custum path to your local C++ compiler in the file `get_ccbin.py`.
 
 #### Python3
 
