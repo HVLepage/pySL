@@ -5,11 +5,10 @@
   - [Table of Contents](#table-of-contents)
   - [About](#about)
   - [Installation](#installation)
-    - [Prerequisites](#prerequisites)
-      - [CUDA SDK](#cuda-sdk)
-      - [Python3](#python3)
-      - [Python modules](#python-modules)
-      - [(Optional) ffmpeg](#optional-ffmpeg)
+    - [CUDA SDK](#cuda-sdk)
+    - [Python3](#python3)
+    - [Python modules](#python-modules)
+    - [(Optional) ffmpeg](#optional-ffmpeg)
   - [Usage](#usage)
     - [Input parameters](#input-parameters)
     - [Parameter sweeps](#parameter-sweeps)
@@ -24,12 +23,7 @@ The python Staggered Leapfrog (pySL) package solves the Time Dependent Schrödin
 ## Installation
 TDSE3DCUDA works on modern NVIDIA GPU systems running Windows or Linux. This code was written using the CUDA 10.2 SDK. The current version has been tested on CUDA 10.0 and later. Earlier versions of CUDA are not supported.
 
-### Prerequisites
-1. **CUDA SDK** from: https://developer.nvidia.com/cuda-downloads
-2. **Python 3** from: https://www.python.org/
-3. **Python modules** install using: `pip install -r requirements.txt`
-
-#### CUDA SDK
+### CUDA SDK
 For installation on Linux, follow the instructions in https://docs.nvidia.com/cuda/cuda-installation-guide-linux/
 
 :warning: **Linux driver issues**
@@ -85,14 +79,21 @@ nvcc --version
 
 You might have to specify a custum path to your local C++ compiler in the file `get_ccbin.py`.
 
-#### Python3
+### Python3
 Most modern systems will come with python version 3 preinstalled. However, the alias `python` might still be linked to python 2.7. Check that both `python` and `pip` are using the correct version or use commands `python3` and `pip3` instead. This code can also be run in a virtual environment such as venv or anaconda.
+
+For all systems, python can be downloaded from https://www.python.org/
+
 ![python --version](https://www.dropbox.com/s/pn9m92yjiec9irb/python-pip-version.png?raw=1)
 
 
-#### Python modules
+### Python modules
+Install required python modules using command: 
+```bash
+pip install -r requirements.txt
+```
 
-#### (Optional) ffmpeg
+### (Optional) ffmpeg
 
 `ffmpeg` is used to generate plot animations. This is not a required feature since plotting is not necessary and other software can be used for analysis purposes. Installation will vary depending on the host operating system.
 
