@@ -116,8 +116,8 @@ L1 = np.sqrt(1/T1) * a
 L1d = np.transpose(L1)
 
 # Dephasing Lindblad term
-T2 = 10
-L2 = 0
+T2 = 600
+L2 = np.sqrt(1/T2)*(1/(hbar*w))*H
 L2d = np.transpose(L2)
 
 # Thermalization Lindblad term
@@ -134,7 +134,10 @@ for i in range(0,int(Nt)):
     #     H = HK + np.diag(V)
 
     rhodot = -1j*commutator(H,rho)/(hbar)
-    rhodot += L1@rho@L1d - 0.5 * anticommutator( L1d@L1, rho )
+    # rhodot += L1@rho@L1d - 0.5 * anticommutator( L1d@L1, rho )
+    rhodot += L2@rho@L2d - 0.5 * anticommutator( L2d@L2, rho )
+
+
 
     rho += rhodot*dt
 
