@@ -1,17 +1,17 @@
-# Essential modules #
+# Optional wheel build #
+wheel
 
+# Essential modules #
+numpy
 pycuda
 scikit-cuda
-
-reikna
-numpy
-
 multiprocessing
 functools
+humanize
+
+reikna
+
 
 # Extra additions #
 
 matplotlib
-humanize
-
-# guppy3
