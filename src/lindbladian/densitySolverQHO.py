@@ -122,8 +122,9 @@ L2d = np.transpose(L2)
 
 # Thermalization Lindblad term
 Temperature = 300
-kBT = 0
-L3 = 0
+kB = 0.1
+kBT = kB * Temperature
+L3 = np.sqrt(1/T1)*np.exp(- 0.5 * hbar*w/kBT ) * ad
 L3d = np.transpose(L3)
 
 
@@ -134,8 +135,9 @@ for i in range(0,int(Nt)):
     #     H = HK + np.diag(V)
 
     rhodot = -1j*commutator(H,rho)/(hbar)
-    # rhodot += L1@rho@L1d - 0.5 * anticommutator( L1d@L1, rho )
-    rhodot += L2@rho@L2d - 0.5 * anticommutator( L2d@L2, rho )
+    rhodot += L1@rho@L1d - 0.5 * anticommutator( L1d@L1, rho )
+    # rhodot += L2@rho@L2d - 0.5 * anticommutator( L2d@L2, rho )
+    rhodot += L3@rho@L3d - 0.5 * anticommutator( L3d@L3, rho )
 
 
 
@@ -171,7 +173,7 @@ for i in range(PsiSize):
     for j in range(PsiSize):
         DMGraph[i][j] = np.conjugate(psi_eig[:,i])@rho@psi_eig[:,j]
 
-ax2.bar(np.arange(0, PsiSize)-.5, np.diag(DMGraph.real))
+ax2.bar(np.arange(0, PsiSize), np.diag(DMGraph.real))
 ax2.set_title("Pure State ocupation")
 
 t = np.linspace(0,T,int(Nt))
