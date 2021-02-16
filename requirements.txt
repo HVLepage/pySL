@@ -5,7 +5,6 @@ wheel
 numpy
 pycuda
 scikit-cuda
-functools
 humanize
 
 reikna
