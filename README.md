@@ -77,7 +77,7 @@ nvcc --version
 ```
 ![nvcc --version](https://www.dropbox.com/s/727x405eo47ffi6/nvcc-version.png?raw=1)
 
-You might have to specify a custum path to your local C++ compiler in the file `get_ccbin.py`.
+You might have to specify a custom path to your local C++ compiler in the file `get_ccbin.py`.
 
 ### Python3
 Most modern systems will come with python version 3 preinstalled. However, the alias `python` might still be linked to python 2.7. Check that both `python` and `pip` are using the correct version or use commands `python3` and `pip3` instead. This code can also be run in a virtual environment such as venv or anaconda.
