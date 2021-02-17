@@ -4,6 +4,7 @@ import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
+from scipy.stats import norm
 import time
 import tracemalloc
 import humanize
@@ -29,12 +30,12 @@ def commutator (A,B):
 def anticommutator (A,B):
     return A@B + B@A
 
-Nx = 51
+Nx = 41
 PsiSize = (Nx)
 m = 1
 
-Xa = -25
-Xb = 25
+Xa = -40
+Xb = 40
 dx = (Xb-Xa)/(Nx-1)
 
 hbar = 1
@@ -59,7 +60,7 @@ HK=np.reshape(H, [PsiSize,PsiSize])
 
 hbar2 = hbar ** 2 #hbar squared
 w = 0.015
-V = w**2 * x**2   
+V = 0.5 * w**2 * x**2   
 
 hk = hbar2 / (2 * m * dx ** 2)
 
@@ -84,8 +85,13 @@ D, psi_eig = LA.eigh(H)
 psi0=psi_eig[:,0]
 psi1=psi_eig[:,1]
 
-psi = (1/np.sqrt(2)) *(psi1+psi0)
+# psi = (1/np.sqrt(2)) *(psi1+psi0)
 # psi = psi0
+
+xoffset = 10 # Wave packet distance from center
+re = (w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) # + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2) # Initial wave function
+psi = np.zeros(PsiSize, dtype=np.complex64)
+psi += re
 
 rho=np.outer(psi,psi)
 
@@ -138,8 +144,6 @@ for i in range(0,int(Nt)):
     rhodot += L1@rho@L1d - 0.5 * anticommutator( L1d@L1, rho )
     # rhodot += L2@rho@L2d - 0.5 * anticommutator( L2d@L2, rho )
     rhodot += L3@rho@L3d - 0.5 * anticommutator( L3d@L3, rho )
-
-
 
     rho += rhodot*dt
 
