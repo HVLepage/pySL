@@ -5,6 +5,7 @@ from numpy import linalg as LA
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
 from scipy.stats import norm
+from scipy.linalg import sqrtm
 import time
 import tracemalloc
 import humanize
@@ -30,7 +31,7 @@ def commutator (A,B):
 def anticommutator (A,B):
     return A@B + B@A
 
-Nx = 41
+Nx = 21
 PsiSize = (Nx)
 m = 1
 
@@ -45,7 +46,7 @@ x=np.linspace(Xa,Xb,Nx)
 #generate Hamiltonian matrix for eigenfunction solving
 
 # Define ladder operators (This should change when not dealing with a QHO)
-a = np.zeros((PsiSize,PsiSize))
+a = np.zeros((PsiSize,PsiSize), dtype=np.complex64)
 rng = np.arange(PsiSize-1)
 a[rng, rng+1] = np.sqrt(rng+1)
 ad = np.transpose(a)
@@ -143,7 +144,7 @@ for i in range(0,int(Nt)):
     rhodot = -1j*commutator(H,rho)/(hbar)
     rhodot += L1@rho@L1d - 0.5 * anticommutator( L1d@L1, rho )
     # rhodot += L2@rho@L2d - 0.5 * anticommutator( L2d@L2, rho )
-    rhodot += L3@rho@L3d - 0.5 * anticommutator( L3d@L3, rho )
+    # rhodot += L3@rho@L3d - 0.5 * anticommutator( L3d@L3, rho )
 
     rho += rhodot*dt
 
