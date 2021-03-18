@@ -5,7 +5,6 @@ from numpy import linalg as LA
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
 from scipy.stats import norm
-from scipy.linalg import sqrtm
 import time
 import tracemalloc
 import humanize
@@ -38,14 +37,6 @@ dx = (Xb-Xa)/(Nx-1)
 hbar = 1
 
 x = np.linspace(Xa,Xb,Nx)
-
-#generate Hamiltonian matrix for eigenfunction solving
-
-# Define ladder operators (This should change when not dealing with a QHO)
-# a = np.zeros((PsiSize,PsiSize), dtype=np.complex64)
-# rng = np.arange(PsiSize-1)
-# a[rng, rng+1] = np.sqrt(rng+1)
-# ad = np.transpose(a)
 
 #Init Hamiltonian
 H = np.zeros([PsiSize**2], dtype=np.complex64)
@@ -111,19 +102,8 @@ dt = 0.01
 
 Nt=T/dt
 
-#rhofinal=expm(-1j *H *T/hbar)@rho@expm(1j *H *T/hbar)
-
-
-psi00 = np.zeros(int(Nt), dtype=np.complex64)
-psi01 = np.zeros(int(Nt), dtype=np.complex64)
-psi10 = np.zeros(int(Nt), dtype=np.complex64)
-psi11 = np.zeros(int(Nt), dtype=np.complex64)
 
 psi2 = np.zeros((int(Nt), int(PsiSize)))
-
-# print(HK.shape)
-# print(H.shape)
-# print(V.shape)
 
 # Dissipation Lindblad term
 T1 = 6
@@ -131,7 +111,7 @@ L1 = np.sqrt(1/T1) * ax
 L1d = np.transpose(L1)
 
 # Dephasing Lindblad term
-T2 = 12
+T2 = 600
 L2 = np.sqrt(1/T2)*(1/(hbar*w))*H
 L2d = np.transpose(L2)
 
@@ -156,29 +136,12 @@ for i in range(0,int(Nt)):
 
     rho += rhodot*dt
 
-    # psi00[i] = np.conjugate(psi0)@rho@psi0
-    # psi01[i] = np.conjugate(psi0)@rho@psi1
-    # psi10[i] = np.conjugate(psi1)@rho@psi0
-    # psi11[i] = np.conjugate(psi1)@rho@psi1
-
     psi2[i] = np.diag(rho).real
 
 # print(rhodot)
 
 fig, (ax2, ax3) = plt.subplots(1, 2)
 fig.suptitle('Potential step at T=2000')
-
-# ax1.plot(range(int(Nt)), psi00.real, label = "psi00")
-# ax1.plot(range(int(Nt)), psi01.real, label = "psi01")
-# ax1.plot(range(int(Nt)), psi10.real, label = "psi10")
-# ax1.plot(range(int(Nt)), psi11.real, label = "psi11")
-
-# ax1.set_xlabel('Time')
-# ax1.set_ylabel('Psi')
-# ax1.set_ylim(-1, 1)
-# ax1.set_title("Pure State Evolution")
-# ax1.legend()
-# ax1.grid()
 
 
 DMGraph = np.zeros((PsiSize,PsiSize), dtype=np.complex64)
@@ -197,12 +160,6 @@ ax3.set_ylabel('Time (ps)')
 
 # fig.savefig("test.png")
 plt.show()
-
-# psifinal00 = np.conjugate(psi0)@rho@psi0
-# psifinal10 = np.conjugate(psi1)@rho@psi0
-# psifinal01 = np.conjugate(psi0)@rho@psi1
-# psifinal11 = np.conjugate(psi1)@rho@psi1
-
 
 
 ################################################################################################################################
