@@ -80,14 +80,6 @@ adx = np.transpose(ax)
 
 
 
-
-
-psi0=psi_eig[:,0]
-psi1=psi_eig[:,1]
-
-# psi = (1/np.sqrt(2)) *(psi1+psi0)
-# psi = psi0
-
 xoffset = 10 # Wave packet distance from center
 re = (w/np.pi)**(1/4)*np.exp(-w*(x-xoffset)**2/2) # + (w/np.pi)**(1/4)*np.exp(-w*(x+xoffset)**2/2) # Initial wave function
 psi = np.zeros(PsiSize, dtype=np.complex64)
