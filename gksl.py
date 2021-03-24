@@ -39,12 +39,9 @@ hbar = 1
 x = np.linspace(Xa,Xb,Nx)
 
 #Init Hamiltonian
-H = np.zeros([PsiSize**2], dtype=np.complex64)
-
-# Define total hamiltonian
-H=np.reshape(H, [PsiSize,PsiSize])
+H = np.zeros([PsiSize, PsiSize], dtype=np.float64)
 # Kinetic part of the Hamiltonian
-HK=np.reshape(H, [PsiSize,PsiSize])
+HK = np.zeros([PsiSize, PsiSize], dtype=np.float64)
 
 hbar2 = hbar ** 2 #hbar squared
 w = 0.015
@@ -71,7 +68,7 @@ H = HK + np.diag(V)
 D, psi_eig = LA.eigh(H)
 
 # Define creation and annihilation operators
-a = np.zeros((PsiSize,PsiSize), dtype=np.complex64)
+a = np.zeros((PsiSize,PsiSize), dtype=np.float64)
 rng = np.arange(PsiSize-1)
 a[rng, rng+1] = np.sqrt(np.diff(D))
 
