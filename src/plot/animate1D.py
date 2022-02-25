@@ -11,9 +11,9 @@ def animate1D(params):
 
     # Read simulation files
     FilePath = './out/' + SimName + '/waves/'
-    waves = [f for f in listdir(FilePath) if isfile(join(FilePath, f))]
+    waves = [f for f in listdir(FilePath) if isfile(join(FilePath, f))] #all the files in folder (wave at each print step)
     waves.sort()
-
+    
 
     wave = np.loadtxt(fname = FilePath + waves[0])
     # print(sum(np.square(wave[:,0]) + np.square(wave[:,1])))
@@ -21,13 +21,13 @@ def animate1D(params):
 
     # First set up the figure, the axis, and the plot element we want to animate
     fig = plt.figure()
-    ax = plt.axes(xlim=(float(params["Xa"]), float(params["Xb"])), ylim=(-10*max(np.square(wave[:,0]) + np.square(wave[:,1])), 10*max(np.square(wave[:,0]) + np.square(wave[:,1]))))
+    ax = plt.axes(xlim=(float(params["Xa"]), float(params["Xb"])), ylim=(-2*max(np.square(wave[:,0]) + np.square(wave[:,1])), 2*max(np.square(wave[:,0]) + np.square(wave[:,1]))))
     fig.suptitle('1D Particle in a Box')
     plt.xlabel('x (nm)')
     plt.ylabel('ψ')
     plotcols = ["blue","red","black"]
     lines = []
-    for index in range(3):
+    for index in range(1):
         lobj = ax.plot([],[],lw=2,color=plotcols[index])[0]
         lines.append(lobj)
 
@@ -43,7 +43,7 @@ def animate1D(params):
         y1 = wave[:,0]
         y2 = wave[:,1]
         y3 = np.square(wave[:,0]) + np.square(wave[:,1])
-        ylist = [y1, y2, y3]
+        ylist = [y3] #[y1, y2, y3]
 
         for lnum,line in enumerate(lines):
             line.set_data(x, ylist[lnum]) # set data for each line separately.

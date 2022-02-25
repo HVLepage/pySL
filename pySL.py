@@ -8,9 +8,9 @@ import tracemalloc
 import humanize
 
 # Set target CUDA device. Must be an integer. Currently no error checking.
-if (len(sys.argv) > 1):
+if (len(sys.argv) > 1): #sys.argv is a list which contains the command line arguments
   print("\nTarget CUDA device: ",str(sys.argv[1]))
-  os.environ['CUDA_DEVICE'] = str(sys.argv[1])
+  os.environ['CUDA_DEVICE'] = str(sys.argv[1]) #set environment variable
 
 # Import pyCUDA modules
 import pycuda.driver as cuda
@@ -26,7 +26,7 @@ from src.input.wavefunction import wavefunction
 from src.fft.convWavefunction import convWavefunction
 from src.export.wavefunctionOut import wavefunctionOut
 from src.export.exportTrace import exportTrace
-from src.input.domain import domain
+
 from src.index.kernelInds import kernelInds
 
 from src.input.potential import potential
@@ -37,6 +37,9 @@ import reikna.cluda as cluda
 
 # Built-in plotting
 from src.plot.animate1D import animate1D
+from src.plot.animate2D import animate2D
+from src.plot.animate2p import animate2p
+from src.plot.animate2p_sum import animate2p_sum
 from src.plot.plot1Dtrace import plot1Dtrace
 
 print("\n----------------------------------------------------------------")
@@ -90,23 +93,36 @@ makepath(params)
 exportParameters(params)
 
 
+
+
+
 print("\n----------------------------------------------------------------")
 print("Allocating potential")
 print("----------------------------------------------------------------")
 t0V = time.time()
 V = potential(params, mod) # Static potential
+#print(V.pot)
+
+#have to use single quotes
+stability=0
+for dXi in params["dXs"]:
+    stability+= dXi**-2
+print(f"Max stable potential value in NU= {1/params['dt']-stability}")
+stability+=np.max(V.pot)
+stability=stability**-1 * params['t_si2nu']**-1
+print(f"dt={params['dt']/params['t_si2nu']} Stable for current potential if dt < {stability}")
+print(f"Max potential value= {np.max(V.pot)}")
+
+
 time_V = time.time() - t0V
 t0V = time.time()
 print("\nPotential allocated in %.4f seconds"%time_V)
-dom = domain(params) # Simulation domain boundary conditions
-time_V = time.time() - t0V
-t0V = time.time()
-print("Simulation domain defined in %.4f seconds"%time_V)
+
 kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avoid calculating this every time
 time_V = time.time() - t0V
 print("KernelInds calculated in %.4f seconds"%time_V)
 
-psi = wavefunction(params,mod, thr, V) #create wavefunction as per parameters
+psi = wavefunction(params,mod, thr, V) #create wavefunction as per parameters, sets as superposition of eigenstates
 
 dt =  np.float32(params["dt"]) # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
@@ -145,12 +161,14 @@ ATB2 = np.float32(params["ATB2"])
 s2TB2 = np.float32(params["s2TB2"])
 fbb = np.float32(params["fbb"])
 value = np.float32(params["dt"] * params["hbar"])
+inds_kernel=np.int32(np.zeros(params["Np"]*params["dim"]))
 
 Xa = np.float32(params["Xa"])
 Ya = np.float32(params["Ya"])
 
 Nm1 = np.float32(1 / N)
 
+#why have some variables been copied to device?
 faa = cuda.mem_alloc_like(params["faa"])
 cuda.memcpy_htod(faa, params["faa"])
 
@@ -165,6 +183,13 @@ cuda.memcpy_htod(dXs, params["dXs"])
 
 dKs = cuda.mem_alloc_like(params["dKs"])
 cuda.memcpy_htod(dKs, params["dKs"])
+
+#Npxdim=cuda.mem_alloc_like(params["Np"]*params["dim"])
+#cuda.memcpy_htod(Npxdim, params["Np"]*params["dim"])
+
+#inds_kernel=cuda.mem_alloc_like(np.zeros(params["Np"]*params["dim"],dtype=np.int32))
+#cuda.memcpy_htod(inds_kernel, np.zeros(params["Np"]*params["dim"],dtype=np.int32))
+
 
 ################################################################################################################################
 # IterateGPU
@@ -186,7 +211,7 @@ for i in range(0, TimeSteps):
 
     # Iterate the staggered leapfrog kernel over the wavefunction
     if (params["TDSESolver"] == "rSpace"):
-        rSpaceSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
+        rSpaceSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
     elif (params["TDSESolver"] == "kSpace"):
         psi.wave_gpu.get(phi.wave_gpu)
         phi.fft(thr, 1)
@@ -217,7 +242,7 @@ for i in range(0, TimeSteps):
       t2 = time.time()
       t_print = t2-t1
       t1 = t2
-      norm = psi.norm()
+      norm = psi.norm() #calculates norm not renormalise
       n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
       print("Iteration:", str(i).zfill(int(n_zero)), "    Time Elapsed: %.2f"%t_print, "    NORM: %.8f"%norm)
 
@@ -229,12 +254,21 @@ print("\nTDSE time elapsed = ",t_print)
 psi.dtoh()
 
 
-################################################################################################################################
+########################c########################################################################################################
 # Show Plots
 ################################################################################################################################
 
 # Animate the 1D wave function as save as an mp4 file. Used in the Particle_in_a_box_1D example
-# animate1D(params)
+if params["dim"]==1 and params["Np"]==1:
+    animate1D(params)
+elif params["dim"]==1 and params["Np"]>1:
+    print("animate separately")
+    #animate2p_sum(params)
+elif params["dim"]==2:
+    print("animate separately")
+    # t0=time.time()
+    # animate2D(params) #significantly slower here for some reason than when run separately
+    # print(f"The time taken to make animation = {time.time()-t0}")
 
 # Trace a 1D particle with the x axis as time and the y axis as the spatial dimension.
 # plot1Dtrace(params)

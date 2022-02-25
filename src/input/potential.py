@@ -10,6 +10,17 @@ import src.index.index3Dto1D as index3Dto1D
 import src.index.index1DtoND as index1DtoND
 import src.index.indexNDto1D as indexNDto1D
 from src.input.electrostaticPotential import electrostaticPotential
+from src.input.harmonicPotential import harmonicPotential
+from src.input.sinusoidalPotential import sinusoidalPotential
+from src.input.approxSoftening import approx1D
+from src.input.approxSoftening import approx2D
+import matplotlib.pyplot as plt
+
+import pycuda.driver as cuda
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
+import pycuda.gpuarray as gpuarray
+
 #from src.input.coulombPotential import CoulombPotential
 
 class potential():
@@ -30,8 +41,9 @@ class potential():
         for i in range(0,params["N1"]):
             self.filePot[i] = float(lines[i+3].split()[0])
         
-    # Build the potential from analytically
+    # Build the potential form analytically
     def construct(self,params, mod):
+        
         CoulombPotential = mod.get_function("CoulombPotential")
         
         Xa = params["Xa"]
@@ -60,90 +72,136 @@ class potential():
         inds = np.zeros(dim*Np)
 
         if (Np > 1):
-            interactionsNr = int((Np**2 - Np) / 2) #Nr of onteractions between particle pairs
-            interactionsMap = np.zeros([interactionsNr,2]) #map of which particle interacts with which
-		
-
-
+            interactionsNr = int((Np**2 - Np) / 2) #Nr of interactions between particle pairs = Np choose 2
+            #interactionsMap = np.zeros([interactionsNr,2]) #map of which particle interacts with which
+            interactionsMap=[]
             for i in range(0,Np):
-                for j in range(i+1,Np):
-                    interactionsMap[i,0] = i
-                    interactionsMap[i,1] = j
+                for j in range(0,Np):
+                    if j>i:
+                        interactionsMap.append([i,j])
+            interactionsMap=np.asarray(interactionsMap)  
+            #print(interactionsMap)
+
+            #alternative method, neither optimal, above faster for few particles
+            # count=0
+            # for i in range(0,Np):
+            #     for j in range((i+1),Np):
+            #         interactionsMap[count+(j-(i+1))][0]=i
+            #         interactionsMap[count+(j-(i+1))][1]=j
+            #     count+=len(range(i+1,Np))
+
+
+
         else:
             interactionsNr = 0
 
         if (interactionsNr > 0):
             V2P=np.zeros((Nx * Ny * Nz)**2, dtype = np.float32) #store 2-particle potential
             V2P_gpu = cuda.mem_alloc_like(V2P)
+
+            Sizes = cuda.mem_alloc_like(params["Sizes"])
+            cuda.memcpy_htod(Sizes, params["Sizes"])
+
+            Xas = cuda.mem_alloc_like(params["Xas"])
+            cuda.memcpy_htod(Xas, params["Xas"])
+
+            dXs = cuda.mem_alloc_like(params["dXs"])
+            cuda.memcpy_htod(dXs, params["dXs"])
+            
             
             blockSize = 256 
-            numBlocks = math.ceil(params["N"] / blockSize) 
-            #calculate 2-particle potential using Coulomb ionteraction
-            CoulombPotential(np.int32(params["N"]), V2P_gpu,  np.int32(Nx),  np.int32(Ny),  np.int32(Nz),  np.float32(Xa),   np.float32(params["dx"]),
+            
+            numBlocks = math.ceil((Nx * Ny * Nz)**2 / blockSize) #math.ceil returns type int, np.ceil returns np.float64
+            
+            #calculate 2-particle potential using Coulomb interaction
+            if params["dim"]==1:
+                softeningParam=approx1D(params)
+                plt.figure()
+                r=np.linspace(0,100,100)
+                plt.plot(r,1/np.sqrt(r**2+softeningParam**2))
+                plt.title("Softened Coulomb potential")
+                plt.xlabel("Dynamic distance r /nm")
+                plt.ylabel("1/sqrt(r^2+softeningParam^2)")
+            elif params["dim"]==2:
+                 softeningParam=approx2D(params)
+                 plt.figure()
+                 r=np.linspace(0,100,100)
+                 plt.plot(r,1/np.sqrt(r**2+softeningParam**2))
+                 plt.title("Softened Coulomb potential")
+                 plt.xlabel("Dynamic distance r /nm")
+                 plt.ylabel("1/sqrt(r^2+softeningParam**2")
+                 
+
+            CoulombPotential(np.int32((Nx * Ny * Nz)**2), V2P_gpu,  np.int32(Nx),  np.int32(Ny),  np.int32(Nz),  np.float32(Xa),   np.float32(params["dx"]),
                                   np.float32(Ya),   np.float32(params["dy"]),   np.float32(Za),   np.float32(params["dy"]),   np.float32(params["RelPerm"]),
                                    np.float32(params["sigmaFit"][0]),    np.float32(params["sigmaFit"][1]),    np.float32(params["sigmaFit"][2]),
                                     np.float32(params["sigmaFit"][3]),    np.float32(params["sigmaFit"][4]),
                                    np.float32(params["sigmaFit"][5]),    np.float32(params["sigmaFit"][6]),   np.float32(params["sigmaFit"][7]),    np.float32(params["sigmaFit"][8]),
-                                  block=(blockSize,1,1), grid=(numBlocks,1))
+                                  Sizes,np.int32(params["dim"]),Xas,dXs,np.float32(softeningParam),block=(blockSize,1,1), grid=(numBlocks,1))
 
             cuda.memcpy_dtoh(V2P, V2P_gpu)
-            
+            #print(V2P)
 
     		#for each pair, fill the potential with their corresponding 2-particle interaction potential
             for p in range(0,interactionsNr):
 
-                p1 = interactionsMap[p,0]
+                p1 = interactionsMap[p,0] #1st particle of pair
                 p2 = interactionsMap[p,1]
-                inds2P = np.zeros(dim*2)
+                inds2P = np.zeros(dim*2) #1st particle then 2nd
+
+                for i in range(0,params["N"]):
+                    index1DtoND.index(i, inds, params["Sizes"], params) #high dimensional (Np*dim) matrix with N elements, assigns inds values
+
+                    for j in range(0,dim):
+                        #get the indices of the 2 particles 
+                        inds2P[j] = inds[int(p1 * dim + j)] #for a given 1D index, the 1st particle's ND indices are assigned (starts with z)
+                        inds2P[j + dim] = inds[int(p2 * dim + j)]
+                    #print(inds2P)
+                    ind2P = int(indexNDto1D.index(inds2P, params["Sizes"], params, 2))
+                    #print(ind2P)
+                    self.pot[i] += params["Charge"][int(p1)] * params["Charge"][int(p2)] * V2P[ind2P]
+
+
+            #add a single particle potential, may be different for each particle
+        
+        #this code is pretty bad, must make sure use x,y if 2D
+
+        if params["1pPotential"]:
+            for p in range(0,params["Np"]):
+                inds1P=np.zeros(dim)
+                V1P = np.zeros(Nx * Ny * Nz)
+                for i in range(0,Nx):
+                    for j in range(0,Ny):
+                        for k in range(0,Nz):
+                            VVal = 0.0
+                            ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
+                            
+                            #either import from file, or calculate from electrostatic equations
+                            # if (params["ImportPotential"]):
+                            #     VVal= self.filePot[ind]
+                                
+                           
+                                #VVal = electrostaticPotential(params,p,x[i],y[j],z[k])
+                            if params["1pPotentialType"]=="Harmonic":
+                                VVal = harmonicPotential(params,p,x[i],y[j],z[k]) #actually is dimension dependent even though passed 3 arguments
+                            if params["1pPotentialType"]=="Sinusoidal":
+                                VVal=sinusoidalPotential(params,p,x[i],y[j],z[k])
+
+                            if (VVal > 100):
+                                VVal = 100.0
+                        
+
+                            V1P[ind] = VVal
+
 
                 for i in range(0,params["N"]):
                     index1DtoND.index(i, inds, params["Sizes"], params)
 
                     for j in range(0,dim):
-                        inds2P[j] = inds[int(p1 * dim + j)]
-                        inds2P[j + dim] = inds[int(p2 * dim + j)]
-				
-                    ind2P = int(indexNDto1D.index(inds2P, params["Sizes"], params, 2))
-                    self.pot[i] += params["Charge"][int(p1)] * params["Charge"][int(p2)] * V2P[ind2P]
-
-
-
-	    #Add 1 particle static potential
-        V1P = np.zeros(Nx * Ny * Nz)
-        
-        for p in range(0, params["Np"]):
-
-            for i in range(0,Nx):
-                for j in range(0,Ny):
-                    for k in range(0,Nz):
-                        VVal = 0.0
-                        ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
-                        
-                        #either import from file, or calculate from electrostatic equations
-                        if (params["ImportPotential"]):
-                            VVal= self.filePot[ind]
-                        else:
-                            VVal = electrostaticPotential(params,p,x[i],y[j],z[k])
-
-                        if (VVal > 100):
-                            VVal = 100.0
-					
-
-                        V1P[ind] = VVal
-		
-        inds1P = np.zeros(dim)
-		
-
-		#Only go into if right indexes are 0, i.e. do this other way around ...
-        for i in range(0,params["N"]):
-            index1DtoND.index(i, inds, params["Sizes"], params)
-
-            for j in range(0, dim):
-                inds1P[j] = inds[p * dim + j]
-			
-            ind1P = indexNDto1D.index(inds1P, params["Sizes"], params, 1)
-            self.pot[i] += V1P[int(ind1P)]
-
+                        inds1P[j]=inds[p*dim+j]
+                    
+                    ind1P=indexNDto1D.index(inds1P, params["Sizes"], params, 1)
+                    self.pot[i]+=V1P[int(ind1P)]
 
             
     

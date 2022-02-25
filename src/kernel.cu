@@ -6,65 +6,58 @@
 /*******************************************************************************************************************************
 Calculate Coulomb potential
 *******************************************************************************************************************************/
+
+#define Npdim 1
+#define dim2p 1 //coulomb pairs (is same as dim)
+
+
 __global__ void CoulombPotential(int N, float* V2P, int Nx, int Ny, int Nz, float Xa, float dx, float Ya, float dy, float Za, float dz, float RelPerm,
                                  float sigmaFit0, float sigmaFit1, float sigmaFit2, float sigmaFit3, float sigmaFit4, float sigmaFit5, float sigmaFit6, 
-                                 float sigmaFit7, float sigmaFit8){       
+                                 float sigmaFit7, float sigmaFit8, int* Sizes, int dim, float* Xas,float* dXs, float softeningParam){       
     int ind = blockIdx.x * blockDim.x + threadIdx.x;
-    int indOut = ind;
-    if (ind<N){
-    
-	long stride = N;
-	long temp = 0;
 	
-	temp = stride;
-	stride = (long)((double)temp / (double)Nx);
-	int i1 = ind / stride;
-	ind = ind - i1 * stride;
-	
-	temp = stride;
-	stride = (long)((double)temp / (double)Ny);
-	int j1 = ind / stride;
-	ind = ind - j1 * stride;
-	
-	temp = stride;
-	stride = (long)((double)temp / (double)Nz);
-	int k1 = ind / stride;
-	ind = ind - k1 * stride;
-	
-	temp = stride;
-	stride = (long)((double)temp / (double)Nx);
-	int i2 = ind / stride;
-	ind = ind - i2 * stride;
-	
-	temp = stride;
-	stride = (long)((double)temp / (double)Ny);
-	int j2 = ind / stride;
-	ind = ind - j2 * stride;
-	
-	temp = stride;
-	stride = (long)((double)temp / (double)Nz);
-	int k2 = ind / stride;
-	//ind = ind - k2 * stride;
-	
-    
-    float x1 = Xa + i1*dx;
-    float y1 = Ya + j1*dy;
-    float z1 = Za + k1*dz;
-    float x2 = Xa + i2*dx;
-    float y2 = Ya + j2*dx;
-    float z2 = Za + k2*dx;
-        
-     float d = sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2) + pow((z1 - z2), 2));
-     float dsoft = powf(d, 8) * sigmaFit0 + powf(d, 7) * sigmaFit1 + powf(d, 6) * sigmaFit2 +
-									powf(d, 5) * sigmaFit3 + powf(d, 4) * sigmaFit4 + powf(d, 3) * sigmaFit5 +
-									powf(d, 2) * sigmaFit6 + d * sigmaFit7 + sigmaFit8;
-	 double VVal = (18.8950673 / RelPerm) * powf(dsoft, -1.0); //use Coulomb softening with cap at 100, 18.89... is conversion factor to natural units and nm
-     VVal = (18.8950673 / RelPerm) * powf(dsoft, -1.0); //use Coulomb softening with cap at 100, 18.89... is conversion factor to natural units and nm
-     if (VVal>100.0){
-         VVal=100.0;
-    }
-     V2P[indOut]=VVal;
-     
+   
+	if (ind<N){
+
+
+		//convert 1D index into a 2*number of dimensions index
+		int stride=N; //THIS IS N FOR 2 PARTICLES, SEE HOW PASSED TO FUNCTION
+		
+		int inds[2*dim2p];
+		int temp_index =ind;
+		
+		for (int i=0;i<2*dim2p;i++){ //convert 1d index into a 2 particles *number of dimensions index
+			stride=stride/Sizes[i%dim2p];
+			inds[i]=temp_index/stride; //will floor as type int
+			temp_index=temp_index -inds[i]*stride;
+		}
+		
+
+		float Xs[dim2p*2]; //will hold the positions of each particle [x1,y1,z1,x2,y2,z2]
+		for (int i=0; i<2*dim2p;i++){
+			Xs[i]=Xas[i%dim2p]+inds[i]*dXs[i%dim2p]; //Xas holds the starting values for each dimension i.e. Xa, Ya etc.
+		}
+		
+		
+		float d=0; //dynamic distance
+		for (int i=0; i<dim2p;i++){
+			d+=pow((Xs[i+dim2p]-Xs[i]),2);
+			
+		}
+		d=sqrt(d);
+		
+
+		
+		float dsoft = sqrt(pow(d,2)+pow(softeningParam,2)); //won't work in 3D
+
+		double VVal = (18.8950673 / RelPerm) * powf(dsoft, -1.0); //use Coulomb softening with cap at 100, 18.89... is conversion factor to natural units and nm
+		VVal = (18.8950673 / RelPerm) * powf(dsoft, -1.0); //use Coulomb softening with cap at 100, 18.89... is conversion factor to natural units and nm
+		if (VVal>100.0){
+			VVal=100.0;
+		}
+		V2P[ind]=VVal;
+		//V2P[ind]=0; //if want 0 interactions can just set here.
+		
    }
 
 }
@@ -89,7 +82,7 @@ __global__ void Axpy(pycuda::complex<float>* Psi, float* V,
 			for (int p = 0; p < Np; p++) {
 				// Set current coordinates
 			
-				int ind = ((index / (int)powf(N1, Np - p - 1)) % (N1)) * dim;
+				int ind = ((index / (int)powf(N1, Np - p - 1)) % (N1)) * dim; //raising float to power
 				float x = Xa + kernelInds[ind] * dXs[0];
 				float y = dim > 1 ? Ya + kernelInds[ind + 1] * dXs[1] : 0.0;
 				// Add SAW potential
@@ -180,21 +173,21 @@ __global__ void kSpaceSL(int N, pycuda::complex<float>* Psi, pycuda::complex<flo
 /*******************************************************************************************************************************
 Real-space Staggered Leapfrog solver
 *******************************************************************************************************************************/
-__global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* domain, 
+__global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V,
                         float t, int iterateRe, int* kernelInds, int Np, int N1, int dim, 
                         float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, 
                         float RS, float DRt0, float URt0, float ATB2, float s2TB2, 
                         float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
 
 	int index = blockIdx.x * blockDim.x + threadIdx.x; // CUDA index
-
-	if (index < N && domain[index]==1) { //check if index is within the wavefunction ant NOT on a boundary
-
-		float Vt = 0.0; //some potentially time depentent part of V
+	
+	if (index < N) { //check if index is within the wavefunction and NOT on a boundary
+		
+		float Vt = 0.0; //some potentially time dependent part of V
 
 		for (int p = 0; p < Np; p++) {
 			// Set current coordinates
-			int ind = ((index / (int)powf(N1, Np - p - 1)) % (N1)) * dim;
+			int ind = ((index / (int)powf(N1, Np - p - 1)) % (N1)) * dim; //raising float to power
 			float x = Xa + kernelInds[ind] * dXs[0];
 			float y = dim > 1 ? Ya + kernelInds[ind + 1] * dXs[1] : 0.0;
 			// Add time-dependent SAW potential
@@ -204,11 +197,12 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 			Vt -= ATB2 * Mass[p] * expf(-s2TB2 * powf(x, 2.0) / 2.0) * TBRamp;
 		}
 		
-		
+	
 		int idxNearestNeighbor=1;
-		if (iterateRe) { // Iterate real part of the wave function
-			PsiRe[index] += (V[index] + Vt) * fbb * PsiIm[index]; // The potential part
-			for (int d = 0; d < dim; d++) {
+		if (iterateRe) { // Iterate real part of the wave function, for odd index in pySL.py, iterateRe=1
+			PsiRe[index] += (V[index]+ Vt) * fbb * PsiIm[index]; // The potential part
+			//PsiRe[index] += (V[index] *expf(-t/100) + Vt) * fbb * PsiIm[index]; //exponential decay of potential
+			for (int d = 0; d < dim; d++) { //for each index need to do this
 				for (int p = 0; p < Np; p++) {
 					PsiRe[index] += (faa[d] / Mass[p]) * (2.0 * PsiIm[index]); // On-site kinetic term
 
@@ -220,20 +214,60 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 					else if (d == (dim - 3))
 						idxNearestNeighbor = Sizes[dim - 1]* Sizes[dim - 2];
 
-					int pp = Np - p -1;
+					int pp = Np - p -1; //goes from Np-1 to 0
 					while (pp > 0) {
 						idxNearestNeighbor *= N1;
 						pp--;
 					}
+					//negative indices?? probably 0 but not always
+					//PsiIm[-1]=4239874239847; //certainly messes everything up whereas changing PsiIm[-2] doesn't
+					//this needs to be fixed for multiple dimensions as assumes that e.g. y=0 z=zb and y=dy z=0 are next to each other
+					//adopt the method used in rSpaceSolverGPU.py or otherwise
 
-					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index - idxNearestNeighbor]; 
-					PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index + idxNearestNeighbor];
+					//effectively rewriting index1DtoND function
+					int stride=N;
 					
+					int inds[Npdim];
+					int temp_index =index;
+					
+					for (int i=0;i<Np*dim;i++){ //may possibly slow down a lot for Np*dim>1
+						
+						stride=stride/Sizes[i%dim];
+						inds[i]=temp_index/stride; //will floor as type int
+						temp_index=temp_index -inds[i]*stride;
+					}
+					// if(index==0){
+					// 	printf("%i",inds[0]);
+					// 	printf("\n");
+					// }
+				
+					if(inds[d+p*dim]<Sizes[d]-1){
+						PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index + idxNearestNeighbor];
+					}
+					
+					
+					if(inds[d+p*dim]>0){
+						PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index - idxNearestNeighbor]; 
+					}
+					
+					// PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index + idxNearestNeighbor];
+					// PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index - idxNearestNeighbor]; 
+
+					//PsiRe[0]=0;
+					//PsiRe[N-1]=0;
+					//delete [] inds;
+
+
 				}
 			}
 		}
+
+		
 		else { // Iterate imaginary part of the wave function
+		
+		
 			PsiIm[index] -= (V[index] + Vt) * fbb * PsiRe[index];
+			//PsiIm[index] -= (V[index] *expf(-t/100)+ Vt) * fbb * PsiRe[index];
 			for (int d = 0; d < dim; d++) {
 				for (int p = 0; p < Np; p++) {
 					PsiIm[index] -= (faa[d] / Mass[p]) * (2.0 * PsiRe[index]); // On-site kinetic term
@@ -251,11 +285,43 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 						idxNearestNeighbor *= N1;
 						pp--;
 					}
+				
+					int stride=N;
+					int inds[Npdim];
+					//int *inds = new int [Np*dim];
+					int temp_index =index;
 
-    				PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index - idxNearestNeighbor];
-					PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index + idxNearestNeighbor];
+					for (int i=0;i<Np*dim;i++){
+						stride=stride/Sizes[i%dim];
+						inds[i]=temp_index/stride; //will floor as type int
+						
+						temp_index=temp_index -inds[i]*stride;
+					}
+
+					if(inds[d+p*dim]<Sizes[d]-1){
+						PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index + idxNearestNeighbor];
+					}
+					
+					if(inds[d+p*dim]>0){
+						PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index - idxNearestNeighbor]; 
+					}
+					
+	
+
+					// PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index + idxNearestNeighbor];
+					// PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index - idxNearestNeighbor]; 
+
+					//PsiIm[0]=0;
+					//PsiIm[N-1]=0;
+
+					//delete [] inds;
+
+
+					// }
 				}
 			}
 		}
 	}
+
+	//delete [] inds;
 }
