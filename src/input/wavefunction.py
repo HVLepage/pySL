@@ -6,6 +6,7 @@ import math
 import numpy as np
 import pycuda.driver as cuda
 from  src.input.defWavefunction import defWavefunction
+from  src.input.npfrom1p import npfrom1p
 from  src.eigensolver.rSpaceSolverCPU import rSpaceSolverCPU
 from  src.eigensolver.rSpaceSolverGPU import rSpaceSolverGPU
 from  src.eigensolver.kSpaceSolverCPU import kSpaceSolverCPU
@@ -94,7 +95,7 @@ class wavefunction:
 	
         with open(OutputFileName, 'w+') as OutputFile:
             for x in np.nditer(self.wave): #efficient iterating
-                OutputFile.write("{:e} {:e} \n".format(x.real, x.imag))
+                OutputFile.write("{:e} {:e} \n".format(x.real, x.imag)) #exponent
 	
 
 
@@ -136,6 +137,7 @@ class wavefunction:
         #self.wave=np.zeros(self.size, dtype = np.complex64)
         self.wave=np.zeros(self.N, dtype = np.complex64)
         
+        
          #self.wave = self.wave.astype(np.complex64)
         if (params["TDSESolver"] == "kSpace"):
             self.wave = np.reshape(self.wave, self.size) #N dimensional e.g. 6 for 3 dim and 2 particles
@@ -148,11 +150,15 @@ class wavefunction:
         else:
             self.re_gpu=cuda.mem_alloc_like(self.wave.real)
             self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
+
         
         if params["defWavefunction"]:
             self.setWavefunction(params)
+        elif params["npfrom1pWavefunction"]:
+            npfrom1p(params,self,mod)
         elif (not params["ImportWavefunction"]):
             self.solve(params,mod, thr, V)
+        
         
         else:
             self.readFromFile(params) #read from file
