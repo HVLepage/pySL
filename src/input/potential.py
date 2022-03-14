@@ -11,6 +11,7 @@ import src.index.index1DtoND as index1DtoND
 import src.index.indexNDto1D as indexNDto1D
 from src.input.electrostaticPotential import electrostaticPotential
 from src.input.harmonicPotential import harmonicPotential
+from src.input.potentialStep import potentialStep
 from src.input.sinusoidalPotential import sinusoidalPotential
 from src.input.approxSoftening import approx1D
 from src.input.approxSoftening import approx2D
@@ -45,7 +46,8 @@ class potential():
     def construct(self,params, mod):
         
         CoulombPotential = mod.get_function("CoulombPotential")
-        
+        AllocateCoulombPotential = mod.get_function("AllocateCoulombPotential")
+
         Xa = params["Xa"]
         Xb = params["Xb"]
         Ya = params["Ya"]
@@ -143,76 +145,117 @@ class potential():
             #print(V2P)
 
     		#for each pair, fill the potential with their corresponding 2-particle interaction potential
+            
+         
+            VCoulomb=np.zeros((Nx * Ny * Nz)**params["Np"], dtype = np.float32) #store 2-particle potential
+            VCoulomb_gpu = cuda.mem_alloc_like(VCoulomb)
+            Charge = cuda.mem_alloc_like(params["Charge"])
+            cuda.memcpy_htod(Charge, params["Charge"])
+            numBlocks = math.ceil(params["N"] / blockSize)
             for p in range(0,interactionsNr):
 
                 p1 = interactionsMap[p,0] #1st particle of pair
                 p2 = interactionsMap[p,1]
-                inds2P = np.zeros(dim*2) #1st particle then 2nd
+                # #inds2P = np.zeros(dim*2) #1st particle then 2nd
+                
+                
+                AllocateCoulombPotential(np.int32(params["N"]),VCoulomb_gpu,np.int32(p1),np.int32(p2),np.int32(params["dim"]),np.int32((Nx * Ny * Nz)**2),Sizes,Charge,V2P_gpu,np.int32(params["Np"]),block=(blockSize,1,1), grid=(numBlocks,1))
 
-                for i in range(0,params["N"]):
-                    index1DtoND.index(i, inds, params["Sizes"], params) #high dimensional (Np*dim) matrix with N elements, assigns inds values
+                cuda.memcpy_dtoh(VCoulomb,VCoulomb_gpu)
+                #print(VCoulomb)
+                if not params["oneptdepPotential"]: 
+                    self.pot+=VCoulomb
+                else:
+                    self.VCoulomb+=VCoulomb
+                
 
-                    for j in range(0,dim):
-                        #get the indices of the 2 particles 
-                        inds2P[j] = inds[int(p1 * dim + j)] #for a given 1D index, the 1st particle's ND indices are assigned (starts with z)
-                        inds2P[j + dim] = inds[int(p2 * dim + j)]
-                    #print(inds2P)
-                    ind2P = int(indexNDto1D.index(inds2P, params["Sizes"], params, 2))
-                    #print(ind2P)
-                    self.pot[i] += params["Charge"][int(p1)] * params["Charge"][int(p2)] * V2P[ind2P]
+                VCoulomb=np.zeros((Nx * Ny * Nz)**params["Np"], dtype = np.float32)
+                cuda.memcpy_htod(VCoulomb_gpu,VCoulomb)
+
+
+                # inds2P = np.zeros(dim*2) #1st particle then 2nd
+
+                # for i in range(0,params["N"]):
+                #     index1DtoND.index(i, inds, params["Sizes"], params) #high dimensional (Np*dim) matrix with N elements, assigns inds values
+
+                #     for j in range(0,dim):
+                #         #get the indices of the 2 particles 
+                #         inds2P[j] = inds[int(p1 * dim + j)] #for a given 1D index, the 1st particle's ND indices are assigned (starts with z)
+                #         inds2P[j + dim] = inds[int(p2 * dim + j)]
+                #     #print(inds2P)
+                #     ind2P = int(indexNDto1D.index(inds2P, params["Sizes"], params, 2))
+                #     #print(ind2P)
+                    # if not params["oneptdepPotential"]: 
+                    #     self.pot[i] += params["Charge"][int(p1)] * params["Charge"][int(p2)] * V2P[ind2P]
+                    # else:
+                    #     self.VCoulomb[i]+= params["Charge"][int(p1)] * params["Charge"][int(p2)] * V2P[ind2P]
 
 
             #add a single particle potential, may be different for each particle
         
+        #print(self.VCoulomb)
         #this code is pretty bad, must make sure use x,y if 2D
-
-        if params["1pPotential"]:
-            for p in range(0,params["Np"]):
-                inds1P=np.zeros(dim)
-                V1P = np.zeros(Nx * Ny * Nz)
-                for i in range(0,Nx):
-                    for j in range(0,Ny):
-                        for k in range(0,Nz):
-                            VVal = 0.0
-                            ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
-                            
-                            #either import from file, or calculate from electrostatic equations
-                            # if (params["ImportPotential"]):
-                            #     VVal= self.filePot[ind]
+        if not params["oneptdepPotential"]:
+            if params["1pPotential"]: #allocating entire potential
+                for p in range(0,params["Np"]):
+                    inds1P=np.zeros(dim)
+                    V1P = np.zeros(Nx * Ny * Nz)
+                    for i in range(0,Nx):
+                        for j in range(0,Ny):
+                            for k in range(0,Nz):
+                                VVal = 0.0
+                                ind = index3Dto1D.index(i, j, k, Nx, Ny, Nz)
                                 
-                           
-                                #VVal = electrostaticPotential(params,p,x[i],y[j],z[k])
-                            if params["1pPotentialType"]=="Harmonic":
-                                VVal = harmonicPotential(params,p,x[i],y[j],z[k]) #actually is dimension dependent even though passed 3 arguments
-                            if params["1pPotentialType"]=="Sinusoidal":
-                                VVal=sinusoidalPotential(params,p,x[i],y[j],z[k])
+                                #either import from file, or calculate from electrostatic equations
+                                # if (params["ImportPotential"]):
+                                #     VVal= self.filePot[ind]
+                                    
+                            
+                                    #VVal = electrostaticPotential(params,p,x[i],y[j],z[k])
+                                if params["1pPotentialType"]=="Harmonic":
+                                    VVal = harmonicPotential(params,p,x[i],y[j],z[k]) #actually is dimension dependent even though passed 3 arguments
+                                if params["1pPotentialType"]=="Sinusoidal":
+                                    VVal=sinusoidalPotential(params,p,x[i],y[j],z[k])
+                                    VVal+=harmonicPotential(params,p,x[i],y[j],z[k])
+                                if params["1pPotentialStep"]:
+                                    VVal+=potentialStep(params,x[i])
+                                    
+                                if (VVal > 100):
+                                    VVal = 100.0
+                            
 
-                            if (VVal > 100):
-                                VVal = 100.0
+                                V1P[ind] = VVal
+
+
+                    for i in range(0,params["N"]):
+                        index1DtoND.index(i, inds, params["Sizes"], params)
+
+                        for j in range(0,dim):
+                            inds1P[j]=inds[p*dim+j]
                         
-
-                            V1P[ind] = VVal
-
-
-                for i in range(0,params["N"]):
-                    index1DtoND.index(i, inds, params["Sizes"], params)
-
-                    for j in range(0,dim):
-                        inds1P[j]=inds[p*dim+j]
-                    
-                    ind1P=indexNDto1D.index(inds1P, params["Sizes"], params, 1)
-                    self.pot[i]+=V1P[int(ind1P)]
-
+                        ind1P=indexNDto1D.index(inds1P, params["Sizes"], params, 1)
+                        self.pot[i]+=V1P[int(ind1P)]
+                if params["dim"]==1:
+                
+                    plt.figure()
+                    plt.plot(x,V1P)
+                    plt.show()
             
     
     def __init__(self,params, mod):        
         
         self.pot=np.zeros(params["N"], dtype=np.float32)
+        self.VCoulomb=np.zeros(params["N"], dtype=np.float32)
         
         self.pot_gpu=cuda.mem_alloc(self.pot.nbytes)
+        self.VCoulomb_gpu=cuda.mem_alloc(self.VCoulomb.nbytes)
     
         self.construct(params, mod)
         
+        if params["oneptdepPotential"]:
+            cuda.memcpy_htod(self.VCoulomb_gpu, self.VCoulomb)
+
+
         self.size1P = []
         self.size = []
         for i in range(0,params["dim"]):
