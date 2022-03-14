@@ -1,6 +1,6 @@
 CURRENTLY ONLY TESTED RSPACESOLVER FOR TIME EVOLUTION, KSPACE MAY NOT WORK
 
-Changes:
+Changes 25/02/22:
 1. Removed the domain which meant that the wavefunction wasn't updated on boundaries. Replaced with code in kernel.cu in the rSpaceSL
 function which ensures that only lattice sites within the domain are used to update the wavefunction on the boundaries. IMPORTANT: must 
 change Npdim at top of kernel.cu file to the number of particles * number of dimensions used in your simulation. If you don't do this,
