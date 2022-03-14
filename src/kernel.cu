@@ -7,7 +7,7 @@
 Calculate Coulomb potential
 *******************************************************************************************************************************/
 
-#define Npdim 1
+#define Npdim 3
 #define dim2p 1 //coulomb pairs (is same as dim)
 
 
@@ -61,6 +61,80 @@ __global__ void CoulombPotential(int N, float* V2P, int Nx, int Ny, int Nz, floa
    }
 
 }
+
+
+__global__ void AllocateCoulombPotential(int N, float* VCoulomb, int p1, int p2, int dim, int N2P,int* Sizes, float* Charge, float* V2P, int Np){
+	int ind = blockIdx.x * blockDim.x + threadIdx.x;
+	
+   
+	if (ind<N){
+
+		int stride=N;
+				
+		int inds[Npdim]; //dim =1 only here
+		int temp_index =ind;
+		
+		for (int i=0;i<Np*dim;i++){ //may possibly slow down a lot for Np*dim>1
+			stride=stride/Sizes[i%dim];
+			inds[i]=temp_index/stride; //will floor as type int
+			temp_index=temp_index -inds[i]*stride;
+		}
+        
+        int inds2P[dim2p*2];
+
+		for(int i=0;i<dim;i++){
+			inds2P[i] = inds[p1 * dim + i] ;
+            inds2P[i + dim] = inds[p2 * dim + i];
+		}
+		stride=N2P;
+		int ind2P=0;
+		for(int i=0;i <dim*2;i++){
+			stride=stride/Sizes[i%dim];
+			ind2P+=inds2P[i]*stride;
+
+		}
+		
+    	VCoulomb[ind]=Charge[p1] * Charge[p2] * V2P[ind2P];
+		
+   }
+
+}
+
+
+__global__ void npfrom1p_gpu(int N, float* PsiReal, float* PsiIm, float* waveReal, float*waveIm, int Np, int p,int* Sizes,int dim){
+	int ind = blockIdx.x * blockDim.x + threadIdx.x;
+	
+   
+	if (ind<N){
+
+		int stride=N;
+				
+		int inds[Npdim]; //dim =1 only here
+		int temp_index =ind;
+
+		for (int i=0;i<Np;i++){ //may possibly slow down a lot for Np*dim>1
+			stride=stride/Sizes[i%dim];
+			inds[i]=temp_index/stride; //will floor as type int
+			temp_index=temp_index -inds[i]*stride;
+		}
+        
+		if (p==0){
+		
+			PsiReal[ind]=waveReal[inds[p]];
+			PsiIm[ind]=waveIm[inds[p]];
+		}
+		else{
+			PsiReal[ind]=PsiReal[ind]*waveReal[inds[p]]-PsiIm[ind]*waveIm[inds[p]]; //complex number multiplication,  might not work
+			PsiIm[ind]=PsiReal[ind]*waveIm[inds[p]]+PsiIm[ind]*waveReal[inds[p]];
+		}
+
+		
+		
+   }
+
+}
+
+
 
 
 /*******************************************************************************************************************************
@@ -177,7 +251,8 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V,
                         float t, int iterateRe, int* kernelInds, int Np, int N1, int dim, 
                         float ASAW, float kSAW, float SAWoffset, float wSAW, float cSAW, 
                         float RS, float DRt0, float URt0, float ATB2, float s2TB2, 
-                        float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
+                        float fbb, float* faa, int* Sizes, float* Mass, float* dXs,
+						float Xa, float Ya, float wX, float* xEqms, float Acos, float kXcos, float tau, int oneptdepPotential, float* VCoulomb, float tauCoulomb) {
 
 	int index = blockIdx.x * blockDim.x + threadIdx.x; // CUDA index
 	
@@ -197,6 +272,33 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V,
 			Vt -= ATB2 * Mass[p] * expf(-s2TB2 * powf(x, 2.0) / 2.0) * TBRamp;
 		}
 		
+		
+		if (oneptdepPotential==1){
+			
+			int stride=N;
+				
+			int inds[Npdim]; //dim =1 only here
+			int temp_index =index;
+			
+			for (int i=0;i<Np*dim;i++){ //may possibly slow down a lot for Np*dim>1
+				
+				stride=stride/Sizes[i%dim];
+				inds[i]=temp_index/stride; //will floor as type int
+				temp_index=temp_index -inds[i]*stride;
+			}
+			
+			for(int p=0; p<Np;p++){
+				float x= Xa + inds[p] *dXs[0];
+				Vt+=0.5*Mass[p]*(powf(wX,2) * powf((x-xEqms[p]),2) );
+				//Vt+=Acos*(1+cosf(kXcos*x))*expf(-t/tau);
+				Vt+=expf(-powf(x+45,2)/(2*powf(2,2)))*0.24*expf(-t/100);
+				
+			}
+
+			//Vt+=VCoulomb[index]*(1-expf(-t/tauCoulomb));
+			Vt+=VCoulomb[index];
+		}
+		//printf("%f",Vt);
 	
 		int idxNearestNeighbor=1;
 		if (iterateRe) { // Iterate real part of the wave function, for odd index in pySL.py, iterateRe=1
@@ -250,6 +352,13 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V,
 						PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index - idxNearestNeighbor]; 
 					}
 					
+					// if(fabsf(PsiRe[index])<1e-6){
+					// 	PsiRe[index]=0;
+					// 	PsiIm[index]=0;
+					// }
+					
+					
+
 					// PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index + idxNearestNeighbor];
 					// PsiRe[index] -= (faa[d] / Mass[p]) * PsiIm[index - idxNearestNeighbor]; 
 
@@ -307,7 +416,11 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V,
 					}
 					
 	
-
+					// if(fabsf(PsiIm[index])<1e-6){
+					// 	PsiIm[index]=0;
+					// 	PsiRe[index]=0;
+					// }
+					
 					// PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index + idxNearestNeighbor];
 					// PsiIm[index] += (faa[d] / Mass[p]) * PsiRe[index - idxNearestNeighbor]; 
 
