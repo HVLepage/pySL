@@ -1,6 +1,17 @@
 CURRENTLY ONLY TESTED RSPACESOLVER FOR TIME EVOLUTION, KSPACE MAY NOT WORK
 
-Changes:
+Changes 14/03/22
+This version time evolves a quantum Newton's cradle with 3 particles. Less stable version than previous as haven't made sure the previous examples still work bug free.
+Requires the initial wavefunction to be placed in src/input but the file is too large for github, can be found here https://drive.google.com/file/d/1ISP9183brwLQxUJ5P3p7TQISPlKMNjQ4/view?usp=sharing. Should be renamed wave.txt
+
+1. Now allocate Coulomb potential on the GPU, orders of magnitude faster.
+2. Improved the code for tracing over N particles in 1D, much faster but ideally this should be put on GPU.
+3. Added the option to just export the trace of N particles.
+4. Added a file npfrom1p.py to make N particle wavefunction as product of 1 particle wavefunctions, done on the GPU.
+5. Added option for potential step which makes for a nice example.
+6. Various smaller changes throughout.
+
+Changes 25/02/22:
 1. Removed the domain which meant that the wavefunction wasn't updated on boundaries. Replaced with code in kernel.cu in the rSpaceSL
 function which ensures that only lattice sites within the domain are used to update the wavefunction on the boundaries. IMPORTANT: must 
 change Npdim at top of kernel.cu file to the number of particles * number of dimensions used in your simulation. If you don't do this,
