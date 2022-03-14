@@ -12,7 +12,7 @@ def getparams():
         # FLAGS 
         ################################################################
         
-        "Np": 1, # Number of particles
+        "Np": 3, # Number of particles
         # "IncludeSpin": False, # Solve Pauli equation instead of Schrödinger equation (future release)
         
         "TDSESolver": "rSpace", # Type of staggered leapfrog solver [rSpace, kSpace]
@@ -21,37 +21,43 @@ def getparams():
         # Define the initial superposition state of the wave function. 
         # The first two elements are the real and imaginary components of the ground state. 
         # The second two elements are the real and imaginary components of the first excited state. 
-        "InputStates": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        "InputStates": [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 
         # Import external files (if set to sal)
         "ImportPotential": False, # If set to false, the potential will be created functionally in fftauxV.py
         "1pPotential":True, #if want to add 1particle potential defined by function e.g harmonicPotential.py then turn this on
-        "1pPotentialType":"Harmonic", #Harmonic or Sinusoidal
+        "1pPotentialType":"Sinusoidal", #Harmonic or Sinusoidal
+        "1pPotentialStep":False,
         "PotentialFileName": "potential.txt",
 
-        "ImportWavefunction": False, #from file
+        "oneptdepPotential":1,
+
+        "ImportWavefunction": True, #from file
         "WaveFileName": "wave.txt",
         "NormalizeWaveFunction": True, # Set to false if importing a partial wave function
 
 
         #Gaussian wavepackets parameters, could make arrays
         "defWavefunction":False, #if set to false eigenvalue solver is used
+        "npfrom1pWavefunction":False,
         "wavefunctionType":"Gaussian", #only this at the moment
-        "muxG":-400, #centre of Gaussian in x, particle 1
-        "mux2G": 400, #centre of Gaussian in x, particle 2
+        "coherentState":False,
+        "muxG":400, #centre of Gaussian in x, particle 1
+        "mux2G": -400, #centre of Gaussian in x, particle 2
         "mux3G":0,#centre of Gaussian in x, particle 3
         "muyG":0, #centre of Gaussian in y, particle 1
         "sigmaxG":200, #width of Gaussian in x, particle 1
         "sigmax2G":200,#width of Gaussian in x, particle 2
         "sigmax3G":200, #width of Gaussian in x, particle 3
         "sigmayG":200, #width of Gaussian in y, particle 1
-        "kGx": 2*np.pi/100,    #plane wave momentum for particle 1 in x (wavepacket is Gaussian * plane wave)
-        "kGx2":-2*np.pi/100, #plane wave momentum for particle 2 in x (wavepacket is Gaussian * plane wave)
+        "kGx": -2*np.pi/100,    #plane wave momentum for particle 1 in x (wavepacket is Gaussian * plane wave)
+        "kGx2":2*np.pi/100, #plane wave momentum for particle 2 in x (wavepacket is Gaussian * plane wave)
         "kGx3":0, #plane wave momentum for particle 3 in x (wavepacket is Gaussian * plane wave)
         "kGy":2*np.pi/100, #plane wave momentum for particle 1 in y (wavepacket is Gaussian * plane wave)
       
 
-        "ExportTrace": False, # Export a reduced wave function for speed and smaller disk usage
+        "ExportTrace": False, # Export a reduced wave function for speed and smaller disk usage#
+        "ExportNpTrace":True,
         "Traces": [ [1,1,2,1] ],
 
         ################################################################
@@ -86,7 +92,7 @@ def getparams():
         ################################################################
 
         
-        "dt": 0.002, # duration of a single time step in [ps]
+        "dt": 0.001, # duration of a single time step in [ps]
         "StartTime": 0.0,
         "TimeSteps": 200000,
         "PrintStep": 1000, # How often the wave function is saved to a file
@@ -144,16 +150,23 @@ def getparams():
         "w2X": 0.0, #these aren't used
         "w2Y": 0.0,
         "w2Z": 0.0,
-        "wX":0.003*1.157676458e2,# 0.000025*1.157676458e2,#0.0001*1.157676458e2, 0.003 for xwidth=200nm, 0.0001 for xwidth=2000nm
+        "wX":0.004*1.157676458e2,# 0.000025*1.157676458e2,#0.0001*1.157676458e2, 0.003 for xwidth=200nm, 0.0001 for xwidth=2000nm
         "wY": 0.0001*1.157676458e2,
         "wZ": 0.0,
-        "xEqms": np.array([0,400]), #nm, x centre of harmonic potential
+        "xEqms": np.array([0,0,0]), #nm, x centre of harmonic potential
         "yEqm": 0.0,
         "zEqm": 0.0,
 
         #Sinusoidal potential variables
-        "kXcos": 2*np.pi/50,
-        "Acos":  0.02/ 1.312342066e-2,  #amplitude of cosine
+        "kXcos": 2*np.pi/45,
+        "Acos":  0.05/ 1.312342066e-2,  #amplitude of cosine
+        "tau":6250,
+        "tauCoulomb":6250,
+
+        #Step parameters
+        "stepPos":0,
+        "stepWidth":5,
+        "stepHeight":0.00297/ 1.312342066e-2,
 
         "ATB1": 0.0,
         "s2TB1": 0.0,
@@ -167,7 +180,7 @@ def getparams():
 
         "sigmaFit": [1.74707037e-17, -2.73761743e-14, 1.78462882e-11, -6.26868417e-09, 1.28479963e-06, -1.55625754e-04, 1.07952353e-02, 6.02006265e-01, 6.93382649e+00],
 
-        "sigSofty":10.0, #softened couilomb potential, width in non dynamic y dimension, 240 for tunnelling in 1 dynamic dimension, 10 for strong repulsion
+        "sigSofty":10.0, #softened coulomb potential, width in non dynamic y dimension, 240 for tunnelling in 1 dynamic dimension, 10 for strong repulsion
         "sigSoftz":10.0,
 
         #"Traces": 0,
@@ -186,13 +199,18 @@ def getparams():
     params["kSAW"] = 2 * math.pi  / params["lambdaSAW"]
     params["DRt0"] *= t_si2nu
     params["URt0"] *= t_si2nu
-
+    
+    if params["coherentState"]:
+        params["wX"]=1/(params["sigmaxG"]**2)*t_si2nu
 
     params["wX"]/=t_si2nu
     params["wY"]/=t_si2nu
     params["wZ"]/=t_si2nu
 
     params["Acos"]*=v_si2nu
+    params["stepHeight"]*=v_si2nu
+
+    
 
     # Construct Hamiltonian
     params["dx"] = 1.0
