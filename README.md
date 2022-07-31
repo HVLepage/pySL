@@ -1,144 +1,33 @@
-# pySL
- 
-## Table of Contents
-- [pySL](#pysl)
-  - [Table of Contents](#table-of-contents)
-  - [About](#about)
-  - [Installation](#installation)
-    - [CUDA SDK](#cuda-sdk)
-    - [Python3](#python3)
-    - [Python modules](#python-modules)
-    - [(Optional) ffmpeg](#optional-ffmpeg)
-  - [Usage](#usage)
-    - [Input parameters](#input-parameters)
-    - [Parameter sweeps](#parameter-sweeps)
-  - [Authors](#authors)
-  - [Publications](#publications)
-  - [Acknowledgments](#acknowledgments)
+The parameters are set up for GaAs.
+
+There are three parameters files in the parameters folder. When using them rename them as parameters.py and place in src/input. The main differences are the potentials present and whether the wave function is imported/formed manually.
+
+parameters_gaas_1peigen is for getting the 1 particle eigenstates (non-interacting system). Running pySL.py will put the eigenstate  wave.txt in out/Particle_in_a_box_1D.
+
+parameters_gaas_3peigen is for forming 3 particle eigenstate, in out/Particle_in_a_box_1D/npfrom1p are the single particle eigenstates, wave1 is the central particle, wave 2 the right particle and wave 3 the left (behind barrier)
+When the simulation finishes, the eigenstate will be saved as wave_final.txt in out/Particle_in_a_box_1D (it will be the 200MB file)
+
+parameters_gaas_qnc is for the nonadiabatic quantum newton's cradle evolution, the 3 particle eigenstate should be placed in src/input as wave.txt. The traced over wave functions are saved in out/Particle_in_a_box_1D/waves
 
 
-## About
-The python Staggered Leapfrog (pySL) package solves the Time Dependent Schrödinger Equation (TDSE) using CUDA for GPU-accerelation.
 
-## Installation
-TDSE3DCUDA works on modern NVIDIA GPU systems running Windows or Linux. This code was written using the CUDA 10.2 SDK. The current version has been tested on CUDA 10.0 and later. Earlier versions of CUDA are not supported.
+If starting a simulation from scratch, you would generate the 3 single particle eigenstates using parameters_gaas_1peigen.py. The simulation would have to be run 3 times and each time wave.txt needs to be saved and placed in
+out/Particle_in_a_box_1D/npfrom1p in preparation for the next step (as wave1, wave2, wave3)
 
-### CUDA SDK
-For installation on Linux, follow the instructions in https://docs.nvidia.com/cuda/cuda-installation-guide-linux/
+Then to find the 3 particle eigenstate you would need the 3 wave files in out/Particle_in_a_box_1D/npfrom1p and parameters_gaas_3peigen, the simulation can then be run and wave_final.txt needs to be saved for the next step.
 
-:warning: **Linux driver issues**
+wave_final.txt then needs to be copied to src/input and renamed as wave.txt,  parameters_gaas_qnc must then be used. Traced over wavefunction is saved in out/Particle_in_a_box_1D/waves for the next step.
 
-Linux drivers installed from the system package manager will sometimes cause issues with CUDA installations. It is recommended to install both the driver and the CUDA SDK using the downloadable run file.
-
-To uninstall all versions of CUDA as well as the drivers on Ubuntu, use the command:
-```bash
-sudo apt autoremove --purge cuda
-sudo apt autoremove --purge *nvidia*
-```
-
-A system restart is required.
-
-Next, install the Latest Production Branch Version driver from https://www.nvidia.com/en-gb/drivers/unix/ for example:
-```bash
-wget https://uk.download.nvidia.com/XFree86/Linux-x86_64/460.39/NVIDIA-Linux-x86_64-460.39.run
-sudo sh NVIDIA-Linux-x86_64-460.39.run
-```
-Note that the exact version will depend on the host computer as well as NVIDIA updates.
-
-A system restart is required.
-
-To check that the drivers have been installed properly, run the command:
-```bash
-nvidia-smi
-```
-![nvidia-smi](https://www.dropbox.com/s/8x2pgdg3rt1q8gg/nvidia-smi.png?raw=1)
+Then animatenp_sep.py (or animation_2Dtrace_separate.py if traced over just one particle) can be separately run to animate the above waves or expectation.py to plot the expectation as a function of time 
+(requires out/Particle_in_a_box_1D/waves to be populated).
 
 
-Next, download the latest version of the CUDA SDK from https://developer.nvidia.com/cuda-downloads make sure you choose the `runfile (local)`. For example:
-```bash
-wget https://developer.download.nvidia.com/compute/cuda/11.2.1/local_installers/cuda_11.2.1_460.32.03_linux.run
-sudo sh cuda_11.2.1_460.32.03_linux.run
-```
-Follow the onscreen instructions and untick the NVIDIA driver as it should already be installed.
-
-![cuda-install](https://www.dropbox.com/s/nu58d9wa4dl41z2/cuda-install.png?raw=1)
-
-Finally, add binaries and libraries to PATH
-```bash
-# Export NVIDIA CUDA bin and libraries to PATH
-export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}
-export LD_LIBRARY_PATH=/usr/local/cuda/lib64\
-${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-```
-
-Make sure `nvcc` is working correctly on your system by running the command
-```bash
-nvcc --version
-```
-![nvcc --version](https://www.dropbox.com/s/727x405eo47ffi6/nvcc-version.png?raw=1)
-
-You might have to specify a custom path to your local C++ compiler in the file `get_ccbin.py`.
-
-### Python3
-Most modern systems will come with python version 3 preinstalled. However, the alias `python` might still be linked to python 2.7. Check that both `python` and `pip` are using the correct version or use commands `python3` and `pip3` instead. This code can also be run in a virtual environment such as venv or anaconda.
-
-For all systems, python can be downloaded from https://www.python.org/
-
-![python --version](https://www.dropbox.com/s/pn9m92yjiec9irb/python-pip-version.png?raw=1)
+The first step has already been done however, so need to start from forming 3 particle eigenstate. Should be as easy as copying parameters_gaas_3peigen as parameters.py into src/input and running pySL.py (for a given sigma parameter)
+Animate the files in out/Particle_in_a_box_1D/waves to ensure that the eigenstate has been found.
+All parameters have a comment describing their function so should be easy to use.
+In kernel.cu, should change #define Npdim 1  to however many particles there are i.e. either 1 or 3. Won't make much of a difference if you forget, but this ensures the wave function is calculated correctly at domain boundaries.
+If don't want spin effects then comment out the code in kernel.cu that says //comment the below code out if don't want spin (there are 2 bits to comment out)
 
 
-### Python modules
-Install required python modules using command: 
-```bash
-pip install -r requirements.txt
-```
-
-### (Optional) ffmpeg
-
-`ffmpeg` is used to generate plot animations. This is not a required feature since plotting is not necessary and other software can be used for analysis purposes. Installation will vary depending on the host operating system.
-
-
-## Usage
-
-To run the solver, use the command:
-```
-python pySL.py [TARGET_GPU_ID]
-```
-The argument following the command indicates which GPU to use in a multi-GPU system. If no argument is given or if the argument is incorrect, the simulation will default to GPU0.
-
-An output directory will be created for each different simulation name. Within this directory several results are recorded in plain text files.
-* `eigs.txt` lists the lowest 5 eigenstates found using the built-in eigensolver.
-* `wave.txt` outputs the complex wave function of the initial state as determined by the user.
-* `waves\wave_iteraton_XXX.txt` are the complex wave functions at every iteration as defined by `PrintStep` in the input parameters.
-
-### Input parameters
-Simulation parameters should be written to the input file `parameters.py`.
-
-Other input files such as an initial wave function or static potentials should be written as text files and placed in the `/input/` directory.
-
-### Parameter sweeps
-Future work includes the ability to sweep over certain parameters to optimise output results.
-
-
-## Authors
-
-* **H. V. Lepage**
-* **A. A. Lasek**
-* **C. H. W. Barnes**
-
-See the list of [contributors](https://github.com/HVLepage/pySL/contributors) who participated in this project.
-
-## Publications
-* [Entanglement generation via power-of-swap operations between dynamic electron-spin qubits (2020)](https://journals.aps.org/pra/abstract/10.1103/PhysRevA.96.052305)
-* [Sound-driven single-electron transfer in a circuit of coupled quantum rails (2019)](https://www.nature.com/articles/s41467-019-12514-w)
-* [Protocol for fermionic positive-operator-valued measures (2017)](https://journals.aps.org/pra/abstract/10.1103/PhysRevA.96.052305)
-
-
-## Acknowledgments
-
-* D. R. M. Arvidsson Shukur
-* A. Andreev
-* E. T. Owen
-* J. Mosakowski
-
-This project has received funding from the European Union’s Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement No 642688.
+Extra plotting files etc. in misc folder. 3D plotting functionality seems to work but not fully tested, requires whole wavefunction to be exported during time evolution.
+Animation is faster for some reason when done separately.
