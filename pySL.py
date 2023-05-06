@@ -71,6 +71,7 @@ mod = SourceModule(source, options=['-ccbin', ccbin])
 # Load CUDA function into python
 rSpaceSL = mod.get_function("rSpaceSL")
 kSpaceSL = mod.get_function("kSpaceSL")
+qubitsSL = mod.get_function("qubitsSL")
 Axpy = mod.get_function("Axpy")
 
 # Block size determines how the GPU parallelizes the problem. This shouldn't need to change.
@@ -116,10 +117,10 @@ if (params["TDSESolver"] == "kSpace"):
     phi = convWavefunction(psi, thr, params)
     psiOut = wavefunctionOut(params, thr)
     psi2 = np.zeros((int(TimeSteps/PrintStep), params["NOut"]))
-else:
+elif (params["TDSESolver"] == "rSpace"):
     psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N)) #output plot data
-
-
+elif (params["TDSESolver"] == "qubits"):
+    psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N))
 k = 0 # Keeps track of print step, will be made obsolete in future release
 
 ################################################################################################################################
@@ -193,8 +194,9 @@ for i in range(0, TimeSteps):
         Axpy(phi.wave_gpu, V.pot_gpu,  N,  t, kerInds.inds_gpu, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2, Mass,  dXs,  Xa,  Ya, block=(blockSize,1,1), grid=(numBlocks,1))
         phi.fft(thr, 0)
         kSpaceSL(np.int32(params["NK"]) , psi.wave_gpu, phi.wave_gpu, t, dt, Np, N1K,  dim,  value,  Sizes,  Mass,  dKs,  np.int32(i%2),  kerInds.inds_gpu, block=(blockSize,1,1), grid=(numBlocks,1))
-        
-        
+    elif (params["TDSESolver"] == "qubits"):
+        qubitsSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim,  fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
+    
     if (i % PrintStep) == 0:
       #Print to file / record to plot every printStep
       psi.dtoh()

@@ -259,3 +259,40 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 		}
 	}
 }
+
+
+__global__ void qubitsSL(int N, float* PsiRe, float* PsiIm, float* V, bool* domain, 
+                        float t, int iterateRe, int* kernelInds, int Np, int N1, int dim,  
+                        float RS, float DRt0, float URt0, float ATB2, float s2TB2, 
+                        float fbb, float* faa, int* Sizes, float* Mass, float* dXs, float Xa, float Ya) {
+
+	int index = blockIdx.x * blockDim.x + threadIdx.x; // CUDA index
+
+	if (index < N && domain[index]==1) { //check if index is within the wavefunction ant NOT on a boundary
+
+		float Vt = 0.0; //some potentially time depentent part of V
+
+		for (int p = 0; p < Np; p++) {
+			// Set current coordinates
+			int ind = ((index / (int)powf(N1, Np - p - 1)) % (N1)) * dim;
+			float x = Xa + kernelInds[ind] * dXs[0];
+			float y = dim > 1 ? Ya + kernelInds[ind + 1] * dXs[1] : 0.0;
+			// Add time-dependent SAW potential
+			Vt += ASAW * (1.0 - cosf(kSAW * (x - SAWoffset) - wSAW * t));
+      // time-dependent ramp potential
+			float TBRamp = 0.5 * (tanhf(RS * (y + (t - DRt0) * cSAW)) + tanhf(-RS * (y + (t - URt0) * cSAW)));
+			Vt -= ATB2 * Mass[p] * expf(-s2TB2 * powf(x, 2.0) / 2.0) * TBRamp;
+		}
+		
+		
+		int idxNearestNeighbor=1;
+		if (iterateRe) { // Iterate real part of the wave function
+			PsiRe[index] += (V[index] + Vt) * fbb * PsiIm[index]; // The potential part
+
+		}
+		else { // Iterate imaginary part of the wave function
+			PsiIm[index] -= (V[index] + Vt) * fbb * PsiRe[index];
+
+		}
+	}
+}

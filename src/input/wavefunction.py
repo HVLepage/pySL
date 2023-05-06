@@ -112,9 +112,11 @@ class wavefunction:
         if (params["TDSESolver"] == "kSpace"):
             self.TDSESolver = "kSpace"
             self.dV = (params["dKx"] * params["dKy"] *params["dKz"]) ** params["Np"]
-        else:
+        elif (params["TDSESolver"] == "rSpace"):
             self.TDSESolver = "rSpace"
             self.dV = (params["dx"] * params["dy"] *params["dz"]) ** params["Np"]
+        elif (params["TDSESolver"] == "qubits"):
+            self.TDSESolver = "qubits"
         
         self.N = params["N"]
         
