@@ -21,7 +21,7 @@ import pycuda.gpuarray as gpuarray
 # Import project modules
 import src.get_gpu_info as gpuinfo
 from src.get_ccbin import get_ccbin
-from src.input.parameters import getparams
+from src.input.parametersQubits import getparams
 from src.input.wavefunction import wavefunction
 from src.fft.convWavefunction import convWavefunction
 from src.export.wavefunctionOut import wavefunctionOut
@@ -39,9 +39,13 @@ import reikna.cluda as cluda
 from src.plot.animate1D import animate1D
 from src.plot.plot1Dtrace import plot1Dtrace
 
+
 print("\n----------------------------------------------------------------")
 print("pySL version 0.1.2")
 print("----------------------------------------------------------------")
+
+
+
 t0_full = time.time() # Keep track of total simulation time
 
 ################################################################################################################################
@@ -69,8 +73,6 @@ with open('./src/kernel.cu', 'r') as file:
 mod = SourceModule(source, options=['-ccbin', ccbin])
 
 # Load CUDA function into python
-rSpaceSL = mod.get_function("rSpaceSL")
-kSpaceSL = mod.get_function("kSpaceSL")
 qubitsSL = mod.get_function("qubitsSL")
 Axpy = mod.get_function("Axpy")
 
@@ -95,7 +97,7 @@ print("\n----------------------------------------------------------------")
 print("Allocating potential")
 print("----------------------------------------------------------------")
 t0V = time.time()
-V = potential(params, mod) # Static potential
+V = potential(params, 0.0, mod) #  Potential
 time_V = time.time() - t0V
 t0V = time.time()
 print("\nPotential allocated in %.4f seconds"%time_V)
@@ -103,9 +105,7 @@ dom = domain(params) # Simulation domain boundary conditions
 time_V = time.time() - t0V
 t0V = time.time()
 print("Simulation domain defined in %.4f seconds"%time_V)
-kerInds = kernelInds(params) #1D index to ND indices lookup for the kernel - avoid calculating this every time
-time_V = time.time() - t0V
-print("KernelInds calculated in %.4f seconds"%time_V)
+
 
 psi = wavefunction(params,mod, thr, V) #create wavefunction as per parameters
 
@@ -113,13 +113,8 @@ dt =  np.float32(params["dt"]) # Time step
 TimeSteps = params["TimeSteps"] # Total solution iterations
 PrintStep = params["PrintStep"]  # Used for saving the wave function
 
-if (params["TDSESolver"] == "kSpace"):
-    phi = convWavefunction(psi, thr, params)
-    psiOut = wavefunctionOut(params, thr)
-    psi2 = np.zeros((int(TimeSteps/PrintStep), params["NOut"]))
-elif (params["TDSESolver"] == "rSpace"):
-    psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N)) #output plot data
-elif (params["TDSESolver"] == "qubits"):
+
+if (params["TDSESolver"] == "qubits"):
     psi2 = np.zeros((int(TimeSteps/PrintStep), psi.N))
 k = 0 # Keeps track of print step, will be made obsolete in future release
 
@@ -131,41 +126,13 @@ k = 0 # Keeps track of print step, will be made obsolete in future release
 N = np.int32(params["N"])
 
 Np = np.int32(params["Np"])
-N1 = np.int32(params["N1"])
-N1K = np.int32(params["N1K"])
-dim = np.int32(params["dim"])
-ASAW = np.float32(params["ASAW"])
-kSAW = np.float32(params["kSAW"])
-SAWoffset = np.float32(params["SAWoffset"])
-wSAW = np.float32(params["wSAW"])
-cSAW = np.float32(params["cSAW"])
-RS = np.float32(params["RS"])
-DRt0 = np.float32(params["DRt0"])
-URt0 = np.float32(params["URt0"])
-ATB2 = np.float32(params["ATB2"])
-s2TB2 = np.float32(params["s2TB2"])
+
 fbb = np.float32(params["fbb"])
 value = np.float32(params["dt"] * params["hbar"])
-
-Xa = np.float32(params["Xa"])
-Ya = np.float32(params["Ya"])
-
-Nm1 = np.float32(1 / N)
 
 faa = cuda.mem_alloc_like(params["faa"])
 cuda.memcpy_htod(faa, params["faa"])
 
-Sizes = cuda.mem_alloc_like(params["Sizes"])
-cuda.memcpy_htod(Sizes, params["Sizes"])
-
-Mass = cuda.mem_alloc_like(params["Mass"])
-cuda.memcpy_htod(Mass, params["Mass"])
-
-dXs = cuda.mem_alloc_like(params["dXs"])
-cuda.memcpy_htod(dXs, params["dXs"])
-
-dKs = cuda.mem_alloc_like(params["dKs"])
-cuda.memcpy_htod(dKs, params["dKs"])
 
 ################################################################################################################################
 # IterateGPU
@@ -185,43 +152,32 @@ t1 = t0
 for i in range(0, TimeSteps):
     t = np.float32(i*dt)
 
+    if t in params["VUpdates"]:
+        V = potential(params, 0.0, mod)
+
     # Iterate the staggered leapfrog kernel over the wavefunction
-    if (params["TDSESolver"] == "rSpace"):
-        rSpaceSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim, ASAW, kSAW, SAWoffset, wSAW, cSAW, RS, DRt0, URt0, ATB2, s2TB2, fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
-    elif (params["TDSESolver"] == "kSpace"):
-        psi.wave_gpu.get(phi.wave_gpu)
-        phi.fft(thr, 1)
-        Axpy(phi.wave_gpu, V.pot_gpu,  N,  t, kerInds.inds_gpu, Nm1,  Np,  N1,  dim,  ASAW,  kSAW,  SAWoffset,  wSAW,  cSAW,  RS,  DRt0,  URt0,  ATB2,  s2TB2, Mass,  dXs,  Xa,  Ya, block=(blockSize,1,1), grid=(numBlocks,1))
-        phi.fft(thr, 0)
-        kSpaceSL(np.int32(params["NK"]) , psi.wave_gpu, phi.wave_gpu, t, dt, Np, N1K,  dim,  value,  Sizes,  Mass,  dKs,  np.int32(i%2),  kerInds.inds_gpu, block=(blockSize,1,1), grid=(numBlocks,1))
+
     elif (params["TDSESolver"] == "qubits"):
-        qubitsSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2), kerInds.inds_gpu, Np, N1, dim,  fbb, faa, Sizes, Mass, dXs, Xa, Ya, block=(blockSize,1,1), grid=(numBlocks,1))
+        qubitsSL(N, psi.re_gpu, psi.im_gpu, V.pot_gpu, dom.domain_gpu, t, np.int32(i%2),   fbb,  block=(blockSize,1,1), grid=(numBlocks,1))
     
     if (i % PrintStep) == 0:
       #Print to file / record to plot every printStep
-      psi.dtoh()
+        psi.dtoh()
       
-      if (params["TDSESolver"] == "kSpace"):
-          psiOut.exportWaveKtoReal(psi, thr, params)
-          if (params["ExportTrace"]):
-              exportTrace(psiOut.wave_gpu, params, i, True, kernelInds, mod)
-          else:
-              psiOut.exportFull(params, i)
-          #psi2[k] = psiOut.wave.real**2 + psiOut.wave.imag**2
-      else:
-          if (params["ExportTrace"]):
-               exportTrace(psi.wave_gpu, params, i, False, kernelInds, mod)
-          else:
-              psi.exportFull(params,i)
-          #psi2[k] = psi.wave.real**2 + psi.wave.imag**2
-      
-      k = k + 1
-      t2 = time.time()
-      t_print = t2-t1
-      t1 = t2
-      norm = psi.norm()
-      n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
-      print("Iteration:", str(i).zfill(int(n_zero)), "    Time Elapsed: %.2f"%t_print, "    NORM: %.8f"%norm)
+
+        if (params["ExportTrace"]):
+             exportTrace(psi.wave_gpu, params, i, False, kernelInds, mod)
+        else:
+            psi.exportFull(params,i)
+        #psi2[k] = psi.wave.real**2 + psi.wave.imag**2
+        
+        k = k + 1
+        t2 = time.time()
+        t_print = t2-t1
+        t1 = t2
+        norm = psi.norm()
+        n_zero = math.log10((float)(params["TimeSteps"]) + 1) + 1
+        print("Iteration:", str(i).zfill(int(n_zero)), "    Time Elapsed: %.2f"%t_print, "    NORM: %.8f"%norm)
 
 t2 = time.time()
 t_print = t2-t0

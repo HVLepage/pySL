@@ -14,6 +14,8 @@ import reikna.fft as rfft
 import pycuda.gpuarray as gpuarray
 from src.get_ccbin import get_ccbin
 import time
+import random
+from scipy.linalg import expm, logm, sqrtm
 
 class wavefunction:
     
@@ -106,46 +108,54 @@ class wavefunction:
         if (params["NormalizeWaveFunction"]):
             self.wave = self.wave / math.sqrt(self.norm())
     
+    def demonInit(self, params):
+        # Get the current time in seconds as a floating-point number
+        zp=np.array([1,0], dtype=np.complex64)
+        zm=np.array([0,1], dtype=np.complex64)
+        z = np.array([[1,0],[0,-1]], dtype=np.complex64)
+        
+        current_time = time.time()
+
+        # Convert the current time to an integer and use it as the seed for the random number generator
+        random.seed(int(current_time))
+
+        random_excited = random.random(0,1)
+        random_phase=random.random(0,2*np.pi)
+        
+        rho_th = expm(- (1/params["T"])*z)
+        
+        rho_th=rho_th/np.trace(rho_th)
+        
+        psi_thermal=  np.sqrt(1-rho_th[0,0])*zm + np.sqrt(rho_th[0,0])*np.exp(1j*random_phase)*zp
+        
+        psi_init=psi_thermal
+        
+        for i in range(0, params["Np"]-1):
+            psi_init=np.kron(psi_init,zm)
+        #psi_thermal=psi_thermal/np.norm(psi_thermal)
+    
     #thi sis called on creation of instance
     def __init__(self, params, mod, thr, V=0):
         
-        if (params["TDSESolver"] == "kSpace"):
-            self.TDSESolver = "kSpace"
-            self.dV = (params["dKx"] * params["dKy"] *params["dKz"]) ** params["Np"]
-        elif (params["TDSESolver"] == "rSpace"):
-            self.TDSESolver = "rSpace"
-            self.dV = (params["dx"] * params["dy"] *params["dz"]) ** params["Np"]
-        elif (params["TDSESolver"] == "qubits"):
-            self.TDSESolver = "qubits"
+
+        self.TDSESolver = "qubits"
         
         self.N = params["N"]
         
-        self.size1P = []
-        self.size = []
-        for i in range(0,params["dim"]):
-            self.size1P.append(int(params["Sizes"][i]))
-        for i in range(0,params["Np"]):
-            self.size += self.size1P
+
+
         
         #self.wave=np.zeros(self.size, dtype = np.complex64)
         self.wave=np.zeros(self.N, dtype = np.complex64)
         
          #self.wave = self.wave.astype(np.complex64)
-        if (params["TDSESolver"] == "kSpace"):
-            self.wave = np.reshape(self.wave, self.size)
-            self.wave_gpu=gpuarray.to_gpu(self.wave)
-            #self.wave = self.wave.ravel()
-            #self.api = cluda.cuda_api()
-            #self.thr = api.Thread.create()
-            fft_h = rfft.FFT(self.wave_gpu)
-            self.fftc=fft_h.compile(thr, compiler_options = ['-ccbin', get_ccbin()])             
-        else:
-            self.re_gpu=cuda.mem_alloc_like(self.wave.real)
-            self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
+ 
+        self.re_gpu=cuda.mem_alloc_like(self.wave.real)
+        self.im_gpu=cuda.mem_alloc_like(self.wave.imag)
         
         
         if (not params["ImportWavefunction"]):
-            self.solve(params,mod, thr, V)
+            self.demonInit(params)
         else:
             self.readFromFile(params) #read from file
         
