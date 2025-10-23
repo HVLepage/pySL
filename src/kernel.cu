@@ -259,25 +259,3 @@ __global__ void rSpaceSL(int N, float* PsiRe, float* PsiIm, float* V, bool* doma
 		}
 	}
 }
-
-
-__global__ void qubitsSL(int N, float* PsiRe, float* PsiIm, float* V, bool* domain, 
-                        float t, int iterateRe, float fbb) {
-
-	int index = blockIdx.x * blockDim.x + threadIdx.x; // CUDA index
-
-	if (index < N && domain[index]==1) { //check if index is within the wavefunction ant NOT on a boundary
-
-	
-		
-		
-		if (iterateRe) { // Iterate real part of the wave function
-			PsiRe[index] += (V[index] ) * fbb * PsiIm[index]; // The potential part
-
-		}
-		else { // Iterate imaginary part of the wave function
-			PsiIm[index] -= (V[index] ) * fbb * PsiRe[index];
-
-		}
-	}
-}
